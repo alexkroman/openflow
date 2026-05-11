@@ -29,7 +29,9 @@ public enum DictationLog {
   static let timestampFormat = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
 
   public static func append(raw: String, polished: String) {
-    append(raw: raw, polished: polished, to: defaultURL, now: Date())
+    #if DEBUG
+      append(raw: raw, polished: polished, to: defaultURL, now: Date())
+    #endif
   }
 
   static func append(raw: String, polished: String, to url: URL, now: Date) {
