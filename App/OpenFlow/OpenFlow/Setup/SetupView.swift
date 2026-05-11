@@ -19,18 +19,25 @@ final class SetupViewModel: ObservableObject {
   func openAccessibility() {
     PermissionsChecker.openAccessibilitySettings()
   }
+}
 
-  func relaunch() {
-    let url = Bundle.main.bundleURL
-    let configuration = NSWorkspace.OpenConfiguration()
-    configuration.createsNewApplicationInstance = true
-    NSWorkspace.shared.openApplication(at: url, configuration: configuration) { _, _ in
-      Task { @MainActor in NSApp.terminate(nil) }
+private enum SetupPhase {
+  case permissions, loading, main
+
+  static func from(allGranted: Bool, modelReady: Bool) -> SetupPhase {
+    if !allGranted { return .permissions }
+    if !modelReady { return .loading }
+    return .main
+  }
+
+  var height: CGFloat {
+    switch self {
+    case .permissions: 400
+    case .loading: 300
+    case .main: 250
     }
   }
 }
-
-private enum SetupPhase { case permissions, loading, main }
 
 struct SetupView: View {
   @StateObject var vm = SetupViewModel()
@@ -44,15 +51,11 @@ struct SetupView: View {
   /// in place, the model-load step runs (cache delete also re-enters
   /// it). Otherwise we're in the steady-state "main" view.
   private var phase: SetupPhase {
-    if !vm.status.allGranted { return .permissions }
-    if !coordinator.modelLoadState.isReady { return .loading }
-    return .main
+    .from(allGranted: vm.status.allGranted, modelReady: coordinator.modelLoadState.isReady)
   }
 
   static func targetHeight(modelReady: Bool, allGranted: Bool) -> CGFloat {
-    if !allGranted { return 400 }
-    if !modelReady { return 300 }
-    return 250
+    SetupPhase.from(allGranted: allGranted, modelReady: modelReady).height
   }
 
   var body: some View {
@@ -78,13 +81,8 @@ struct SetupView: View {
       .scrollDisabled(true)
     }
     .frame(width: 500)
-    .onChange(of: phase) { _, _ in
-      onHeightChange(
-        Self.targetHeight(
-          modelReady: coordinator.modelLoadState.isReady,
-          allGranted: vm.status.allGranted
-        )
-      )
+    .onChange(of: phase) { _, newPhase in
+      onHeightChange(newPhase.height)
     }
     .task {
       while !Task.isCancelled {

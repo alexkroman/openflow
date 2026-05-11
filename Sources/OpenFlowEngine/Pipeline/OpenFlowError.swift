@@ -22,7 +22,7 @@ extension OpenFlowError: LocalizedError {
     case .sttFailed(let e): "Couldn't transcribe. \(e.localizedDescription)"
     case .stylerTimedOut: "Couldn't refine in time. Inserted the raw transcript."
     case .stylerFailed(let e): "Couldn't refine transcript. \(e.localizedDescription)"
-    case .targetAppLost: "The target app is no longer active."
+    case .targetAppLost: "Couldn't reach the target app."
     case .audioCaptureFailed(let e): "Couldn't capture audio. \(e.localizedDescription)"
     }
   }

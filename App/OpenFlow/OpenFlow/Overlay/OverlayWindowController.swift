@@ -46,7 +46,11 @@ final class OverlayWindowController {
   }
 
   func show(state: OverlayState) {
-    bridge.state = state
+    // STT/LLM streams call this on every token; skip the @Published assignment
+    // if nothing actually changed so SwiftUI doesn't re-render per-token.
+    if bridge.state != state {
+      bridge.state = state
+    }
     guard !panel.isVisible else { return }
     reposition()
     if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
