@@ -149,7 +149,12 @@ public actor DictationSession {
     DictationLog.append(raw: raw, polished: finalText)
     setPhase(.injecting(text: finalText))
     do {
-      try await injector.insert(finalText)
+      // Trailing space lets the user keep dictating into the same caret
+      // position without manually adding separators between utterances.
+      // Trim first so the styler returning its own whitespace doesn't
+      // double up.
+      let toInject = finalText.trimmingCharacters(in: .whitespacesAndNewlines) + " "
+      try await injector.insert(toInject)
     } catch {
       setPhase(.failed(.targetAppLost))
       return

@@ -17,13 +17,13 @@ extension OpenFlowError: LocalizedError {
     switch self {
     case .microphonePermissionDenied: "Microphone access is required."
     case .accessibilityPermissionMissing: "Accessibility access is required."
-    case .modelDownloadFailed(let e): "Model download failed: \(e.localizedDescription)"
-    case .modelLoadFailed(let e): "Model load failed: \(e.localizedDescription)"
-    case .sttFailed(let e): "Transcription failed: \(e.localizedDescription)"
-    case .stylerTimedOut: "Styling timed out — inserted raw transcript."
-    case .stylerFailed(let e): "Styling failed: \(e.localizedDescription)"
-    case .targetAppLost: "Target app lost focus or quit."
-    case .audioCaptureFailed(let e): "Audio capture failed: \(e.localizedDescription)"
+    case .modelDownloadFailed(let e): "Couldn't download model. \(e.localizedDescription)"
+    case .modelLoadFailed(let e): "Couldn't load model. \(e.localizedDescription)"
+    case .sttFailed(let e): "Couldn't transcribe. \(e.localizedDescription)"
+    case .stylerTimedOut: "Couldn't refine in time. Inserted the raw transcript."
+    case .stylerFailed(let e): "Couldn't refine transcript. \(e.localizedDescription)"
+    case .targetAppLost: "The target app is no longer active."
+    case .audioCaptureFailed(let e): "Couldn't capture audio. \(e.localizedDescription)"
     }
   }
 }

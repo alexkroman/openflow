@@ -63,7 +63,7 @@ struct OverlayView: View {
     case .transcribing:
       Text("Transcribing…").font(.callout)
     case .styling:
-      Text("Polishing…").font(.callout)
+      Text("Refining…").font(.callout)
     }
   }
 
@@ -72,7 +72,7 @@ struct OverlayView: View {
     case .idle: return "OpenFlow ready. Hold \(state.hotkeyLabel) to dictate."
     case .recording: return "Recording."
     case .transcribing: return "Transcribing."
-    case .styling: return "Polishing."
+    case .styling: return "Refining."
     }
   }
 }

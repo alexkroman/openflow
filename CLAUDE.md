@@ -32,7 +32,7 @@ The xcodebuild post-build script (`App/OpenFlow/project.yml`) copies the bundle 
 ## Architecture
 
 ```
-HotkeyWatcher → DictationSession (actor) → MicCapture
+KeyboardShortcuts (sindresorhus) → DictationSession (actor) → MicCapture
                        ↓
               TinyAudioTranscriber  (STT, sibling SPM)
                        ↓
@@ -41,7 +41,7 @@ HotkeyWatcher → DictationSession (actor) → MicCapture
               KeyInjector → focused app (CGEvent or clipboard-paste)
 ```
 
-**`DictationSession`** (`Sources/OpenFlowEngine/Pipeline/DictationSession.swift`) is the central actor. It exposes `press()` / `release()` / `cancel()` and a `phase: PipelinePhase` (`idle | recording | transcribing | styling | injecting | failed | cancelled`). All four collaborators are protocol-typed (`MicCaptureProtocol`, `TranscriberProtocol`, `StylerProtocol`, `InjectorProtocol`) so tests can stub them — see `Tests/OpenFlowEngineTests/Stubs/`.
+**`DictationSession`** (`Sources/OpenFlowEngine/Pipeline/DictationSession.swift`) is the central actor. It exposes `press()` / `release()` / `cancel()`, a `phase: PipelinePhase` (`idle | recording | transcribing | styling | injecting | failed | cancelled`), and `nonisolated let phases: AsyncStream<PipelinePhase>` for observers. All four collaborators are protocol-typed (`MicCaptureProtocol`, `TranscriberProtocol`, `StylerProtocol`, `InjectorProtocol`) so tests can stub them — see `Tests/OpenFlowEngineTests/Stubs/`.
 
 **`SafeguardedStyler`** wraps any `StylerProtocol` with three failsafes that should not be removed casually:
 - 8-second timeout → emits `.replaceAll(raw)` and throws `stylerTimedOut` (caller treats raw as final text)
@@ -52,11 +52,13 @@ These exist because the LLM occasionally hallucinates or returns nothing on edge
 
 **`KeyInjector.insert`** picks between two paths via `InjectionPath.choose`: keystroke-by-keystroke `CGEvent` posting (short text) or clipboard-paste with restore (≥ `longTextThreshold` chars, default 500). The clipboard path saves and restores the prior pasteboard contents.
 
-**`AppCoordinator`** (`App/OpenFlow/OpenFlow/AppCoordinator.swift`) is the only place the engine is composed for the real app. It builds concrete instances, owns the `HotkeyWatcher`, and polls `session.phase` every 16ms to drive the overlay (a TODO calls out replacing this with an `AsyncStream`).
+**`AppCoordinator`** (`App/OpenFlow/OpenFlow/AppCoordinator.swift`) is the only place the engine is composed for the real app. It builds concrete instances, registers `KeyboardShortcuts.onKeyDown(for: .dictate)` / `onKeyUp(for: .dictate)` to drive `session.press()` / `release()`, and updates the overlay + status item by awaiting `session.phases` in a `@MainActor` task.
+
+The app runs as **`LSUIElement: true`** (no Dock icon — see `App/OpenFlow/project.yml`) with a menu-bar `StatusItemController`. The macOS-notch-hiding-the-icon problem is mitigated inside the controller (`autosaveName` + `behavior = [.removalAllowed]`) so the user can rescue the icon via a third-party menu-bar manager. This is a deliberate re-introduction of the menu-bar variant; don't strip it again without checking with the user.
 
 ## Hotkey reality check
 
-The README says "Right Option" but the live config is **`HotkeyConfig.controlOptionD` (⌃⌥D)** — see `AppCoordinator.hotkeyConfig`. Modifier-only hotkeys (bare Right Option) are intentionally rejected because they require Input Monitoring, which the project avoids on the hot path. If you change the hotkey, update `App/SMOKE.md` too.
+The README still says "Right Option," but the live default is **⌃⌥D**, declared as `KeyboardShortcuts.Name.dictate` in `App/OpenFlow/OpenFlow/Hotkey/DictateShortcut.swift`. The shortcut is user-rebindable at runtime via the sindresorhus `KeyboardShortcuts` SPM package; the displayed label comes from `DictateHotkey.label`. If you change the default binding, update `App/SMOKE.md` and the README too.
 
 ## Styling prompt
 
@@ -71,6 +73,5 @@ The README says "Right Option" but the live config is **`HotkeyConfig.controlOpt
 
 ## Things deliberately not here
 
-- **No menu bar icon, no `LSUIElement`** — OpenFlow is a regular Dock app. A menu-bar variant existed briefly but was reverted because the macOS 26 notch hid the icon. If you find yourself reaching for `NSStatusItem`, stop and ask.
 - **No streaming STT** — `TinyAudio`'s public API doesn't expose it, so the overlay shows "Transcribing…" then jumps to the full text. Styling tokens *do* stream.
 - **No bundled models** — both the ASR weights (`mazesmazes/tiny-audio-swift-bundle`) and the Qwen3.5-2B styling model (`mlx-community/Qwen3.5-2B-OptiQ-4bit`) are downloaded by TinyAudio on first run and cached under `~/Library/Application Support/TinyAudio/Models/`. The Setup window shows progress bars; the hotkey is disabled until both models are ready. To force a re-download, delete the cache directory.

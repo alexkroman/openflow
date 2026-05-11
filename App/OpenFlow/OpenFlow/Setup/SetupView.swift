@@ -30,37 +30,62 @@ final class SetupViewModel: ObservableObject {
   }
 }
 
+private enum SetupPhase { case permissions, loading, main }
+
 struct SetupView: View {
   @StateObject var vm = SetupViewModel()
   @ObservedObject var coordinator: AppCoordinator
+  var onHeightChange: (CGFloat) -> Void = { _ in }
 
   private var hotkeyLabel: String { DictateHotkey.label }
+
+  /// Permissions are the gate — always show the permissions step if any
+  /// grant is missing, including after revocation. Once permissions are
+  /// in place, the model-load step runs (cache delete also re-enters
+  /// it). Otherwise we're in the steady-state "main" view.
+  private var phase: SetupPhase {
+    if !vm.status.allGranted { return .permissions }
+    if !coordinator.modelLoadState.isReady { return .loading }
+    return .main
+  }
+
+  static func targetHeight(modelReady: Bool, allGranted: Bool) -> CGFloat {
+    if !allGranted { return 400 }
+    if !modelReady { return 300 }
+    return 250
+  }
 
   var body: some View {
     VStack(spacing: 0) {
       header
       Divider()
       Form {
-        if !coordinator.modelLoadState.isReady {
+        switch phase {
+        case .permissions:
+          microphoneSection
+          accessibilitySection
+        case .loading:
           ModelLoadSection(
             state: coordinator.modelLoadState,
             retrySTT: { Task { await coordinator.retrySTTWarmUp() } },
             retryLLM: { Task { await coordinator.retryLLMWarmUp() } }
           )
-        }
-        hotkeySection
-        if vm.status.allGranted {
-          successSection
-        } else {
-          microphoneSection
-          accessibilitySection
-          recheckSection
+        case .main:
+          hotkeySection
         }
       }
       .formStyle(.grouped)
       .scrollDisabled(true)
     }
     .frame(width: 500)
+    .onChange(of: phase) { _, _ in
+      onHeightChange(
+        Self.targetHeight(
+          modelReady: coordinator.modelLoadState.isReady,
+          allGranted: vm.status.allGranted
+        )
+      )
+    }
     .task {
       while !Task.isCancelled {
         try? await Task.sleep(for: .seconds(1))
@@ -77,16 +102,13 @@ struct SetupView: View {
         .frame(width: 64, height: 64)
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 6) {
-        Text("Welcome to OpenFlow").font(.title).bold()
-        Text(
-          "Hold \(hotkeyLabel) anywhere to dictate. "
-            + "Your voice is transcribed on-device and typed into the app you're using."
-        )
-        .foregroundStyle(.secondary)
-        .fixedSize(horizontal: false, vertical: true)
+        Text("OpenFlow").font(.title).bold()
+        Text("Hold \(hotkeyLabel) in any app to dictate. Transcription stays on this device.")
+          .foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
       }
     }
-    .padding(28)
+    .padding(20)
   }
 
   private var hotkeySection: some View {
@@ -99,30 +121,14 @@ struct SetupView: View {
     } header: {
       Text("Shortcut")
     } footer: {
-      Text("Pick any key+modifier combo. Defaults to ⌃⌥D.")
-    }
-  }
-
-  private var successSection: some View {
-    Section {
-      LabeledContent {
-        HStack(spacing: 4) {
-          Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-          Text("All set").foregroundStyle(.secondary)
-        }
-      } label: {
-        Label("Permissions", systemImage: "lock.shield")
-      }
-      Button("Restart OpenFlow") { vm.relaunch() }
-        .keyboardShortcut(.defaultAction)
-    } footer: {
-      Text("OpenFlow needs to restart so the new permissions take effect.")
+      Text("Default: ⌃⌥D.")
     }
   }
 
   private var microphoneSection: some View {
     Section {
       permissionRow(
+        rowLabel: "Microphone",
         symbol: "mic.fill",
         granted: vm.status.microphone,
         buttonLabel: "Allow Microphone Access",
@@ -132,16 +138,14 @@ struct SetupView: View {
     } header: {
       Text("Microphone")
     } footer: {
-      Text(
-        "OpenFlow needs to hear you while you dictate. "
-          + "Recording only happens while you're holding \(hotkeyLabel)."
-      )
+      Text("OpenFlow only records while you hold the shortcut.")
     }
   }
 
   private var accessibilitySection: some View {
     Section {
       permissionRow(
+        rowLabel: "Accessibility",
         symbol: "accessibility",
         granted: vm.status.accessibility,
         buttonLabel: "Open Accessibility Settings…",
@@ -152,24 +156,16 @@ struct SetupView: View {
       Text("Accessibility")
     } footer: {
       Text(
-        "OpenFlow types the transcribed text into the app you're using. "
-          + "This opens System Settings — turn on OpenFlow in the Accessibility list, "
-          + "then come back here."
+        "Required to type into other apps. "
+          + "Add OpenFlow in System Settings → Privacy & Security → Accessibility, "
+          + "then turn it on."
       )
-    }
-  }
-
-  private var recheckSection: some View {
-    Section {
-      HStack {
-        Spacer()
-        Button("Recheck Status") { vm.recheck() }
-      }
     }
   }
 
   @ViewBuilder
   private func permissionRow(
+    rowLabel: String,
     symbol: String,
     granted: Bool,
     buttonLabel: String,
@@ -188,7 +184,7 @@ struct SetupView: View {
         Button(buttonLabel, action: action)
       }
     } label: {
-      Label("Status", systemImage: symbol)
+      Label(rowLabel, systemImage: symbol)
     }
   }
 }

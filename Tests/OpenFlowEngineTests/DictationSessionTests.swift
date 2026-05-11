@@ -41,7 +41,7 @@ extension DictationSessionTests {
     await session.waitForIdle()
 
     #expect(await session.phase == .idle)
-    #expect(await injector.inserted == ["Hello world."])
+    #expect(await injector.inserted == ["Hello world. "])
   }
 
   @Test("styling disabled: raw transcript inserted")
@@ -59,7 +59,7 @@ extension DictationSessionTests {
     await session.release()
     await session.waitForIdle()
 
-    #expect(await injector.inserted == ["hello world"])
+    #expect(await injector.inserted == ["hello world "])
   }
 
   @Test("mic.stop throw transitions to failed(.audioCaptureFailed)")
@@ -201,6 +201,6 @@ extension DictationSessionTests {
     await session.press()
     await session.waitForIdle()  // auto-release fires release() within 50ms
 
-    #expect(await injector.inserted == ["Timed out text."])
+    #expect(await injector.inserted == ["Timed out text. "])
   }
 }

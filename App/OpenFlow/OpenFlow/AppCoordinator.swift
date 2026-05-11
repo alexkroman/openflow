@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import Foundation
 import KeyboardShortcuts
 import OpenFlowEngine
@@ -11,28 +12,29 @@ final class AppCoordinator: ObservableObject {
 
   private let overlay: OverlayWindowController
   private let toast: ToastPresenter
-  private let statusItem: StatusItemController
+  private let onShowSetup: @MainActor () -> Void
 
-  private let mic: MicCapture
+  private let mic: PushToTalkCapture
   private let transcriber: TinyAudioTranscriber
   private let mlxStyler: MLXStyler
   private let safeStyler: SafeguardedStyler
   private let injector: KeyInjector
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
+  private var wasRecording = false
 
   @Published private(set) var modelLoadState = ModelLoadState()
 
   init(
     overlay: OverlayWindowController,
     toast: ToastPresenter,
-    statusItem: StatusItemController
+    onShowSetup: @MainActor @escaping () -> Void
   ) {
     self.overlay = overlay
     self.toast = toast
-    self.statusItem = statusItem
+    self.onShowSetup = onShowSetup
 
-    self.mic = MicCapture()
+    self.mic = PushToTalkCapture()
     self.transcriber = TinyAudioTranscriber()
     self.mlxStyler = MLXStyler()
     self.safeStyler = SafeguardedStyler(inner: mlxStyler)
@@ -52,7 +54,7 @@ final class AppCoordinator: ObservableObject {
     Task { @MainActor in
       async let stt: Void = self.warmUp(.stt)
       async let llm: Void = self.warmUp(.llm)
-      async let audio: Void = self.mic.warmUp()
+      async let audio: Void = self.warmUpMicIfAuthorized()
       _ = await (stt, llm, audio)
     }
 
@@ -60,7 +62,9 @@ final class AppCoordinator: ObservableObject {
       guard let self else { return }
       Task { @MainActor in
         guard self.modelLoadState.isReady else {
-          self.toast.show("Still preparing models — please wait")
+          // Surface the Setup window so the user sees download progress
+          // directly instead of dismissing a toast that says "wait."
+          self.onShowSetup()
           return
         }
         await self.session.press()
@@ -114,6 +118,17 @@ final class AppCoordinator: ObservableObject {
     await warmUp(model)
   }
 
+  /// Pre-warm the mic only when permission is already granted. Calling
+  /// `AVAudioEngine.prepare` on an unauthorized app pops macOS's mic prompt,
+  /// which we don't want at launch — the Setup window's "Allow Microphone
+  /// Access" button is the canonical entry point. First dictation after
+  /// permission is granted pays a small warmup cost; subsequent presses
+  /// don't.
+  private func warmUpMicIfAuthorized() async {
+    guard AVCaptureDevice.authorizationStatus(for: .audio) == .authorized else { return }
+    await mic.warmUp()
+  }
+
   private func update(_ model: Model, status: ChannelStatus) {
     switch model {
     case .stt:
@@ -128,8 +143,14 @@ final class AppCoordinator: ObservableObject {
   // MARK: - Dictation render
 
   private func render(_ phase: PipelinePhase) {
-    statusItem.update(phase: phase)
     let label = DictateHotkey.label
+    let isRecording: Bool = if case .recording = phase { true } else { false }
+    if isRecording && !wasRecording {
+      NSSound(named: "Pop")?.play()
+    } else if !isRecording && wasRecording {
+      NSSound(named: "Tink")?.play()
+    }
+    wasRecording = isRecording
     switch phase {
     case .idle, .injecting, .cancelled:
       overlay.show(state: .init(phase: .idle, hotkeyLabel: label))

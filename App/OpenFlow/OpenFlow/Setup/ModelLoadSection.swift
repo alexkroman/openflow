@@ -8,12 +8,12 @@ struct ModelLoadSection: View {
 
   var body: some View {
     Section {
-      ModelLoadRow(label: "Speech recognition model", status: state.stt, retry: retrySTT)
-      ModelLoadRow(label: "Language model", status: state.llm, retry: retryLLM)
+      ModelLoadRow(label: "Speech recognition", status: state.stt, retry: retrySTT)
+      ModelLoadRow(label: "Text cleanup", status: state.llm, retry: retryLLM)
     } header: {
-      Text("Setting up")
+      Text("Models")
     } footer: {
-      Text("Downloaded once, then cached under ~/Library/Application Support/TinyAudio.")
+      Text("Downloaded once and kept on this device.")
         .foregroundStyle(.secondary)
     }
   }
@@ -50,7 +50,7 @@ private struct ModelLoadRow: View {
   private func progressView(for p: TinyAudio.LoadProgress) -> some View {
     switch p {
     case .checking:
-      Text("Checking cache").foregroundStyle(.secondary)
+      Text("Checking…").foregroundStyle(.secondary)
     case .downloading(let fraction):
       ProgressView(value: fraction).frame(width: 160)
       Text("\(Int(fraction * 100))%").monospacedDigit().foregroundStyle(.secondary)

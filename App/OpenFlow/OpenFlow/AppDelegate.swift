@@ -5,21 +5,16 @@ import OpenFlowEngine
 final class AppDelegate: NSObject, NSApplicationDelegate {
   @MainActor private var coordinator: AppCoordinator?
   @MainActor private var setupWindow = SetupWindowController()
-  @MainActor private var statusItem: StatusItemController?
 
   @MainActor
   func applicationDidFinishLaunching(_ notification: Notification) {
-    // Fire the AX-protected call at launch so tccd registers OpenFlow in the
-    // Accessibility list before the user ever opens System Settings — clicking
-    // the button later loses the race against the Settings UI rendering.
-    PermissionsChecker.registerForAccessibilityTCC()
-
     let overlay = OverlayWindowController()
     let toast = ToastPresenter()
     let setupWindow = self.setupWindow
 
-    // coordinator depends on statusItem, so onShowSetup resolves coordinator at click time.
-    let statusItem = StatusItemController(
+    let coord = AppCoordinator(
+      overlay: overlay,
+      toast: toast,
       onShowSetup: { [weak self] in
         guard let self else { return }
         MainActor.assumeIsolated {
@@ -27,15 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             setupWindow.show(coordinator: coordinator)
           }
         }
-      },
-      onQuit: { NSApp.terminate(nil) }
-    )
-    self.statusItem = statusItem
-
-    let coord = AppCoordinator(
-      overlay: overlay,
-      toast: toast,
-      statusItem: statusItem
+      }
     )
     self.coordinator = coord
 
@@ -47,9 +34,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     coord.start()
   }
 
-  // For LSUIElement agent apps, this fires when the user re-launches the .app
-  // from Finder/Spotlight — the user-facing escape hatch for "menu bar icon
-  // hidden by the notch."
+  /// Called from the SwiftUI `Settings…` command (⌘,) in `App.swift`.
+  @MainActor
+  func showSetup() {
+    guard let coordinator else { return }
+    setupWindow.show(coordinator: coordinator)
+  }
+
+  // Closing the Setup window must not quit the app — the hotkey still drives
+  // dictation while the app sits idle in the Dock. Re-opening Setup is the
+  // job of `applicationShouldHandleReopen` (Dock-icon click).
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    false
+  }
+
   @MainActor
   func applicationShouldHandleReopen(
     _ sender: NSApplication,

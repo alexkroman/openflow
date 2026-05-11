@@ -15,10 +15,10 @@
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
 		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
+		A9C0F6BECB5868C23823F60C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D7EA0F026882BF57C5FBB753 /* Assets.xcassets */; };
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
 		BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */; };
 		C1DC2D9C5757123C314A90CF /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC9526CBA28E0702C1E0C4 /* App.swift */; };
-		C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */; };
 		DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957A32E91D36705B16A719B7 /* SetupWindowController.swift */; };
 		E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8172C344625A9801EE3EDD97 /* ToastPresenter.swift */; };
 		E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */; };
@@ -31,7 +31,6 @@
 		38EECD10C11AB7A58617CAA1 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
 		62F092E712D065AFCB941BD9 /* ModelLoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadState.swift; sourceTree = "<group>"; };
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
@@ -40,6 +39,7 @@
 		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		D7EA0F026882BF57C5FBB753 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
 		F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -88,10 +88,10 @@
 				40FC9526CBA28E0702C1E0C4 /* App.swift */,
 				D139AA26A8F4B73857470E2C /* AppCoordinator.swift */,
 				25D02828C113256A90A18D1C /* AppDelegate.swift */,
+				D7EA0F026882BF57C5FBB753 /* Assets.xcassets */,
 				6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */,
 				62F092E712D065AFCB941BD9 /* ModelLoadState.swift */,
 				DD23241CC3362389725DD4AC /* OpenFlow.entitlements */,
-				5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */,
 				CE1075EC2686C5C4F9396479 /* Hotkey */,
 				73C2C10FA744B263909CFB6B /* Overlay */,
 				DA5E6930882DE0043CABB6F1 /* Setup */,
@@ -152,6 +152,7 @@
 			buildConfigurationList = 9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */;
 			buildPhases = (
 				AC7D5586EC782E9617563944 /* Sources */,
+				3BFA98C486330483C1F3F498 /* Resources */,
 				4A5EF6ECC56ABF134ACFBAE6 /* Frameworks */,
 				053200E5A126F68144BAEFEE /* Install to /Applications */,
 			);
@@ -206,6 +207,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		3BFA98C486330483C1F3F498 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9C0F6BECB5868C23823F60C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXShellScriptBuildPhase section */
 		053200E5A126F68144BAEFEE /* Install to /Applications */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -244,7 +256,6 @@
 				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
 				5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */,
 				DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */,
-				C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */,
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -288,6 +299,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -348,6 +360,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

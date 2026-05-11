@@ -2,6 +2,7 @@ import AVFoundation
 import AppKit
 import ApplicationServices
 import Foundation
+import os
 
 public struct PermissionStatus: Equatable, Sendable {
   public let microphone: Bool
@@ -16,6 +17,11 @@ public struct PermissionStatus: Equatable, Sendable {
 }
 
 public enum PermissionsChecker {
+  // Subsystem matches the rest of the engine (see MicCapture). Tail with:
+  //   log show --predicate 'subsystem == "dev.alex.OpenFlow"
+  //                         AND category == "Permissions"' --last 5m
+  private static let logger = Logger(subsystem: "dev.alex.OpenFlow", category: "Permissions")
+
   public static func check() -> PermissionStatus {
     PermissionStatus(
       microphone: micGranted(),
@@ -34,46 +40,19 @@ public enum PermissionsChecker {
     await AVCaptureDevice.requestAccess(for: .audio)
   }
 
-  /// Trigger the Accessibility permission flow:
-  /// 1. Make a *real* AX-protected call against another app's UI tree —
-  ///    this is what reliably registers OpenFlow in TCC on macOS 26.
-  ///    `AXIsProcessTrustedWithOptions` and the system-wide query don't
-  ///    appear to count as "activity" for registration purposes.
-  /// 2. Show the trust prompt with an "Open System Settings" button.
+  /// Show the standard Accessibility permission prompt. Calling
+  /// `AXIsProcessTrustedWithOptions` with the prompt option is the only
+  /// thing that gets tccd to write a `kTCCServiceAccessibility` row for
+  /// this bundle on macOS 26 — passive checks (`AXIsProcessTrusted`,
+  /// `AXIsProcessTrustedWithOptions(nil)`) all return `DB Action:None`
+  /// from tccd and leave the app unlisted in System Settings.
   @MainActor
   public static func openAccessibilitySettings() {
-    forceAccessibilityActivity()
+    // The exported `kAXTrustedCheckOptionPrompt` is a non-Sendable C global
+    // under Swift 6; using the documented literal value avoids the warning.
     let prompt: NSDictionary = ["AXTrustedCheckOptionPrompt": true]
-    _ = AXIsProcessTrustedWithOptions(prompt)
-  }
-
-  /// Kept as a no-prompt nudge — same protected-call body as
-  /// `openAccessibilitySettings`'s first step. Best-effort.
-  @MainActor
-  public static func registerForAccessibilityTCC() {
-    forceAccessibilityActivity()
-  }
-
-  @MainActor
-  private static func forceAccessibilityActivity() {
-    // AX reads against our own pid are NOT TCC-protected — apps can always
-    // read their own UI. We must target a different process so tccd sees
-    // a denied request and registers OpenFlow in the Accessibility list.
-    // `frontmostApplication` is OpenFlow itself when this runs from a
-    // button in our own window, which is why prior versions never worked.
-    let myPid = ProcessInfo.processInfo.processIdentifier
-    let others = NSWorkspace.shared.runningApplications.filter {
-      $0.processIdentifier > 0 && $0.processIdentifier != myPid
-    }
-    let target =
-      others.first(where: { $0.bundleIdentifier == "com.apple.finder" })
-      ?? others.first(where: { $0.activationPolicy == .regular })
-      ?? others.first
-    guard let pid = target?.processIdentifier else { return }
-    let element = AXUIElementCreateApplication(pid)
-    var value: CFTypeRef?
-    _ = AXUIElementCopyAttributeValue(
-      element, kAXFocusedUIElementAttribute as CFString, &value)
+    let trusted = AXIsProcessTrustedWithOptions(prompt)
+    logger.info("openAccessibilitySettings prompt-call trusted=\(trusted)")
   }
 
   @MainActor
