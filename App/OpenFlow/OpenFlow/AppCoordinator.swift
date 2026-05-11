@@ -2,9 +2,10 @@ import AppKit
 import Foundation
 import KeyboardShortcuts
 import OpenFlowEngine
+import TinyAudio
 
 @MainActor
-final class AppCoordinator {
+final class AppCoordinator: ObservableObject {
   private static let stylingEnabled = true
   private static let longTextThreshold = 500
 
@@ -19,6 +20,15 @@ final class AppCoordinator {
   private let injector: KeyInjector
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
+
+  @Published private(set) var modelLoadState: ModelLoadState = .idle
+
+  private var latestSTTProgress: TinyAudio.LoadProgress = .checking
+  private var latestLLMProgress: TinyAudio.LoadProgress = .checking
+  private var sttReady = false
+  private var llmReady = false
+  private var sttError: Error?
+  private var llmError: Error?
 
   init(
     overlay: OverlayWindowController,
@@ -46,30 +56,27 @@ final class AppCoordinator {
   func start() {
     render(.idle)
 
-    // Pre-warm models + audio engine in the background so the first dictation
-    // doesn't pay cold-start cost: TinyAudio's weight load, MLX kernel JIT +
-    // weight load, the styler's KV-cache primer turn, and AVAudioEngine
-    // hardware-route discovery + prepare(). Together that's multiple seconds
-    // on a cold launch. Errors are swallowed so a warmup failure doesn't block
-    // startup; the same paths run lazily on first use as a fallback.
-    let transcriber = self.transcriber
-    let styler = self.mlxStyler
-    let mic = self.mic
-    Task.detached(priority: .utility) {
-      async let stt: Void = {
-        try? await transcriber.warmUp()
-      }()
-      async let llm: Void = {
-        try? await styler.warmUp()
-      }()
-      async let audio: Void = {
-        await mic.warmUp()
-      }()
+    // Kick off model downloads + audio engine warm-up in parallel. While
+    // models are loading, the hotkey is gated below. AVAudioEngine warm-up
+    // can race with model loading; it's small and independent.
+    Task { @MainActor in
+      modelLoadState = .loading(stt: .checking, llm: .checking)
+
+      async let stt: Void = self.warmUpSTT()
+      async let llm: Void = self.warmUpLLM()
+      async let audio: Void = self.mic.warmUp()
       _ = await (stt, llm, audio)
     }
 
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
-      Task { @MainActor in await self?.session.press() }
+      guard let self else { return }
+      Task { @MainActor in
+        guard self.modelLoadState.isReady else {
+          self.toast.show("Still preparing models — please wait")
+          return
+        }
+        await self.session.press()
+      }
     }
     KeyboardShortcuts.onKeyUp(for: .dictate) { [weak self] in
       Task { @MainActor in await self?.session.release() }
@@ -84,6 +91,68 @@ final class AppCoordinator {
       }
     }
   }
+
+  // MARK: - Model load orchestration
+
+  func retrySTTWarmUp() async {
+    sttError = nil
+    sttReady = false
+    latestSTTProgress = .checking
+    recomputeLoadState()
+    await warmUpSTT()
+  }
+
+  func retryLLMWarmUp() async {
+    llmError = nil
+    llmReady = false
+    latestLLMProgress = .checking
+    recomputeLoadState()
+    await warmUpLLM()
+  }
+
+  private func warmUpSTT() async {
+    do {
+      try await transcriber.warmUp { [weak self] p in
+        Task { @MainActor in
+          self?.latestSTTProgress = p
+          self?.recomputeLoadState()
+        }
+      }
+      sttReady = true
+    } catch {
+      sttError = error
+    }
+    recomputeLoadState()
+  }
+
+  private func warmUpLLM() async {
+    do {
+      try await mlxStyler.warmUp { [weak self] p in
+        Task { @MainActor in
+          self?.latestLLMProgress = p
+          self?.recomputeLoadState()
+        }
+      }
+      llmReady = true
+    } catch {
+      llmError = error
+    }
+    recomputeLoadState()
+  }
+
+  private func recomputeLoadState() {
+    if sttError != nil || llmError != nil {
+      modelLoadState = .failed(stt: sttError, llm: llmError)
+      return
+    }
+    if sttReady && llmReady {
+      modelLoadState = .ready
+      return
+    }
+    modelLoadState = .loading(stt: latestSTTProgress, llm: latestLLMProgress)
+  }
+
+  // MARK: - Dictation render
 
   private func render(_ phase: PipelinePhase) {
     statusItem.update(phase: phase)
