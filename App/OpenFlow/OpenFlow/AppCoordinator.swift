@@ -89,9 +89,14 @@ final class AppCoordinator: ObservableObject {
 
   private func warmUp(_ model: Model) async {
     let onProgress: @Sendable (TinyAudio.LoadProgress) -> Void = { [weak self] progress in
-      Task { @MainActor in
-        self?.update(model, status: Self.channelStatus(from: progress))
+      // Whole-percent buckets keep Equatable de-dup quiet during downloads.
+      let bucketed: TinyAudio.LoadProgress
+      if case .downloading(let f) = progress {
+        bucketed = .downloading(fractionCompleted: (f * 100).rounded(.down) / 100)
+      } else {
+        bucketed = progress
       }
+      Task { @MainActor in self?.update(model, status: .progress(bucketed)) }
     }
     do {
       switch model {
@@ -105,7 +110,7 @@ final class AppCoordinator: ObservableObject {
   }
 
   private func retry(_ model: Model) async {
-    update(model, status: .checking)
+    update(model, status: .progress(.checking))
     await warmUp(model)
   }
 
@@ -117,16 +122,6 @@ final class AppCoordinator: ObservableObject {
     case .llm:
       guard modelLoadState.llm != status else { return }
       modelLoadState.llm = status
-    }
-  }
-
-  private static func channelStatus(from progress: TinyAudio.LoadProgress) -> ChannelStatus {
-    switch progress {
-    case .checking: return .checking
-    case .downloading(let fraction):
-      // Bucket to whole-percent so identical buckets compare equal and don't republish.
-      return .downloading(fraction: (fraction * 100).rounded(.down) / 100)
-    case .loading: return .loading
     }
   }
 

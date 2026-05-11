@@ -28,6 +28,9 @@ public enum DictationLog {
 
   static let timestampFormat = Date.ISO8601FormatStyle(includingFractionalSeconds: true)
 
+  /// Append a (raw, polished) entry to the JSONL log. **Debug-only:** the
+  /// body is compiled out of Release builds; callers can invoke this
+  /// unconditionally and pay zero cost when shipping.
   public static func append(raw: String, polished: String) {
     #if DEBUG
       append(raw: raw, polished: polished, to: defaultURL, now: Date())

@@ -1,4 +1,5 @@
 import SwiftUI
+import TinyAudio
 
 struct ModelLoadSection: View {
   let state: ModelLoadState
@@ -34,6 +35,20 @@ private struct ModelLoadRow: View {
   @ViewBuilder
   private var statusView: some View {
     switch status {
+    case .progress(let p):
+      progressView(for: p)
+    case .loaded:
+      Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+      Text("Ready").foregroundStyle(.secondary)
+    case .failed(let message):
+      Text(message).foregroundStyle(.red).lineLimit(1)
+      Button("Retry", action: retry)
+    }
+  }
+
+  @ViewBuilder
+  private func progressView(for p: TinyAudio.LoadProgress) -> some View {
+    switch p {
     case .checking:
       Text("Checking cache").foregroundStyle(.secondary)
     case .downloading(let fraction):
@@ -41,12 +56,6 @@ private struct ModelLoadRow: View {
       Text("\(Int(fraction * 100))%").monospacedDigit().foregroundStyle(.secondary)
     case .loading:
       ProgressView().controlSize(.small)
-    case .loaded:
-      Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-      Text("Ready").foregroundStyle(.secondary)
-    case .failed(let message):
-      Text(message).foregroundStyle(.red).lineLimit(1)
-      Button("Retry", action: retry)
     }
   }
 }
