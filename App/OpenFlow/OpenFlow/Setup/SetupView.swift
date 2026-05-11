@@ -32,6 +32,7 @@ final class SetupViewModel: ObservableObject {
 
 struct SetupView: View {
   @StateObject var vm = SetupViewModel()
+  @ObservedObject var coordinator: AppCoordinator
 
   private var hotkeyLabel: String { DictateHotkey.label }
 
@@ -40,6 +41,13 @@ struct SetupView: View {
       header
       Divider()
       Form {
+        if !coordinator.modelLoadState.isReady {
+          ModelLoadSection(
+            state: coordinator.modelLoadState,
+            retrySTT: { Task { await coordinator.retrySTTWarmUp() } },
+            retryLLM: { Task { await coordinator.retryLLMWarmUp() } }
+          )
+        }
         hotkeySection
         if vm.status.allGranted {
           successSection

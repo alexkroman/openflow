@@ -144,7 +144,7 @@
 			path = Setup;
 			sourceTree = "<group>";
 		};
-		"TEMP_E0899ABC-5A59-41F6-A423-0ABC7F5CF2AC" /* Resources */ = {
+		"TEMP_C9B28EBA-D589-4EC7-9F59-B8C384D2C81A" /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 			);
