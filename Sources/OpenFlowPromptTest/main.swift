@@ -101,9 +101,9 @@ struct PromptTestRunner {
     }
   }
 
-  static func evaluateWithScore(mode: String, expected: String?, threshold: Double?, actual: String)
-    -> (Bool, Double?)
-  {
+  static func evaluateWithScore(
+    mode: String, expected: String?, threshold: Double?, actual: String
+  ) -> (Bool, Double?) {
     let trimmed = actual.trimmingCharacters(in: .whitespacesAndNewlines)
     switch mode {
     case "exact":
