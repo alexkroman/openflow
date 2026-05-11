@@ -4,8 +4,24 @@ Run before tagging a release. Each row should pass; failures get filed as issues
 
 ## Prerequisites
 - All three permissions granted (Mic / Accessibility / Input Monitoring)
-- LLM model downloaded
+- Both models present in `~/Library/Application Support/TinyAudio/Models/` (TinyAudio downloads them automatically on first launch — see "First-run model download" below)
 - Build: `xcodebuild -project App/OpenFlow/OpenFlow.xcodeproj -scheme OpenFlow -configuration Debug -derivedDataPath /tmp/openflow-build build`
+
+## First-run model download
+1. Quit OpenFlow.
+2. `rm -rf "$HOME/Library/Application Support/TinyAudio"`
+3. Launch OpenFlow.
+4. Setup window opens automatically with two progress rows ("Speech recognition model", "Language model").
+5. Both rows progress from "Checking cache" → "Downloading X%" → row disappears once cached.
+6. After both rows clear, dictation hotkey starts working.
+7. Pressing the hotkey while a row is visible shows the "Still preparing models — please wait" toast.
+
+## Retry path
+1. Quit OpenFlow.
+2. `rm -rf "$HOME/Library/Application Support/TinyAudio"`
+3. Disconnect from network.
+4. Launch OpenFlow → both rows show an error string + Retry button.
+5. Reconnect, click Retry on each row → downloads complete.
 
 ## Apps to test
 For each, place cursor in a text field, hold Right Option, dictate "this is a test um of the openflow dictation app", release.
