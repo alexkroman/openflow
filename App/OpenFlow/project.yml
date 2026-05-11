@@ -1,0 +1,98 @@
+name: OpenFlow
+options:
+  bundleIdPrefix: dev.alex
+  deploymentTarget:
+    macOS: "14.0"
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "640A7F5A9754400D4A0491E7A6FB30542D907806"
+    DEVELOPMENT_TEAM: "Y54ZB9JF63"
+    ENABLE_HARDENED_RUNTIME: YES
+packages:
+  OpenFlowEngine:
+    path: ../..
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    from: "2.0.0"
+targets:
+  OpenFlow:
+    type: application
+    platform: macOS
+    sources:
+      - path: OpenFlow
+        excludes:
+          - "Resources/Models/**"
+      - path: OpenFlow/Resources/Models
+        type: folder
+        buildPhase: resources
+        optional: true
+    info:
+      path: OpenFlow/Info.plist
+      properties:
+        CFBundleName: OpenFlow
+        CFBundleDisplayName: OpenFlow
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        LSMinimumSystemVersion: "14.0"
+        LSUIElement: true
+        NSMicrophoneUsageDescription: OpenFlow uses your microphone to transcribe your dictation locally on this device.
+        NSAppleEventsUsageDescription: OpenFlow inserts text into the app you're using.
+    entitlements:
+      path: OpenFlow/OpenFlow.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.device.audio-input: true
+        com.apple.security.cs.allow-jit: true
+        com.apple.security.cs.allow-unsigned-executable-memory: true
+        com.apple.security.cs.disable-library-validation: true
+    dependencies:
+      - package: OpenFlowEngine
+        product: OpenFlowEngine
+      - package: KeyboardShortcuts
+        product: KeyboardShortcuts
+    postBuildScripts:
+      - name: Install to /Applications
+        script: |
+          set -e
+          # Copy + re-sign into /Applications so TCC sees a permanent path.
+          # (Xcode/CLI builds otherwise live in DerivedData / /tmp — paths
+          # macOS treats as transient and refuses to add to the Privacy
+          # & Security toggle list.) Falls back to ~/Applications if the
+          # system folder isn't writable on this machine.
+          if [ -w /Applications ]; then
+            DEST="/Applications/${PRODUCT_NAME}.app"
+          else
+            DEST="$HOME/Applications/${PRODUCT_NAME}.app"
+            mkdir -p "$HOME/Applications"
+          fi
+          rm -rf "$DEST"
+          cp -R "$BUILT_PRODUCTS_DIR/${PRODUCT_NAME}.app" "$DEST"
+
+          # SHA-1 of the Developer ID Application: Alexander Kroman cert.
+          # Errors are NOT swallowed.
+          IDENTITY="640A7F5A9754400D4A0491E7A6FB30542D907806"
+          ENTS="${SRCROOT}/OpenFlow/OpenFlow.entitlements"
+          # Inside-out signing: Debug builds emit unsigned dylibs
+          # (__preview.dylib, OpenFlow.debug.dylib). Signing the bundle
+          # alone doesn't recurse, so verify fails. Sign nested code first.
+          find "$DEST" -type f \( -name "*.dylib" -o -name "*.so" \) \
+            -print0 | while IFS= read -r -d '' f; do
+            codesign --force --sign "$IDENTITY" --options runtime "$f"
+          done
+          codesign --force --sign "$IDENTITY" \
+            --entitlements "$ENTS" \
+            --options runtime \
+            "$DEST"
+          codesign --verify --strict --verbose=1 "$DEST"
+          echo "Installed: $DEST"
+        basedOnDependencyAnalysis: false
+    scheme:
+      testTargets: []
+      gatherCoverageData: false
+      commandLineArguments: {}
+      environmentVariables: {}
+      disableMainThreadChecker: false

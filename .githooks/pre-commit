@@ -1,0 +1,8 @@
+#!/bin/bash
+# Versioned pre-commit hook. Activate once with: scripts/install-hooks.sh
+# Bypass for an emergency commit: git commit --no-verify
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+exec "$REPO_ROOT/scripts/check.sh"

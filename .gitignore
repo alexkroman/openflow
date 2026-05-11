@@ -1,0 +1,8 @@
+.build/
+.swiftpm/
+DerivedData/
+*.xcuserdatad/
+xcuserdata/
+.DS_Store
+.claude/
+App/OpenFlow/OpenFlow/Resources/Models/

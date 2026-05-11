@@ -1,0 +1,482 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 928B81225BAAB01A9A5A460D /* KeyboardShortcuts */; };
+		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
+		4E9D38E5637E8D3C5F509373 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 57EAF656382186A79A261018 /* Models */; };
+		5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AD11B117E39DD5F21BEB69 /* SetupView.swift */; };
+		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
+		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
+		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
+		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
+		BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */; };
+		C1DC2D9C5757123C314A90CF /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC9526CBA28E0702C1E0C4 /* App.swift */; };
+		C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */; };
+		DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957A32E91D36705B16A719B7 /* SetupWindowController.swift */; };
+		E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8172C344625A9801EE3EDD97 /* ToastPresenter.swift */; };
+		E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0178FD639B92FF2215426A06 /* FloatingPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingPanel.swift; sourceTree = "<group>"; };
+		0DE182084E4ACF12A47020FE /* openflow */ = {isa = PBXFileReference; lastKnownFileType = folder; name = openflow; path = ../..; sourceTree = SOURCE_ROOT; };
+		25D02828C113256A90A18D1C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		38EECD10C11AB7A58617CAA1 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
+		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		57EAF656382186A79A261018 /* Models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Models; path = OpenFlow/Resources/Models; sourceTree = SOURCE_ROOT; };
+		5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
+		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
+		957A32E91D36705B16A719B7 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
+		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
+		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
+		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
+		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4A5EF6ECC56ABF134ACFBAE6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */,
+				01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0BC1693FDE2B78AABDDAFAB1 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				0178FD639B92FF2215426A06 /* FloatingPanel.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		262F9F73BE590BF00927C90D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C98A9912C900B827A70525B /* OpenFlow.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		46C24B722B981666C9CCD9B2 = {
+			isa = PBXGroup;
+			children = (
+				57EAF656382186A79A261018 /* Models */,
+				5D389FE8BCB1A44149295D52 /* OpenFlow */,
+				8891488D8BCA8EC7E841DE30 /* Packages */,
+				262F9F73BE590BF00927C90D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5D389FE8BCB1A44149295D52 /* OpenFlow */ = {
+			isa = PBXGroup;
+			children = (
+				40FC9526CBA28E0702C1E0C4 /* App.swift */,
+				D139AA26A8F4B73857470E2C /* AppCoordinator.swift */,
+				25D02828C113256A90A18D1C /* AppDelegate.swift */,
+				6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */,
+				DD23241CC3362389725DD4AC /* OpenFlow.entitlements */,
+				5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */,
+				CE1075EC2686C5C4F9396479 /* Hotkey */,
+				73C2C10FA744B263909CFB6B /* Overlay */,
+				DA5E6930882DE0043CABB6F1 /* Setup */,
+				0BC1693FDE2B78AABDDAFAB1 /* Shared */,
+				947AA73A0E40545B67404EEF /* Toast */,
+			);
+			path = OpenFlow;
+			sourceTree = "<group>";
+		};
+		73C2C10FA744B263909CFB6B /* Overlay */ = {
+			isa = PBXGroup;
+			children = (
+				38EECD10C11AB7A58617CAA1 /* OverlayView.swift */,
+				B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */,
+			);
+			path = Overlay;
+			sourceTree = "<group>";
+		};
+		8891488D8BCA8EC7E841DE30 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				0DE182084E4ACF12A47020FE /* openflow */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		947AA73A0E40545B67404EEF /* Toast */ = {
+			isa = PBXGroup;
+			children = (
+				8172C344625A9801EE3EDD97 /* ToastPresenter.swift */,
+			);
+			path = Toast;
+			sourceTree = "<group>";
+		};
+		CE1075EC2686C5C4F9396479 /* Hotkey */ = {
+			isa = PBXGroup;
+			children = (
+				C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */,
+			);
+			path = Hotkey;
+			sourceTree = "<group>";
+		};
+		DA5E6930882DE0043CABB6F1 /* Setup */ = {
+			isa = PBXGroup;
+			children = (
+				B4AD11B117E39DD5F21BEB69 /* SetupView.swift */,
+				957A32E91D36705B16A719B7 /* SetupWindowController.swift */,
+			);
+			path = Setup;
+			sourceTree = "<group>";
+		};
+		"TEMP_3EB5B25C-4BBC-4425-82FD-03613A4BA934" /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DBE3E26DF40FAC5974189496 /* OpenFlow */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */;
+			buildPhases = (
+				AC7D5586EC782E9617563944 /* Sources */,
+				3BFA98C486330483C1F3F498 /* Resources */,
+				4A5EF6ECC56ABF134ACFBAE6 /* Frameworks */,
+				053200E5A126F68144BAEFEE /* Install to /Applications */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenFlow;
+			packageProductDependencies = (
+				5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */,
+				928B81225BAAB01A9A5A460D /* KeyboardShortcuts */,
+			);
+			productName = OpenFlow;
+			productReference = 3C98A9912C900B827A70525B /* OpenFlow.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		87FC373B88D5B2CA510C9BF5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					DBE3E26DF40FAC5974189496 = {
+						DevelopmentTeam = Y54ZB9JF63;
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = 7E4DD48FFFE0A55A01AE9D29 /* Build configuration list for PBXProject "OpenFlow" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 46C24B722B981666C9CCD9B2;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C25D1D986FB7945A98507867 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				83B8AA7D3994AD47923B7478 /* XCLocalSwiftPackageReference "../.." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 262F9F73BE590BF00927C90D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DBE3E26DF40FAC5974189496 /* OpenFlow */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3BFA98C486330483C1F3F498 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E9D38E5637E8D3C5F509373 /* Models in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		053200E5A126F68144BAEFEE /* Install to /Applications */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Install to /Applications";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n# Copy + re-sign into /Applications so TCC sees a permanent path.\n# (Xcode/CLI builds otherwise live in DerivedData / /tmp — paths\n# macOS treats as transient and refuses to add to the Privacy\n# & Security toggle list.) Falls back to ~/Applications if the\n# system folder isn't writable on this machine.\nif [ -w /Applications ]; then\n  DEST=\"/Applications/${PRODUCT_NAME}.app\"\nelse\n  DEST=\"$HOME/Applications/${PRODUCT_NAME}.app\"\n  mkdir -p \"$HOME/Applications\"\nfi\nrm -rf \"$DEST\"\ncp -R \"$BUILT_PRODUCTS_DIR/${PRODUCT_NAME}.app\" \"$DEST\"\n\n# SHA-1 of the Developer ID Application: Alexander Kroman cert.\n# Errors are NOT swallowed.\nIDENTITY=\"640A7F5A9754400D4A0491E7A6FB30542D907806\"\nENTS=\"${SRCROOT}/OpenFlow/OpenFlow.entitlements\"\n# Inside-out signing: Debug builds emit unsigned dylibs\n# (__preview.dylib, OpenFlow.debug.dylib). Signing the bundle\n# alone doesn't recurse, so verify fails. Sign nested code first.\nfind \"$DEST\" -type f \\( -name \"*.dylib\" -o -name \"*.so\" \\) \\\n  -print0 | while IFS= read -r -d '' f; do\n  codesign --force --sign \"$IDENTITY\" --options runtime \"$f\"\ndone\ncodesign --force --sign \"$IDENTITY\" \\\n  --entitlements \"$ENTS\" \\\n  --options runtime \\\n  \"$DEST\"\ncodesign --verify --strict --verbose=1 \"$DEST\"\necho \"Installed: $DEST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AC7D5586EC782E9617563944 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1DC2D9C5757123C314A90CF /* App.swift in Sources */,
+				7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */,
+				8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */,
+				E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */,
+				98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */,
+				1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */,
+				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
+				5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */,
+				DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */,
+				C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */,
+				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		04C1CD20AA4D5DD0AE4C01EB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = OpenFlow/OpenFlow.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = OpenFlow/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.alex.OpenFlow;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		78F26285A70EBFF8CC23C380 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = OpenFlow/OpenFlow.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = OpenFlow/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.alex.OpenFlow;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		ADAD20A70740EE4B10445CC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = 640A7F5A9754400D4A0491E7A6FB30542D907806;
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = Y54ZB9JF63;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		C7D1C15C2B16E1F7C3FCE15A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = 640A7F5A9754400D4A0491E7A6FB30542D907806;
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = Y54ZB9JF63;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7E4DD48FFFE0A55A01AE9D29 /* Build configuration list for PBXProject "OpenFlow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C7D1C15C2B16E1F7C3FCE15A /* Debug */,
+				ADAD20A70740EE4B10445CC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04C1CD20AA4D5DD0AE4C01EB /* Debug */,
+				78F26285A70EBFF8CC23C380 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		83B8AA7D3994AD47923B7478 /* XCLocalSwiftPackageReference "../.." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C25D1D986FB7945A98507867 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OpenFlowEngine;
+		};
+		928B81225BAAB01A9A5A460D /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C25D1D986FB7945A98507867 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 87FC373B88D5B2CA510C9BF5 /* Project object */;
+}
