@@ -14,6 +14,7 @@
 		825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
+		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
 		BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */; };
 		C1DC2D9C5757123C314A90CF /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC9526CBA28E0702C1E0C4 /* App.swift */; };
@@ -31,6 +32,7 @@
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
+		62F092E712D065AFCB941BD9 /* ModelLoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadState.swift; sourceTree = "<group>"; };
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
 		957A32E91D36705B16A719B7 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				D139AA26A8F4B73857470E2C /* AppCoordinator.swift */,
 				25D02828C113256A90A18D1C /* AppDelegate.swift */,
 				6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */,
+				62F092E712D065AFCB941BD9 /* ModelLoadState.swift */,
 				DD23241CC3362389725DD4AC /* OpenFlow.entitlements */,
 				5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */,
 				CE1075EC2686C5C4F9396479 /* Hotkey */,
@@ -236,6 +239,7 @@
 				E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */,
 				98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */,
 				825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */,
+				A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */,
 				1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */,
 				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
 				5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */,

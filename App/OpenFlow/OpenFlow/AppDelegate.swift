@@ -18,9 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let toast = ToastPresenter()
     let setupWindow = self.setupWindow
 
-    // Build statusItem first so we can hand it to the coordinator, then wire
-    // the onShowSetup closure to look up the coordinator at click time (it
-    // needs the coordinator's observable state to render the Setup UI).
+    // coordinator depends on statusItem, so onShowSetup resolves coordinator at click time.
     let statusItem = StatusItemController(
       onShowSetup: { [weak self] in
         guard let self else { return }
@@ -41,10 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     )
     self.coordinator = coord
 
-    // Show Setup on launch when permissions are missing OR models aren't
-    // ready yet. modelLoadState starts as .idle on first launch (and remains
-    // not-ready until both downloads complete) so this opens automatically on
-    // any cold launch / cache wipe.
+    // modelLoadState starts not-ready, so Setup opens on every cold launch / cache wipe.
     if !PermissionsChecker.check().allGranted || !coord.modelLoadState.isReady {
       setupWindow.show(coordinator: coord)
     }

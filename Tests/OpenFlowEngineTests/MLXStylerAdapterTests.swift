@@ -9,7 +9,7 @@ struct MLXStylerAdapterTests {
   func configDefaults() {
     let c = MLXStyler.Config()
     #expect(c.maxTokens == 512)
-    #expect(abs(c.temperature - 0.2) < 0.001)
+    #expect(c.temperature == 0.2)
   }
 
   @Test("Config custom values pass through")

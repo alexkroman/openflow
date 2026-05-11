@@ -18,18 +18,20 @@ public actor MLXStyler: StylerProtocol {
     self.config = config
   }
 
-  /// Load the underlying TinyAudio chat session (downloads from HF on first run).
-  /// Idempotent — second call is a no-op.
+  /// Loads the underlying TinyAudio chat session (downloads from HF on first run).
+  @discardableResult
   public func warmUp(
     progress: (@Sendable (TinyAudio.LoadProgress) -> Void)? = nil
-  ) async throws {
-    if session != nil { return }
+  ) async throws -> TinyAudio.ChatSession {
+    if let session { return session }
     do {
-      session = try await TinyAudio.ChatSession.load(
+      let new = try await TinyAudio.ChatSession.load(
         systemPrompt: StylingPrompt.system,
         generation: .init(maxTokens: config.maxTokens, temperature: config.temperature),
         progress: progress
       )
+      session = new
+      return new
     } catch {
       throw OpenFlowError.modelLoadFailed(underlying: error)
     }
@@ -39,17 +41,7 @@ public actor MLXStyler: StylerProtocol {
     AsyncThrowingStream { continuation in
       Task {
         do {
-          try await self.warmUp()
-          guard let session = await self.session else {
-            continuation.finish(
-              throwing: OpenFlowError.modelLoadFailed(
-                underlying: NSError(
-                  domain: "OpenFlow", code: -1,
-                  userInfo: [
-                    NSLocalizedDescriptionKey: "ChatSession unavailable after warmUp"
-                  ])))
-            return
-          }
+          let session = try await self.warmUp()
           let userText = StylingPrompt.userMessage(for: raw)
           for try await chunk in session.respond(to: userText) {
             if Task.isCancelled {

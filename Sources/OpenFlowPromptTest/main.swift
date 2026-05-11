@@ -12,10 +12,16 @@ import TinyAudio
 
 @main
 struct PromptTestRunner {
+  enum Mode: String, Codable {
+    case exact, contains
+    case notContains = "not_contains"
+    case empty, regex, similarity
+  }
+
   struct TestCase: Codable {
     let id: String
     let input: String
-    let mode: String  // "exact" | "contains" | "not_contains" | "empty" | "regex" | "similarity"
+    let mode: Mode
     let expected: String?
     let threshold: Double?  // similarity threshold, default 0.85
   }
@@ -73,7 +79,7 @@ struct PromptTestRunner {
       if let score { simScores.append(score) }
       print("[\(status)] \(tc.id)\(score.map { String(format: " sim=%.3f", $0) } ?? "")")
       print("  in:       \(quote(tc.input))")
-      print("  expected: \(tc.mode)\(tc.expected.map { " " + quote($0) } ?? "")")
+      print("  expected: \(tc.mode.rawValue)\(tc.expected.map { " " + quote($0) } ?? "")")
       print("  actual:   \(quote(output))")
       print()
     }
@@ -88,10 +94,7 @@ struct PromptTestRunner {
   static func generate(
     session: TinyAudio.ChatSession, raw: String, noThink: Bool
   ) async -> String {
-    let userText =
-      noThink
-      ? "<transcript>\(raw)</transcript> /no_think"
-      : "<transcript>\(raw)</transcript>"
+    let userText = StylingPrompt.userMessage(for: raw) + (noThink ? " /no_think" : "")
     var out = ""
     do {
       for try await chunk in session.respond(to: userText) { out += chunk }
@@ -102,29 +105,27 @@ struct PromptTestRunner {
   }
 
   static func evaluateWithScore(
-    mode: String, expected: String?, threshold: Double?, actual: String
+    mode: Mode, expected: String?, threshold: Double?, actual: String
   ) -> (Bool, Double?) {
     let trimmed = actual.trimmingCharacters(in: .whitespacesAndNewlines)
     switch mode {
-    case "exact":
+    case .exact:
       return (trimmed == (expected ?? ""), nil)
-    case "contains":
+    case .contains:
       guard let e = expected else { return (false, nil) }
       return (trimmed.localizedCaseInsensitiveContains(e), nil)
-    case "not_contains":
+    case .notContains:
       guard let e = expected else { return (true, nil) }
       return (!trimmed.localizedCaseInsensitiveContains(e), nil)
-    case "empty":
+    case .empty:
       return (trimmed.isEmpty, nil)
-    case "regex":
+    case .regex:
       guard let e = expected, let regex = try? Regex(e) else { return (false, nil) }
       return (trimmed.contains(regex), nil)
-    case "similarity":
+    case .similarity:
       guard let e = expected else { return (false, nil) }
       let score = similarity(trimmed, e)
       return (score >= (threshold ?? 0.85), score)
-    default:
-      return (false, nil)
     }
   }
 

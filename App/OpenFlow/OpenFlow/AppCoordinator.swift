@@ -21,14 +21,7 @@ final class AppCoordinator: ObservableObject {
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
 
-  @Published private(set) var modelLoadState: ModelLoadState = .idle
-
-  private var latestSTTProgress: TinyAudio.LoadProgress = .checking
-  private var latestLLMProgress: TinyAudio.LoadProgress = .checking
-  private var sttReady = false
-  private var llmReady = false
-  private var sttError: Error?
-  private var llmError: Error?
+  @Published private(set) var modelLoadState = ModelLoadState()
 
   init(
     overlay: OverlayWindowController,
@@ -56,14 +49,9 @@ final class AppCoordinator: ObservableObject {
   func start() {
     render(.idle)
 
-    // Kick off model downloads + audio engine warm-up in parallel. While
-    // models are loading, the hotkey is gated below. AVAudioEngine warm-up
-    // can race with model loading; it's small and independent.
     Task { @MainActor in
-      modelLoadState = .loading(stt: .checking, llm: .checking)
-
-      async let stt: Void = self.warmUpSTT()
-      async let llm: Void = self.warmUpLLM()
+      async let stt: Void = self.warmUp(.stt)
+      async let llm: Void = self.warmUp(.llm)
       async let audio: Void = self.mic.warmUp()
       _ = await (stt, llm, audio)
     }
@@ -94,62 +82,52 @@ final class AppCoordinator: ObservableObject {
 
   // MARK: - Model load orchestration
 
-  func retrySTTWarmUp() async {
-    sttError = nil
-    sttReady = false
-    latestSTTProgress = .checking
-    recomputeLoadState()
-    await warmUpSTT()
-  }
+  func retrySTTWarmUp() async { await retry(.stt) }
+  func retryLLMWarmUp() async { await retry(.llm) }
 
-  func retryLLMWarmUp() async {
-    llmError = nil
-    llmReady = false
-    latestLLMProgress = .checking
-    recomputeLoadState()
-    await warmUpLLM()
-  }
+  private enum Model { case stt, llm }
 
-  private func warmUpSTT() async {
-    do {
-      try await transcriber.warmUp { [weak self] p in
-        Task { @MainActor in
-          self?.latestSTTProgress = p
-          self?.recomputeLoadState()
-        }
+  private func warmUp(_ model: Model) async {
+    let onProgress: @Sendable (TinyAudio.LoadProgress) -> Void = { [weak self] progress in
+      Task { @MainActor in
+        self?.update(model, status: Self.channelStatus(from: progress))
       }
-      sttReady = true
-    } catch {
-      sttError = error
     }
-    recomputeLoadState()
-  }
-
-  private func warmUpLLM() async {
     do {
-      try await mlxStyler.warmUp { [weak self] p in
-        Task { @MainActor in
-          self?.latestLLMProgress = p
-          self?.recomputeLoadState()
-        }
+      switch model {
+      case .stt: try await transcriber.warmUp(progress: onProgress)
+      case .llm: try await mlxStyler.warmUp(progress: onProgress)
       }
-      llmReady = true
+      update(model, status: .loaded)
     } catch {
-      llmError = error
+      update(model, status: .failed(message: error.localizedDescription))
     }
-    recomputeLoadState()
   }
 
-  private func recomputeLoadState() {
-    if sttError != nil || llmError != nil {
-      modelLoadState = .failed(stt: sttError, llm: llmError)
-      return
+  private func retry(_ model: Model) async {
+    update(model, status: .checking)
+    await warmUp(model)
+  }
+
+  private func update(_ model: Model, status: ChannelStatus) {
+    switch model {
+    case .stt:
+      guard modelLoadState.stt != status else { return }
+      modelLoadState.stt = status
+    case .llm:
+      guard modelLoadState.llm != status else { return }
+      modelLoadState.llm = status
     }
-    if sttReady && llmReady {
-      modelLoadState = .ready
-      return
+  }
+
+  private static func channelStatus(from progress: TinyAudio.LoadProgress) -> ChannelStatus {
+    switch progress {
+    case .checking: return .checking
+    case .downloading(let fraction):
+      // Bucket to whole-percent so identical buckets compare equal and don't republish.
+      return .downloading(fraction: (fraction * 100).rounded(.down) / 100)
+    case .loading: return .loading
     }
-    modelLoadState = .loading(stt: latestSTTProgress, llm: latestLLMProgress)
   }
 
   // MARK: - Dictation render
