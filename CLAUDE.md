@@ -19,7 +19,6 @@ swift test --filter DictationSessionTests   # single suite
 swift test --filter happyPath               # single test case by name
 
 scripts/check.sh                            # full health check: swift test + xcodegen + xcodebuild + swiftlint
-scripts/fetch-model.sh                      # download Qwen3.5-2B-OptiQ-4bit (~1.4 GB) into Resources/Models/ — required before app builds run end-to-end
 scripts/install-hooks.sh                    # one-time: point core.hooksPath at .githooks/ (pre-commit runs check.sh)
 
 cd App/OpenFlow && xcodegen generate        # regenerate OpenFlow.xcodeproj from project.yml
@@ -74,4 +73,4 @@ The README says "Right Option" but the live config is **`HotkeyConfig.controlOpt
 
 - **No menu bar icon, no `LSUIElement`** — OpenFlow is a regular Dock app. A menu-bar variant existed briefly but was reverted because the macOS 26 notch hid the icon. If you find yourself reaching for `NSStatusItem`, stop and ask.
 - **No streaming STT** — `TinyAudio`'s public API doesn't expose it, so the overlay shows "Transcribing…" then jumps to the full text. Styling tokens *do* stream.
-- **Bundled model is gitignored** (`App/OpenFlow/OpenFlow/Resources/Models/Qwen3.5-2B-OptiQ-4bit/`). The XcodeGen `project.yml` references it as an `optional: true` resource folder so builds succeed without it; runtime falls through to a clear "model not found" error pointing the user at `scripts/fetch-model.sh`.
+- **No bundled models** — both the ASR weights (`mazesmazes/tiny-audio-swift-bundle`) and the Qwen3.5-2B styling model (`mlx-community/Qwen3.5-2B-OptiQ-4bit`) are downloaded by TinyAudio on first run and cached under `~/Library/Application Support/TinyAudio/Models/`. The Setup window shows progress bars; the hotkey is disabled until both models are ready. To force a re-download, delete the cache directory.
