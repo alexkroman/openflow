@@ -41,7 +41,7 @@ extension DictationSessionTests {
     await session.waitForIdle()
 
     #expect(await session.phase == .idle)
-    #expect(await injector.inserted == ["Hello world."])
+    #expect(await injector.inserted == ["Hello world. "])
   }
 
   @Test("styling disabled: raw transcript inserted")
@@ -59,7 +59,31 @@ extension DictationSessionTests {
     await session.release()
     await session.waitForIdle()
 
-    #expect(await injector.inserted == ["hello world"])
+    #expect(await injector.inserted == ["hello world "])
+  }
+
+  @Test("mic.stop throw transitions to failed(.audioCaptureFailed)")
+  func stopThrowsTransitionsToFailed() async throws {
+    struct CaptureBoom: Error, Sendable {}
+    let mic = StubMicCapture()
+    await mic.setStopError(CaptureBoom())
+    let stt = StubTranscriber(mode: .yieldChunks(["x"]))
+    let styler = StubStyler(mode: .yieldChunks([.delta("x")]))
+    let injector = StubInjector()
+    let session = DictationSession(
+      mic: mic, transcriber: stt, styler: styler, injector: injector,
+      stylingEnabled: false
+    )
+
+    await session.press()
+    await session.release()
+    await session.waitForIdle()
+
+    let phase = await session.phase
+    guard case .failed(let err) = phase, case .audioCaptureFailed = err else {
+      Issue.record("expected .failed(.audioCaptureFailed), got \(phase)")
+      return
+    }
   }
 }
 
@@ -177,6 +201,6 @@ extension DictationSessionTests {
     await session.press()
     await session.waitForIdle()  // auto-release fires release() within 50ms
 
-    #expect(await injector.inserted == ["Timed out text."])
+    #expect(await injector.inserted == ["Timed out text. "])
   }
 }
