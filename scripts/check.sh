@@ -40,7 +40,7 @@ run_xcodebuild \
   -project OpenFlow.xcodeproj \
   -scheme OpenFlow \
   -configuration Debug \
-  -destination 'platform=macOS' \
+  -destination 'platform=macOS,arch=arm64' \
   build
 
 if command -v swiftlint >/dev/null 2>&1; then

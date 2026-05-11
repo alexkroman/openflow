@@ -5,6 +5,10 @@ into whatever app you're using. Fully on-device: speech-to-text via
 [`tiny-audio-swift`](../tiny-audio-swift) (a sibling clone in your `~/Code/`
 directory), cleanup styling via an MLX-based LLM (Qwen3.5-2B-OptiQ-4bit).
 
+## Download
+
+[Download OpenFlow (latest, DMG)](https://github.com/alexkroman/openflow/releases/latest/download/OpenFlow.dmg)
+
 ## Build
 
 Requirements:
