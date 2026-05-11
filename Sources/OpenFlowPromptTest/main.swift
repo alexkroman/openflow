@@ -1,14 +1,14 @@
 import Foundation
-import MLXLLM
-import MLXLMCommon
 import OpenFlowEngine
+import TinyAudio
 
-// CLI for iterating on the cleanup prompt against the bundled MLX model.
-// Reads prompt and test cases from disk so we can edit + re-run without
-// recompiling.
+// CLI for iterating on the cleanup prompt against the Qwen3.5-2B model managed
+// by TinyAudio. Reads prompt and test cases from disk so we can edit + re-run
+// without recompiling. Model is downloaded from HF on first run, cached
+// thereafter under ~/Library/Application Support/TinyAudio/Models/.
 //
 // Usage:
-//   openflow-prompt-test <model-dir> <prompt-file> <cases-file> [--no-think]
+//   openflow-prompt-test <prompt-file> <cases-file> [--no-think]
 
 @main
 struct PromptTestRunner {
@@ -21,15 +21,14 @@ struct PromptTestRunner {
   }
 
   static func main() async {
-    guard CommandLine.arguments.count >= 4 else {
+    guard CommandLine.arguments.count >= 3 else {
       FileHandle.standardError.write(
-        Data("usage: openflow-prompt-test <model-dir> <prompt-file> <cases-file> [--no-think]\n".utf8))
+        Data("usage: openflow-prompt-test <prompt-file> <cases-file> [--no-think]\n".utf8))
       exit(2)
     }
-    let modelURL = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
-    let promptURL = URL(fileURLWithPath: CommandLine.arguments[2])
-    let casesURL = URL(fileURLWithPath: CommandLine.arguments[3])
-    let noThink = CommandLine.arguments.dropFirst(4).contains("--no-think")
+    let promptURL = URL(fileURLWithPath: CommandLine.arguments[1])
+    let casesURL = URL(fileURLWithPath: CommandLine.arguments[2])
+    let noThink = CommandLine.arguments.dropFirst(3).contains("--no-think")
 
     let prompt: String
     let cases: [TestCase]
@@ -42,24 +41,33 @@ struct PromptTestRunner {
       exit(1)
     }
 
-    print("Loading model from: \(modelURL.path)")
-    let container: ModelContainer
+    print("Loading model (first run downloads from HuggingFace)...")
+    let session: TinyAudio.ChatSession
     do {
-      let cfg = ModelConfiguration(directory: modelURL)
-      container = try await LLMModelFactory.shared.loadContainer(configuration: cfg)
+      session = try await TinyAudio.ChatSession.load(
+        systemPrompt: prompt,
+        generation: TinyAudio.GenerationConfig(maxTokens: 512, temperature: 0.0),
+        progress: { p in
+          if case .downloading(let f) = p {
+            FileHandle.standardError.write(
+              Data(String(format: "\rdownloading %.0f%%", f * 100).utf8))
+          }
+        }
+      )
     } catch {
       print("Model load failed: \(error)")
       exit(1)
     }
-    print("Model loaded. Running \(cases.count) cases...\n")
+    print("\nModel loaded. Running \(cases.count) cases...\n")
 
     var pass = 0
     var fail = 0
     var simScores: [Double] = []
     for tc in cases {
-      let raw = await generate(container: container, prompt: prompt, raw: tc.input, noThink: noThink)
+      let raw = await generate(session: session, raw: tc.input, noThink: noThink)
       let output = stripThinkBlocks(raw)
-      let (ok, score) = evaluateWithScore(mode: tc.mode, expected: tc.expected, threshold: tc.threshold, actual: output)
+      let (ok, score) = evaluateWithScore(
+        mode: tc.mode, expected: tc.expected, threshold: tc.threshold, actual: output)
       let status = ok ? "PASS" : "FAIL"
       if ok { pass += 1 } else { fail += 1 }
       if let score { simScores.append(score) }
@@ -77,32 +85,25 @@ struct PromptTestRunner {
     if fail > 0 { exit(1) }
   }
 
-  static func generate(container: ModelContainer, prompt: String, raw: String, noThink: Bool) async -> String {
-    let userText = noThink
+  static func generate(
+    session: TinyAudio.ChatSession, raw: String, noThink: Bool
+  ) async -> String {
+    let userText =
+      noThink
       ? "<transcript>\(raw)</transcript> /no_think"
       : "<transcript>\(raw)</transcript>"
-    let messages: [Chat.Message] = [
-      .system(prompt),
-      .user(userText)
-    ]
-    let userInput = UserInput(chat: messages)
+    var out = ""
     do {
-      let lmInput = try await container.prepare(input: userInput)
-      let stream = try await container.generate(
-        input: lmInput,
-        parameters: GenerateParameters(maxTokens: 512, temperature: 0.0)
-      )
-      var out = ""
-      for await event in stream {
-        if case .chunk(let text) = event { out += text }
-      }
+      for try await chunk in session.respond(to: userText) { out += chunk }
       return out
     } catch {
       return "<<error: \(error)>>"
     }
   }
 
-  static func evaluateWithScore(mode: String, expected: String?, threshold: Double?, actual: String) -> (Bool, Double?) {
+  static func evaluateWithScore(mode: String, expected: String?, threshold: Double?, actual: String)
+    -> (Bool, Double?)
+  {
     let trimmed = actual.trimmingCharacters(in: .whitespacesAndNewlines)
     switch mode {
     case "exact":
