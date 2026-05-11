@@ -2,9 +2,10 @@ import AppKit
 import Foundation
 import KeyboardShortcuts
 import OpenFlowEngine
+import TinyAudio
 
 @MainActor
-final class AppCoordinator {
+final class AppCoordinator: ObservableObject {
   private static let stylingEnabled = true
   private static let longTextThreshold = 500
 
@@ -19,6 +20,8 @@ final class AppCoordinator {
   private let injector: KeyInjector
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
+
+  @Published private(set) var modelLoadState = ModelLoadState()
 
   init(
     overlay: OverlayWindowController,
@@ -46,30 +49,22 @@ final class AppCoordinator {
   func start() {
     render(.idle)
 
-    // Pre-warm models + audio engine in the background so the first dictation
-    // doesn't pay cold-start cost: TinyAudio's weight load, MLX kernel JIT +
-    // weight load, the styler's KV-cache primer turn, and AVAudioEngine
-    // hardware-route discovery + prepare(). Together that's multiple seconds
-    // on a cold launch. Errors are swallowed so a warmup failure doesn't block
-    // startup; the same paths run lazily on first use as a fallback.
-    let transcriber = self.transcriber
-    let styler = self.mlxStyler
-    let mic = self.mic
-    Task.detached(priority: .utility) {
-      async let stt: Void = {
-        try? await transcriber.warmUp()
-      }()
-      async let llm: Void = {
-        try? await styler.warmUp()
-      }()
-      async let audio: Void = {
-        await mic.warmUp()
-      }()
+    Task { @MainActor in
+      async let stt: Void = self.warmUp(.stt)
+      async let llm: Void = self.warmUp(.llm)
+      async let audio: Void = self.mic.warmUp()
       _ = await (stt, llm, audio)
     }
 
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
-      Task { @MainActor in await self?.session.press() }
+      guard let self else { return }
+      Task { @MainActor in
+        guard self.modelLoadState.isReady else {
+          self.toast.show("Still preparing models — please wait")
+          return
+        }
+        await self.session.press()
+      }
     }
     KeyboardShortcuts.onKeyUp(for: .dictate) { [weak self] in
       Task { @MainActor in await self?.session.release() }
@@ -84,6 +79,53 @@ final class AppCoordinator {
       }
     }
   }
+
+  // MARK: - Model load orchestration
+
+  func retrySTTWarmUp() async { await retry(.stt) }
+  func retryLLMWarmUp() async { await retry(.llm) }
+
+  private enum Model { case stt, llm }
+
+  private func warmUp(_ model: Model) async {
+    let onProgress: @Sendable (TinyAudio.LoadProgress) -> Void = { [weak self] progress in
+      // Whole-percent buckets keep Equatable de-dup quiet during downloads.
+      let bucketed: TinyAudio.LoadProgress
+      if case .downloading(let f) = progress {
+        bucketed = .downloading(fractionCompleted: (f * 100).rounded(.down) / 100)
+      } else {
+        bucketed = progress
+      }
+      Task { @MainActor in self?.update(model, status: .progress(bucketed)) }
+    }
+    do {
+      switch model {
+      case .stt: try await transcriber.warmUp(progress: onProgress)
+      case .llm: try await mlxStyler.warmUp(progress: onProgress)
+      }
+      update(model, status: .loaded)
+    } catch {
+      update(model, status: .failed(message: error.localizedDescription))
+    }
+  }
+
+  private func retry(_ model: Model) async {
+    update(model, status: .progress(.checking))
+    await warmUp(model)
+  }
+
+  private func update(_ model: Model, status: ChannelStatus) {
+    switch model {
+    case .stt:
+      guard modelLoadState.stt != status else { return }
+      modelLoadState.stt = status
+    case .llm:
+      guard modelLoadState.llm != status else { return }
+      modelLoadState.llm = status
+    }
+  }
+
+  // MARK: - Dictation render
 
   private func render(_ phase: PipelinePhase) {
     statusItem.update(phase: phase)

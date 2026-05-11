@@ -7,9 +7,12 @@ public actor TinyAudioTranscriber: TranscriberProtocol {
   public init() {}
 
   /// Loads model weights. Call once before first use (e.g. in app warm-up or lazily on first dictation).
-  public func warmUp() async throws {
+  /// First call may trigger an HF download via TinyAudio; subsequent calls hit the local cache.
+  public func warmUp(
+    progress: (@Sendable (TinyAudio.LoadProgress) -> Void)? = nil
+  ) async throws {
     if transcriber == nil {
-      transcriber = try await Transcriber.load()
+      transcriber = try await Transcriber.load(progress: progress)
     }
   }
 

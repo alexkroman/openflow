@@ -9,20 +9,13 @@ let package = Package(
         .executable(name: "openflow-prompt-test", targets: ["OpenFlowPromptTest"])
     ],
     dependencies: [
-        .package(path: "../tiny-audio-swift/swift"),
-        .package(url: "https://github.com/ml-explore/mlx-swift-lm", from: "2.30.3"),
-        .package(url: "https://github.com/huggingface/swift-huggingface", from: "0.9.0"),
-        .package(url: "https://github.com/huggingface/swift-transformers", from: "1.1.6")
+        .package(path: "../tiny-audio-swift/swift")
     ],
     targets: [
         .target(
             name: "OpenFlowEngine",
             dependencies: [
-                .product(name: "TinyAudio", package: "swift"),
-                .product(name: "MLXLLM", package: "mlx-swift-lm"),
-                .product(name: "MLXLMCommon", package: "mlx-swift-lm"),
-                .product(name: "HuggingFace", package: "swift-huggingface"),
-                .product(name: "Tokenizers", package: "swift-transformers")
+                .product(name: "TinyAudio", package: "swift")
             ]
         ),
         .executableTarget(

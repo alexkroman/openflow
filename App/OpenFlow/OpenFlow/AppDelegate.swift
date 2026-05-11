@@ -18,8 +18,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let toast = ToastPresenter()
     let setupWindow = self.setupWindow
 
+    // coordinator depends on statusItem, so onShowSetup resolves coordinator at click time.
     let statusItem = StatusItemController(
-      onShowSetup: { setupWindow.show() },
+      onShowSetup: { [weak self] in
+        guard let self else { return }
+        MainActor.assumeIsolated {
+          if let coordinator = self.coordinator {
+            setupWindow.show(coordinator: coordinator)
+          }
+        }
+      },
       onQuit: { NSApp.terminate(nil) }
     )
     self.statusItem = statusItem
@@ -31,8 +39,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     )
     self.coordinator = coord
 
-    if !PermissionsChecker.check().allGranted {
-      setupWindow.show()
+    // modelLoadState starts not-ready, so Setup opens on every cold launch / cache wipe.
+    if !PermissionsChecker.check().allGranted || !coord.modelLoadState.isReady {
+      setupWindow.show(coordinator: coord)
     }
 
     coord.start()
@@ -47,7 +56,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     hasVisibleWindows: Bool
   ) -> Bool {
     guard !hasVisibleWindows else { return true }
-    setupWindow.show()
+    if let coordinator = self.coordinator {
+      setupWindow.show(coordinator: coordinator)
+    }
     return true
   }
 }

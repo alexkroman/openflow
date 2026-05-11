@@ -24,12 +24,6 @@ targets:
     platform: macOS
     sources:
       - path: OpenFlow
-        excludes:
-          - "Resources/Models/**"
-      - path: OpenFlow/Resources/Models
-        type: folder
-        buildPhase: resources
-        optional: true
     info:
       path: OpenFlow/Info.plist
       properties:
@@ -58,6 +52,15 @@ targets:
       - name: Install to /Applications
         script: |
           set -e
+          # Debug-only: installs a re-signed copy at a stable path so TCC will
+          # register OpenFlow in the Accessibility / Input Monitoring lists.
+          # Release builds skip this — the release-build.sh script handles
+          # staging, secure-timestamp signing, DMG creation, and notarization
+          # separately.
+          if [ "$CONFIGURATION" != "Debug" ]; then
+            echo "Skipping Install to /Applications for $CONFIGURATION builds."
+            exit 0
+          fi
           # Copy + re-sign into /Applications so TCC sees a permanent path.
           # (Xcode/CLI builds otherwise live in DerivedData / /tmp — paths
           # macOS treats as transient and refuses to add to the Privacy

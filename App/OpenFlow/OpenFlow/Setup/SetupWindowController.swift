@@ -5,12 +5,12 @@ import SwiftUI
 final class SetupWindowController {
   private var window: NSWindow?
 
-  func show() {
+  func show(coordinator: AppCoordinator) {
     if let window {
       bringToFront(window)
       return
     }
-    let hosting = NSHostingController(rootView: SetupView())
+    let hosting = NSHostingController(rootView: SetupView(coordinator: coordinator))
     let w = NSWindow(contentViewController: hosting)
     w.title = "OpenFlow Setup"
     w.styleMask = [.titled, .closable]
