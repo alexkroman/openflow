@@ -24,12 +24,6 @@ targets:
     platform: macOS
     sources:
       - path: OpenFlow
-        excludes:
-          - "Resources/Models/**"
-      - path: OpenFlow/Resources/Models
-        type: folder
-        buildPhase: resources
-        optional: true
     info:
       path: OpenFlow/Info.plist
       properties:

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 928B81225BAAB01A9A5A460D /* KeyboardShortcuts */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
-		4E9D38E5637E8D3C5F509373 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 57EAF656382186A79A261018 /* Models */; };
 		5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AD11B117E39DD5F21BEB69 /* SetupView.swift */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
 		825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */; };
@@ -31,7 +30,6 @@
 		38EECD10C11AB7A58617CAA1 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		57EAF656382186A79A261018 /* Models */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Models; path = OpenFlow/Resources/Models; sourceTree = SOURCE_ROOT; };
 		5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
@@ -76,7 +74,6 @@
 		46C24B722B981666C9CCD9B2 = {
 			isa = PBXGroup;
 			children = (
-				57EAF656382186A79A261018 /* Models */,
 				5D389FE8BCB1A44149295D52 /* OpenFlow */,
 				8891488D8BCA8EC7E841DE30 /* Packages */,
 				262F9F73BE590BF00927C90D /* Products */,
@@ -144,13 +141,6 @@
 			path = Setup;
 			sourceTree = "<group>";
 		};
-		"TEMP_C9B28EBA-D589-4EC7-9F59-B8C384D2C81A" /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -159,7 +149,6 @@
 			buildConfigurationList = 9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */;
 			buildPhases = (
 				AC7D5586EC782E9617563944 /* Sources */,
-				3BFA98C486330483C1F3F498 /* Resources */,
 				4A5EF6ECC56ABF134ACFBAE6 /* Frameworks */,
 				053200E5A126F68144BAEFEE /* Install to /Applications */,
 			);
@@ -213,17 +202,6 @@
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXResourcesBuildPhase section */
-		3BFA98C486330483C1F3F498 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4E9D38E5637E8D3C5F509373 /* Models in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		053200E5A126F68144BAEFEE /* Install to /Applications */ = {
