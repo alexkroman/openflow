@@ -30,13 +30,11 @@ actor StubTranscriber: TranscriberProtocol {
         case .throwError(let err):
           continuation.finish(throwing: err)
         case .stallForever:
-          // Stall until the task itself is cancelled
-          await withTaskCancellationHandler(
-            operation: {
-              await withCheckedContinuation { (_: CheckedContinuation<Void, Never>) in }
-            },
-            onCancel: { continuation.finish() }
-          )
+          // Stall until the task itself is cancelled. Task.sleep throws on
+          // cancel, exiting the loop; the deferred finish() above cleans up.
+          while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(3600))
+          }
         }
       }
       continuation.onTermination = { _ in task.cancel() }
