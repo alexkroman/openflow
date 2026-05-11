@@ -66,7 +66,7 @@ public actor DictationSession {
     case .idle, .failed, .cancelled:
       return
     case .recording:
-      _ = await mic.stop()
+      _ = try? await mic.stop()
     default:
       pipelineTask?.cancel()
       await pipelineTask?.value  // wait for the task to actually finish before transitioning
@@ -77,7 +77,13 @@ public actor DictationSession {
 
   public func release() async {
     guard phase == .recording else { return }
-    let samples = await mic.stop()
+    let samples: [Float]
+    do {
+      samples = try await mic.stop()
+    } catch {
+      setPhase(.failed(.audioCaptureFailed(underlying: error)))
+      return
+    }
     setPhase(.transcribing(rawSoFar: ""))
     pipelineTask = Task { [weak self] in
       await self?.runTranscribeStyleInject(samples: samples)

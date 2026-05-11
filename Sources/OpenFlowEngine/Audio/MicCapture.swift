@@ -84,7 +84,7 @@ public actor MicCapture: MicCaptureProtocol {
     }
   }
 
-  public func stop() async -> [Float] {
+  public func stop() async throws -> [Float] {
     engine.inputNode.removeTap(onBus: 0)
     engine.stop()
     let raw = rawSamples
