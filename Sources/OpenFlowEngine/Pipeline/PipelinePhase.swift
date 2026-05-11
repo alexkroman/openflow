@@ -15,6 +15,10 @@ public enum PipelinePhase: Equatable, Sendable {
     default: false
     }
   }
+
+  public var isRecording: Bool {
+    if case .recording = self { true } else { false }
+  }
 }
 
 extension OpenFlowError: Equatable {

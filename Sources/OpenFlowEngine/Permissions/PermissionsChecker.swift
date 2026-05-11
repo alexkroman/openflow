@@ -29,7 +29,7 @@ public enum PermissionsChecker {
     )
   }
 
-  private static func micGranted() -> Bool {
+  public static func micGranted() -> Bool {
     switch AVCaptureDevice.authorizationStatus(for: .audio) {
     case .authorized: return true
     default: return false

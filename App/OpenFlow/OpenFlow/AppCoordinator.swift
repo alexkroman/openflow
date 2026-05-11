@@ -1,5 +1,4 @@
 import AppKit
-import AVFoundation
 import Foundation
 import KeyboardShortcuts
 import OpenFlowEngine
@@ -22,6 +21,8 @@ final class AppCoordinator: ObservableObject {
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
   private var wasRecording = false
+  private let startSound = NSSound(named: "Pop")
+  private let stopSound = NSSound(named: "Morse")
 
   @Published private(set) var modelLoadState = ModelLoadState()
 
@@ -125,7 +126,7 @@ final class AppCoordinator: ObservableObject {
   /// permission is granted pays a small warmup cost; subsequent presses
   /// don't.
   private func warmUpMicIfAuthorized() async {
-    guard AVCaptureDevice.authorizationStatus(for: .audio) == .authorized else { return }
+    guard PermissionsChecker.micGranted() else { return }
     await mic.warmUp()
   }
 
@@ -144,11 +145,11 @@ final class AppCoordinator: ObservableObject {
 
   private func render(_ phase: PipelinePhase) {
     let label = DictateHotkey.label
-    let isRecording: Bool = if case .recording = phase { true } else { false }
+    let isRecording = phase.isRecording
     if isRecording && !wasRecording {
-      NSSound(named: "Pop")?.play()
+      startSound?.play()
     } else if !isRecording && wasRecording {
-      NSSound(named: "Tink")?.play()
+      stopSound?.play()
     }
     wasRecording = isRecording
     switch phase {
