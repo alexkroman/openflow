@@ -12,6 +12,7 @@
 		4E9D38E5637E8D3C5F509373 /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 57EAF656382186A79A261018 /* Models */; };
 		5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AD11B117E39DD5F21BEB69 /* SetupView.swift */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
+		825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
@@ -40,6 +41,7 @@
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
+		F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,13 +137,14 @@
 		DA5E6930882DE0043CABB6F1 /* Setup */ = {
 			isa = PBXGroup;
 			children = (
+				F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */,
 				B4AD11B117E39DD5F21BEB69 /* SetupView.swift */,
 				957A32E91D36705B16A719B7 /* SetupWindowController.swift */,
 			);
 			path = Setup;
 			sourceTree = "<group>";
 		};
-		"TEMP_E3B3B536-C5D0-4E4F-B6A2-C3F61575732F" /* Resources */ = {
+		"TEMP_E0899ABC-5A59-41F6-A423-0ABC7F5CF2AC" /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -254,6 +257,7 @@
 				8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */,
 				E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */,
 				98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */,
+				825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */,
 				1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */,
 				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
 				5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */,
