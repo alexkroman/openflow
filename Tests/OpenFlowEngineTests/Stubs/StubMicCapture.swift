@@ -9,6 +9,7 @@ actor StubMicCapture: MicCaptureProtocol {
   var startError: (any Error & Sendable)?
   var stopError: (any Error & Sendable)?
 
+  func setStartError(_ error: (any Error & Sendable)?) { startError = error }
   func setStopError(_ error: (any Error & Sendable)?) { stopError = error }
 
   nonisolated func start() async throws {

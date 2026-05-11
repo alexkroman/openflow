@@ -84,6 +84,9 @@ public actor MicCapture: MicCaptureProtocol {
     }
   }
 
+  // FIXME: signature throws but body still silently returns [] on resampler
+  // failure (lines 132, 152, 155). Interim — file is replaced by
+  // TinyAudio.PushToTalkCapture in the next task.
   public func stop() async throws -> [Float] {
     engine.inputNode.removeTap(onBus: 0)
     engine.stop()

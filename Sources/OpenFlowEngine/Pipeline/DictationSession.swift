@@ -66,6 +66,8 @@ public actor DictationSession {
     case .idle, .failed, .cancelled:
       return
     case .recording:
+      // Best-effort: stop-time failures (resampler, I/O) are already logged
+      // by the implementer; cancel completes to .cancelled either way.
       _ = try? await mic.stop()
     default:
       pipelineTask?.cancel()
