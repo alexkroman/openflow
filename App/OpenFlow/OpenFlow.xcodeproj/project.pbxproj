@@ -14,6 +14,7 @@
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
 		825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
+		95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B51C821A5037C71DEC840A /* WizardController.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
 		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
@@ -39,6 +40,7 @@
 		957A32E91D36705B16A719B7 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
 		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		C1B51C821A5037C71DEC840A /* WizardController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardController.swift; sourceTree = "<group>"; };
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
 		CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				DA5E6930882DE0043CABB6F1 /* Setup */,
 				0BC1693FDE2B78AABDDAFAB1 /* Shared */,
 				947AA73A0E40545B67404EEF /* Toast */,
+				9A42E96918A6890BF584678A /* Wizard */,
 			);
 			path = OpenFlow;
 			sourceTree = "<group>";
@@ -127,6 +130,14 @@
 				8172C344625A9801EE3EDD97 /* ToastPresenter.swift */,
 			);
 			path = Toast;
+			sourceTree = "<group>";
+		};
+		9A42E96918A6890BF584678A /* Wizard */ = {
+			isa = PBXGroup;
+			children = (
+				C1B51C821A5037C71DEC840A /* WizardController.swift */,
+			);
+			path = Wizard;
 			sourceTree = "<group>";
 		};
 		CE1075EC2686C5C4F9396479 /* Hotkey */ = {
@@ -269,6 +280,7 @@
 				DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */,
 				C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */,
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
+				95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
