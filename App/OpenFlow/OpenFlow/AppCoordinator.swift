@@ -7,7 +7,6 @@ import TinyAudio
 @MainActor
 final class AppCoordinator: ObservableObject {
   private static let stylingEnabled = true
-  private static let longTextThreshold = 500
 
   private let overlay: OverlayWindowController
   private let toast: ToastPresenter
@@ -33,7 +32,7 @@ final class AppCoordinator: ObservableObject {
     self.transcriber = TinyAudioTranscriber()
     self.mlxStyler = MLXStyler()
     self.safeStyler = SafeguardedStyler(inner: mlxStyler)
-    self.injector = KeyInjector(config: .init(longTextThreshold: Self.longTextThreshold))
+    self.injector = KeyInjector()
     self.session = DictationSession(
       mic: mic,
       transcriber: transcriber,

@@ -3,21 +3,9 @@ import CoreGraphics
 import Foundation
 
 public actor KeyInjector: InjectorProtocol {
-  public struct Config: Sendable {
-    public var longTextThreshold: Int
-    public var keystrokePacingMicros: UInt32
-    public init(longTextThreshold: Int = 500, keystrokePacingMicros: UInt32 = 1_000) {
-      self.longTextThreshold = longTextThreshold
-      self.keystrokePacingMicros = keystrokePacingMicros
-    }
-  }
-
-  private var config: Config
   private var targetApp: NSRunningApplication?
 
-  public init(config: Config = Config()) {
-    self.config = config
-  }
+  public init() {}
 
   public static func withTrailingSpace(_ text: String) -> String {
     guard !text.isEmpty else { return text }
@@ -26,48 +14,17 @@ public actor KeyInjector: InjectorProtocol {
   }
 
   public func setTargetApp(_ app: NSRunningApplication?) {
-    self.targetApp = app
-  }
-
-  public func updateConfig(_ config: Config) {
-    self.config = config
+    targetApp = app
   }
 
   public nonisolated func insert(_ text: String) async throws {
     guard !text.isEmpty else { return }
     let finalText = KeyInjector.withTrailingSpace(text)
-    let cfg = await self.config
-    let path = InjectionPath.choose(for: finalText, longTextThreshold: cfg.longTextThreshold)
-    if let target = await self.targetApp {
+    if let target = await targetApp {
       target.activate()
       try? await Task.sleep(nanoseconds: 30_000_000)
     }
-    switch path {
-    case .typeKeystrokes:
-      await self.typeKeystrokes(finalText)
-    case .clipboardPaste:
-      await self.clipboardPaste(finalText)
-    }
-  }
-
-  private func typeKeystrokes(_ text: String) {
-    let pacing = config.keystrokePacingMicros
-    let source = CGEventSource(stateID: .combinedSessionState)
-    for scalar in text.unicodeScalars {
-      postUnicode(scalar, source: source)
-      usleep(pacing)
-    }
-  }
-
-  private func postUnicode(_ scalar: Unicode.Scalar, source: CGEventSource?) {
-    guard let down = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: true),
-      let up = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: false)
-    else { return }
-    var utf16 = Array(String(scalar).utf16)
-    down.keyboardSetUnicodeString(stringLength: utf16.count, unicodeString: &utf16)
-    // (do NOT set the unicode string on keyUp — causes double-insert in some apps)
-    down.post(tap: .cghidEventTap)
-    up.post(tap: .cghidEventTap)
+    await clipboardPaste(finalText)
   }
 
   private func clipboardPaste(_ text: String) async {
