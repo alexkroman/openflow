@@ -137,6 +137,7 @@ create-dmg \
   --app-drop-link 400 180 \
   --no-internet-enable \
   --format UDZO \
+  --skip-jenkins \
   "$DMG" \
   "$STAGE" >/dev/null
 
