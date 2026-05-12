@@ -36,11 +36,17 @@ else
 fi
 
 echo "==> xcodebuild build (OpenFlow)"
+# Skip codesigning for the health-check build: the Developer ID cert only
+# lives on the maintainer's machine. The postBuildScripts "Install to
+# /Applications" step also bails out when CODE_SIGNING_ALLOWED=NO.
 run_xcodebuild \
   -project OpenFlow.xcodeproj \
   -scheme OpenFlow \
   -configuration Debug \
   -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGN_IDENTITY="-" \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO \
   build
 
 if command -v swiftlint >/dev/null 2>&1; then
