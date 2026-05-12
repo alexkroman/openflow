@@ -21,6 +21,7 @@ final class WizardController: ObservableObject {
       modelState: coordinator.modelLoadState
     )
     self.modelLoadObserver = coordinator.$modelLoadState
+      .dropFirst()
       .sink { [weak self] newState in
         Task { @MainActor in self?.recompute(modelState: newState) }
       }
@@ -35,7 +36,7 @@ final class WizardController: ObservableObject {
     pollTask = Task { @MainActor [weak self] in
       while !Task.isCancelled {
         try? await Task.sleep(for: .seconds(1))
-        guard let self else { return }
+        guard !Task.isCancelled, let self else { return }
         self.recompute(permissions: PermissionsChecker.check())
       }
     }
@@ -73,5 +74,9 @@ final class WizardController: ObservableObject {
     guard !hasKickedOffModelLoad, let coordinator else { return }
     hasKickedOffModelLoad = true
     coordinator.beginModelLoad()
+  }
+
+  deinit {
+    pollTask?.cancel()
   }
 }
