@@ -52,10 +52,6 @@ struct HotkeyStepView: View {
         "Speech is transcribed and cleaned up locally on this device.",
         systemImage: "lock.shield"
       )
-      Label(
-        "Closing this window keeps OpenFlow running — click its Dock icon to open it again.",
-        systemImage: "dock.rectangle"
-      )
     } header: {
       Text("Tips")
     }
