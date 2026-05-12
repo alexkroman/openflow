@@ -87,11 +87,17 @@ struct PermissionsStepView: View {
     Section {
       HStack {
         Spacer()
-        Button("Continue") {
-          controller.continueFromPermissions()
+        if controller.permissions.allGranted {
+          Button("Continue") {
+            controller.continueFromPermissions()
+          }
+          .keyboardShortcut(.defaultAction)
+        } else {
+          Button("Continue") {
+            controller.continueFromPermissions()
+          }
+          .disabled(true)
         }
-        .keyboardShortcut(.defaultAction)
-        .disabled(!controller.permissions.allGranted)
       }
     }
   }
