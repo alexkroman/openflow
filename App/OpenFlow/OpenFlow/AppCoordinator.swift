@@ -49,12 +49,7 @@ final class AppCoordinator: ObservableObject {
   func start() {
     render(.idle)
 
-    Task { @MainActor in
-      async let stt: Void = self.warmUp(.stt)
-      async let llm: Void = self.warmUp(.llm)
-      async let audio: Void = self.mic.warmUp()
-      _ = await (stt, llm, audio)
-    }
+    beginModelLoad()
 
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
       guard let self else { return }
@@ -77,6 +72,17 @@ final class AppCoordinator: ObservableObject {
         if Task.isCancelled { return }
         self.render(phase)
       }
+    }
+  }
+
+  /// Kicks off STT / LLM / audio warm-up. Idempotent in practice — each
+  /// warm-up bails out fast if the model is already loaded.
+  func beginModelLoad() {
+    Task { @MainActor in
+      async let stt: Void = self.warmUp(.stt)
+      async let llm: Void = self.warmUp(.llm)
+      async let audio: Void = self.mic.warmUp()
+      _ = await (stt, llm, audio)
     }
   }
 
