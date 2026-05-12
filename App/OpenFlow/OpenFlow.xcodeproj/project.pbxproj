@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 928B81225BAAB01A9A5A460D /* KeyboardShortcuts */; };
+		043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
 		5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AD11B117E39DD5F21BEB69 /* SetupView.swift */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
@@ -39,6 +40,7 @@
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
 		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
+		CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
 		F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 				5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */,
 				CE1075EC2686C5C4F9396479 /* Hotkey */,
 				73C2C10FA744B263909CFB6B /* Overlay */,
+				E5F8F92281CD90EEFF63EB47 /* Resources */,
 				DA5E6930882DE0043CABB6F1 /* Setup */,
 				0BC1693FDE2B78AABDDAFAB1 /* Shared */,
 				947AA73A0E40545B67404EEF /* Toast */,
@@ -144,6 +147,14 @@
 			path = Setup;
 			sourceTree = "<group>";
 		};
+		E5F8F92281CD90EEFF63EB47 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -152,6 +163,7 @@
 			buildConfigurationList = 9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */;
 			buildPhases = (
 				AC7D5586EC782E9617563944 /* Sources */,
+				3BFA98C486330483C1F3F498 /* Resources */,
 				4A5EF6ECC56ABF134ACFBAE6 /* Frameworks */,
 				053200E5A126F68144BAEFEE /* Install to /Applications */,
 			);
@@ -205,6 +217,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3BFA98C486330483C1F3F498 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		053200E5A126F68144BAEFEE /* Install to /Applications */ = {
@@ -289,6 +312,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -350,6 +374,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
