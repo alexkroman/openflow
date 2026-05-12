@@ -62,12 +62,12 @@ git -C "$REPO_ROOT" tag -a "$TAG" -m "$TAG"
 git -C "$REPO_ROOT" push origin "$TAG"
 
 step "GitHub Release"
-# Upload under a stable, version-less name so
+# Upload under the stable display name OpenFlow.dmg so
 # https://github.com/<owner>/<repo>/releases/latest/download/OpenFlow.dmg
 # always resolves to the current release (README.md links to that URL).
-STABLE_DMG="$BUILD_ROOT/OpenFlow.dmg"
-cp "$DMG" "$STABLE_DMG"
-gh release create "$TAG" "$STABLE_DMG" \
+# The `path#display-name` syntax lets us keep the versioned filename on
+# disk while serving it under the version-less name on the release page.
+gh release create "$TAG" "$DMG#OpenFlow.dmg" \
   --title "$TAG" \
   --generate-notes \
   --latest
