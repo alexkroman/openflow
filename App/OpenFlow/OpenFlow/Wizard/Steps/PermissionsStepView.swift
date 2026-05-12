@@ -11,7 +11,6 @@ struct PermissionsStepView: View {
       Form {
         microphoneSection
         accessibilitySection
-        continueSection
       }
       .formStyle(.grouped)
       .scrollDisabled(true)
@@ -80,25 +79,6 @@ struct PermissionsStepView: View {
           + "This opens System Settings — turn on OpenFlow in the Accessibility list, "
           + "then come back here."
       )
-    }
-  }
-
-  private var continueSection: some View {
-    Section {
-      HStack {
-        Spacer()
-        if controller.permissions.allGranted {
-          Button("Continue") {
-            controller.continueFromPermissions()
-          }
-          .keyboardShortcut(.defaultAction)
-        } else {
-          Button("Continue") {
-            controller.continueFromPermissions()
-          }
-          .disabled(true)
-        }
-      }
     }
   }
 
