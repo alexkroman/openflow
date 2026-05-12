@@ -16,7 +16,7 @@ public enum WizardStep: Equatable, Sendable {
     modelState: ModelReadiness
   ) -> WizardStep {
     if !permissions.allGranted { return .permissions }
-    if !modelState.isReady     { return .settingUp }
+    if !modelState.isReady { return .settingUp }
     return .hotkey
   }
 }
