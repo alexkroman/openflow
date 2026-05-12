@@ -11,7 +11,6 @@ final class AppCoordinator: ObservableObject {
 
   private let overlay: OverlayWindowController
   private let toast: ToastPresenter
-  private let statusItem: StatusItemController
 
   private let mic: MicCapture
   private let transcriber: TinyAudioTranscriber
@@ -25,12 +24,10 @@ final class AppCoordinator: ObservableObject {
 
   init(
     overlay: OverlayWindowController,
-    toast: ToastPresenter,
-    statusItem: StatusItemController
+    toast: ToastPresenter
   ) {
     self.overlay = overlay
     self.toast = toast
-    self.statusItem = statusItem
 
     self.mic = MicCapture()
     self.transcriber = TinyAudioTranscriber()
@@ -48,8 +45,6 @@ final class AppCoordinator: ObservableObject {
 
   func start() {
     render(.idle)
-
-    beginModelLoad()
 
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
       guard let self else { return }
@@ -134,7 +129,6 @@ final class AppCoordinator: ObservableObject {
   // MARK: - Dictation render
 
   private func render(_ phase: PipelinePhase) {
-    statusItem.update(phase: phase)
     let label = DictateHotkey.label
     switch phase {
     case .idle, .injecting, .cancelled:

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 928B81225BAAB01A9A5A460D /* KeyboardShortcuts */; };
+		03A9E8F0EC4DEAD979B7E110 /* WizardWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */; };
 		043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */; };
 		0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
@@ -49,6 +50,7 @@
 		99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepIndicator.swift; sourceTree = "<group>"; };
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
 		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardWindowController.swift; sourceTree = "<group>"; };
 		C1B51C821A5037C71DEC840A /* WizardController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardController.swift; sourceTree = "<group>"; };
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
 		CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 				99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */,
 				C1B51C821A5037C71DEC840A /* WizardController.swift */,
 				65C1315CC840E8EB96963585 /* WizardView.swift */,
+				B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */,
 				9ACE04DEDC4BCFB423221D98 /* Steps */,
 			);
 			path = Wizard;
@@ -309,6 +312,7 @@
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
 				95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */,
 				A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */,
+				03A9E8F0EC4DEAD979B7E110 /* WizardWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
