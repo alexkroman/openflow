@@ -12,7 +12,7 @@ struct OpenFlowApp: App {
     .commands {
       CommandGroup(replacing: .appSettings) {
         Button("Settings…") {
-          (NSApp.delegate as? AppDelegate)?.openWizard()
+          AppDelegate.shared?.openWizard()
         }
         .keyboardShortcut(",", modifiers: [.command])
       }

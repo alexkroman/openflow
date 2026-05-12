@@ -3,12 +3,16 @@ import Foundation
 import OpenFlowEngine
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+  @MainActor static private(set) var shared: AppDelegate?
+
   @MainActor private var coordinator: AppCoordinator?
   @MainActor private var wizardController: WizardController?
   @MainActor private let wizardWindow = WizardWindowController()
 
   @MainActor
   func applicationDidFinishLaunching(_ notification: Notification) {
+    AppDelegate.shared = self
+
     // Fire the AX-protected call at launch so tccd registers OpenFlow in the
     // Accessibility list before the user ever opens System Settings.
     PermissionsChecker.registerForAccessibilityTCC()

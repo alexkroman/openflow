@@ -23,11 +23,12 @@ struct HotkeyStepView: View {
         .frame(width: 64, height: 64)
         .accessibilityHidden(true)
       VStack(alignment: .leading, spacing: 6) {
-        Text("You're ready").font(.title).bold()
+        Text("OpenFlow").font(.title).bold()
         Text("Hold the shortcut anywhere on your Mac and start dictating.")
           .foregroundStyle(.secondary)
           .fixedSize(horizontal: false, vertical: true)
       }
+      Spacer(minLength: 0)
     }
     .padding(28)
   }

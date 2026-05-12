@@ -57,6 +57,10 @@ final class WizardWindowController {
   private func bringToFront(_ w: NSWindow) {
     NSApp.activate(ignoringOtherApps: true)
     w.makeKeyAndOrderFront(nil)
+    // Defensive: when invoked from a SwiftUI menu command, the activation
+    // can lose the race against the foreground app. orderFrontRegardless
+    // forces the window above other apps' windows.
+    w.orderFrontRegardless()
   }
 
   private func title(for step: WizardStep) -> String {
