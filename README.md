@@ -1,57 +1,52 @@
 # OpenFlow
 
-A macOS dictation app — hold Right Option, speak, get cleaned-up text typed
-into whatever app you're using. Fully on-device: speech-to-text via
-[`tiny-audio-swift`](../tiny-audio-swift) (a sibling clone in your `~/Code/`
-directory), cleanup styling via an MLX-based LLM (Qwen3.5-2B-OptiQ-4bit).
+Hold a hotkey, speak, and your words land as cleaned-up text in whatever app
+you're focused on. Fully on-device — your voice never leaves your Mac.
 
-## Build
+## Download
 
-Requirements:
-- macOS 14+, Apple Silicon
-- Xcode 16+ (Swift 6 toolchain)
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
-- A clone of `tiny-audio-swift` at `../tiny-audio-swift` (sibling to this repo)
+[**Download OpenFlow (DMG)**](https://github.com/alexkroman/openflow/releases/latest/download/OpenFlow.dmg)
 
-```bash
-swift test                                  # engine unit tests
-cd App/OpenFlow && xcodegen generate        # generate xcodeproj
-xcodebuild -project App/OpenFlow/OpenFlow.xcodeproj \
-  -scheme OpenFlow -configuration Debug \
-  -derivedDataPath /tmp/openflow-build build
-open /tmp/openflow-build/Build/Products/Debug/OpenFlow.app
-```
+Open the DMG and drag **OpenFlow.app** into Applications.
 
-On first launch:
-1. Grant Microphone, Accessibility, and Input Monitoring permissions in the
-   Setup window.
-2. Click "Download (~1.4 GB)" to pre-download the LLM model.
-3. Open any text app and hold Right Option to dictate.
+## Requirements
 
-## Layout
+- macOS 14 (Sonoma) or later
+- Apple Silicon Mac (M1 / M2 / M3 / M4)
+- ~2 GB free disk space for the on-device models
 
-- `Sources/OpenFlowEngine/` — engine package (pipeline, STT, LLM, hotkey, injection)
-- `Tests/OpenFlowEngineTests/` — engine unit tests (21 tests across 5 suites)
-- `App/OpenFlow/` — AppKit shell (status item, overlay, settings, setup)
-- `App/SMOKE.md` — manual smoke checklist
-- `docs/superpowers/specs/` — design spec
-- `docs/superpowers/plans/` — implementation plan
+## First launch
 
-## Architecture
+OpenFlow lives in your menu bar — there's no Dock icon, so look for the
+OpenFlow icon at the top of the screen.
 
-A local Swift package `OpenFlowEngine` owns the dictation pipeline behind
-protocol seams. A thin AppKit shell wires it to a menu-bar status item, a
-floating overlay, a Settings window, and a first-run Setup window.
+1. The Setup window walks you through granting **Microphone**,
+   **Accessibility**, and **Input Monitoring** permissions in System Settings.
+2. On first run OpenFlow downloads its speech-recognition and text-cleanup
+   models (~1.4 GB). Progress is shown in the Setup window. The hotkey stays
+   disabled until both models are ready.
 
-```
-HotkeyWatcher → DictationSession → MicCapture
-                       ↓
-              TinyAudioTranscriber  (STT)
-                       ↓
-              SafeguardedStyler → MLXStyler  (LLM)
-                       ↓
-              KeyInjector → focused app
-```
+## How to dictate
 
-Pipeline phases: `idle → recording → transcribing → styling → injecting → idle`.
-Cancel and failure are transitions out of any active phase.
+Hold **⌃⌥D** (Control-Option-D), speak, then release. A small overlay shows
+the current phase:
+
+`recording → transcribing → styling → injecting`
+
+When it finishes, the cleaned-up text is typed straight into the app you were
+focused on. You can rebind the hotkey from OpenFlow's menu-bar Settings.
+
+## Privacy
+
+Everything runs locally on your Mac:
+
+- Speech-to-text via [`tiny-audio-swift`](https://github.com/mazesmazes/tiny-audio-swift)
+- Cleanup styling via an MLX-based LLM (Qwen3.5-2B-OptiQ-4bit)
+
+No audio, transcripts, or text are sent to any server. The only network
+activity is the one-time model download on first launch.
+
+## Contributing
+
+Issues and pull requests are welcome. See [`CLAUDE.md`](CLAUDE.md) for the
+architecture overview and how to build from source.

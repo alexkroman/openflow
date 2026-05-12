@@ -1,0 +1,40 @@
+name: check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout openflow
+        uses: actions/checkout@v6
+        with:
+          path: openflow
+
+      - name: Checkout tiny-audio-swift (sibling SPM dep)
+        uses: actions/checkout@v6
+        with:
+          repository: alexkroman/tiny-audio-swift
+          path: tiny-audio-swift
+
+      - name: Install build tools
+        run: brew install xcodegen xcbeautify swiftlint actionlint prettier
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Run check.sh
+        working-directory: openflow
+        run: scripts/check.sh

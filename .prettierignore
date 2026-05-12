@@ -1,0 +1,10 @@
+# Build / cache directories
+.build/
+build/
+.swiftpm/
+**/.DS_Store
+
+# Xcode-generated files
+*.xcodeproj/
+*.xcworkspace/
+Package.resolved

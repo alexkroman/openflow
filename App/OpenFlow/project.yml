@@ -61,6 +61,10 @@ targets:
             echo "Skipping Install to /Applications for $CONFIGURATION builds."
             exit 0
           fi
+          if [ "${CODE_SIGNING_ALLOWED:-YES}" = "NO" ]; then
+            echo "Skipping Install to /Applications: codesigning disabled (CI / health check)."
+            exit 0
+          fi
           # Copy + re-sign into /Applications so TCC sees a permanent path.
           # (Xcode/CLI builds otherwise live in DerivedData / /tmp — paths
           # macOS treats as transient and refuses to add to the Privacy

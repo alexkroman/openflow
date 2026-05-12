@@ -36,11 +36,17 @@ else
 fi
 
 echo "==> xcodebuild build (OpenFlow)"
+# Skip codesigning for the health-check build: the Developer ID cert only
+# lives on the maintainer's machine. The postBuildScripts "Install to
+# /Applications" step also bails out when CODE_SIGNING_ALLOWED=NO.
 run_xcodebuild \
   -project OpenFlow.xcodeproj \
   -scheme OpenFlow \
   -configuration Debug \
-  -destination 'platform=macOS' \
+  -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGN_IDENTITY="-" \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO \
   build
 
 if command -v swiftlint >/dev/null 2>&1; then
@@ -60,6 +66,22 @@ if command -v periphery >/dev/null 2>&1; then
   periphery scan --strict --quiet
 else
   echo "note: periphery not installed; skipping (brew install periphery)"
+fi
+
+if command -v actionlint >/dev/null 2>&1; then
+  echo "==> actionlint"
+  cd "$REPO_ROOT"
+  actionlint
+else
+  echo "note: actionlint not installed; skipping (brew install actionlint)"
+fi
+
+if command -v prettier >/dev/null 2>&1; then
+  echo "==> prettier --check"
+  cd "$REPO_ROOT"
+  prettier --check '**/*.{yml,yaml,md}'
+else
+  echo "note: prettier not installed; skipping (brew install prettier)"
 fi
 
 echo "==> ok"

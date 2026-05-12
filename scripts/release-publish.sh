@@ -62,9 +62,15 @@ git -C "$REPO_ROOT" tag -a "$TAG" -m "$TAG"
 git -C "$REPO_ROOT" push origin "$TAG"
 
 step "GitHub Release"
-gh release create "$TAG" "$DMG" \
+# Upload under a stable, version-less name so
+# https://github.com/<owner>/<repo>/releases/latest/download/OpenFlow.dmg
+# always resolves to the current release (README.md links to that URL).
+STABLE_DMG="$BUILD_ROOT/OpenFlow.dmg"
+cp "$DMG" "$STABLE_DMG"
+gh release create "$TAG" "$STABLE_DMG" \
   --title "$TAG" \
-  --generate-notes
+  --generate-notes \
+  --latest
 
 URL="$(gh release view "$TAG" --json url -q .url)"
 info "published: $URL"
