@@ -35,8 +35,8 @@ targets:
       properties:
         CFBundleName: OpenFlow
         CFBundleDisplayName: OpenFlow
-        CFBundleVersion: "2"
-        CFBundleShortVersionString: "0.1.1"
+        CFBundleVersion: "3"
+        CFBundleShortVersionString: "0.1.2"
         LSMinimumSystemVersion: "14.0"
         LSApplicationCategoryType: public.app-category.productivity
         NSMicrophoneUsageDescription: OpenFlow uses your microphone to transcribe your dictation locally on this device.
