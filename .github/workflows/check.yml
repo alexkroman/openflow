@@ -28,7 +28,7 @@ jobs:
           path: tiny-audio-swift
 
       - name: Install build tools
-        run: brew install xcodegen xcbeautify swiftlint
+        run: brew install xcodegen xcbeautify swiftlint actionlint prettier
 
       - name: Show toolchain
         run: |
