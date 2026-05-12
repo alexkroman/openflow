@@ -8,6 +8,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
+    ARCHS: arm64
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "640A7F5A9754400D4A0491E7A6FB30542D907806"
     DEVELOPMENT_TEAM: "Y54ZB9JF63"
@@ -29,8 +30,8 @@ targets:
       properties:
         CFBundleName: OpenFlow
         CFBundleDisplayName: OpenFlow
-        CFBundleVersion: "1"
-        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "2"
+        CFBundleShortVersionString: "0.1.1"
         LSMinimumSystemVersion: "14.0"
         LSUIElement: true
         NSMicrophoneUsageDescription: OpenFlow uses your microphone to transcribe your dictation locally on this device.
