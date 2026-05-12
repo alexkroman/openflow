@@ -9,13 +9,16 @@ final class WizardWindowController {
   private var stepSyncTask: Task<Void, Never>?
 
   func show(controller: WizardController, coordinator: AppCoordinator) {
-    if let window {
-      controller.startPolling()
-      // Restart the sync task in case the previous window-close cancelled it.
-      startStepSync(controller: controller)
-      bringToFront(window)
-      return
+    // Always recreate the window. Reusing a previously-closed NSWindow with a
+    // SwiftUI hosting controller leaves the hosting view tree in a state where
+    // makeKeyAndOrderFront silently no-ops on some macOS versions. A fresh
+    // window is cheap and avoids the edge case entirely.
+    if let oldWindow = window {
+      stepSyncTask?.cancel()
+      oldWindow.delegate = nil
+      oldWindow.close()
     }
+
     let hosting = NSHostingController(
       rootView: WizardView(controller: controller, coordinator: coordinator)
     )
@@ -30,10 +33,7 @@ final class WizardWindowController {
     w.delegate = closeDelegate
     window = w
 
-    // Keep the title and style mask in sync with the step. Stored so the
-    // window-close path can cancel it; restarted on next show().
     startStepSync(controller: controller)
-
     controller.startPolling()
     bringToFront(w)
   }

@@ -4,8 +4,12 @@ import Foundation
 
 // Brand color: saturated indigo (#4A5BE0).
 let brandColor = NSColor(srgbRed: 0x4A / 255.0, green: 0x5B / 255.0, blue: 0xE0 / 255.0, alpha: 1.0)
-let glyphFraction: CGFloat = 0.56
-let cornerRadiusFraction: CGFloat = 0.24
+// Apple's macOS app-icon template inscribes an 824×824 squircle inside the
+// 1024×1024 canvas, leaving a 100px margin all around for the Dock's shadow
+// and consistent visual sizing alongside built-in apps.
+let liveAreaFraction: CGFloat = 824.0 / 1024.0
+let cornerRadiusFraction: CGFloat = 0.225  // of live area (Big Sur+ spec)
+let glyphFraction: CGFloat = 0.55          // of live area
 
 func renderIcon(size: CGFloat) -> NSImage {
   let intSize = Int(size)
@@ -31,15 +35,17 @@ func renderIcon(size: CGFloat) -> NSImage {
   ctx.imageInterpolation = .high
   NSGraphicsContext.current = ctx
 
-  // Squircle background.
-  let rect = NSRect(x: 0, y: 0, width: size, height: size)
-  let radius = size * cornerRadiusFraction
+  // Squircle background, inset from the canvas to match the macOS template.
+  let liveArea = size * liveAreaFraction
+  let inset = (size - liveArea) / 2
+  let rect = NSRect(x: inset, y: inset, width: liveArea, height: liveArea)
+  let radius = liveArea * cornerRadiusFraction
   let path = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
   brandColor.setFill()
   path.fill()
 
-  // mic.fill SF Symbol, white, centered, height ≈ glyphFraction of canvas.
-  let glyphPointSize = size * glyphFraction
+  // mic.fill SF Symbol, white, centered in the live area.
+  let glyphPointSize = liveArea * glyphFraction
   let config = NSImage.SymbolConfiguration(pointSize: glyphPointSize, weight: .semibold)
   guard
     let baseGlyph = NSImage(systemSymbolName: "mic.fill", accessibilityDescription: nil),
