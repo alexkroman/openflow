@@ -57,7 +57,7 @@ These exist because the LLM occasionally hallucinates or returns nothing on edge
 
 ## Hotkey reality check
 
-The README says "Right Option" but the live config is **`HotkeyConfig.controlOptionD` (⌃⌥D)** — see `AppCoordinator.hotkeyConfig`. Modifier-only hotkeys (bare Right Option) are intentionally rejected because they require Input Monitoring, which the project avoids on the hot path. If you change the hotkey, update `App/SMOKE.md` too.
+The README says "Right Option" but the live config is **`HotkeyConfig.controlOptionD` (⌃⌥D)** — see `AppCoordinator.hotkeyConfig`. Modifier-only hotkeys (bare Right Option) are intentionally rejected because they require Input Monitoring, which the project avoids on the hot path.
 
 ## Styling prompt
 
