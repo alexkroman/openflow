@@ -17,12 +17,12 @@ jobs:
 
     steps:
       - name: Checkout openflow
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: openflow
 
       - name: Checkout tiny-audio-swift (sibling SPM dep)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: alexkroman/tiny-audio-swift
           path: tiny-audio-swift
