@@ -9,7 +9,7 @@ let brandColor = NSColor(srgbRed: 0x4A / 255.0, green: 0x5B / 255.0, blue: 0xE0 
 // and consistent visual sizing alongside built-in apps.
 let liveAreaFraction: CGFloat = 824.0 / 1024.0
 let cornerRadiusFraction: CGFloat = 0.225  // of live area (Big Sur+ spec)
-let glyphFraction: CGFloat = 0.55          // of live area
+let glyphFraction: CGFloat = 0.55  // of live area
 
 func renderIcon(size: CGFloat) -> NSImage {
   let intSize = Int(size)
@@ -128,18 +128,18 @@ for entry in sizes {
 
 let contents: [String: Any] = [
   "images": [
-    ["filename": "icon_16x16.png",     "idiom": "mac", "scale": "1x", "size": "16x16"],
-    ["filename": "icon_16x16@2x.png",  "idiom": "mac", "scale": "2x", "size": "16x16"],
-    ["filename": "icon_32x32.png",     "idiom": "mac", "scale": "1x", "size": "32x32"],
-    ["filename": "icon_32x32@2x.png",  "idiom": "mac", "scale": "2x", "size": "32x32"],
-    ["filename": "icon_128x128.png",   "idiom": "mac", "scale": "1x", "size": "128x128"],
-    ["filename": "icon_128x128@2x.png","idiom": "mac", "scale": "2x", "size": "128x128"],
-    ["filename": "icon_256x256.png",   "idiom": "mac", "scale": "1x", "size": "256x256"],
-    ["filename": "icon_256x256@2x.png","idiom": "mac", "scale": "2x", "size": "256x256"],
-    ["filename": "icon_512x512.png",   "idiom": "mac", "scale": "1x", "size": "512x512"],
-    ["filename": "icon_512x512@2x.png","idiom": "mac", "scale": "2x", "size": "512x512"],
+    ["filename": "icon_16x16.png", "idiom": "mac", "scale": "1x", "size": "16x16"],
+    ["filename": "icon_16x16@2x.png", "idiom": "mac", "scale": "2x", "size": "16x16"],
+    ["filename": "icon_32x32.png", "idiom": "mac", "scale": "1x", "size": "32x32"],
+    ["filename": "icon_32x32@2x.png", "idiom": "mac", "scale": "2x", "size": "32x32"],
+    ["filename": "icon_128x128.png", "idiom": "mac", "scale": "1x", "size": "128x128"],
+    ["filename": "icon_128x128@2x.png", "idiom": "mac", "scale": "2x", "size": "128x128"],
+    ["filename": "icon_256x256.png", "idiom": "mac", "scale": "1x", "size": "256x256"],
+    ["filename": "icon_256x256@2x.png", "idiom": "mac", "scale": "2x", "size": "256x256"],
+    ["filename": "icon_512x512.png", "idiom": "mac", "scale": "1x", "size": "512x512"],
+    ["filename": "icon_512x512@2x.png", "idiom": "mac", "scale": "2x", "size": "512x512"],
   ],
-  "info": ["author": "xcode", "version": 1]
+  "info": ["author": "xcode", "version": 1],
 ]
 var json = try JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys])
 json.append(contentsOf: "\n".utf8)

@@ -68,23 +68,23 @@ final class WizardWindowController {
   private func title(for step: WizardStep) -> String {
     switch step {
     case .permissions: return "Welcome to OpenFlow"
-    case .settingUp:   return "Setting up OpenFlow"
-    case .hotkey:      return "OpenFlow"
+    case .settingUp: return "Setting up OpenFlow"
+    case .hotkey: return "OpenFlow"
     }
   }
 
   private func styleMask(for step: WizardStep) -> NSWindow.StyleMask {
     switch step {
     case .permissions, .settingUp: return [.titled, .closable]
-    case .hotkey:                  return [.titled, .closable, .miniaturizable]
+    case .hotkey: return [.titled, .closable, .miniaturizable]
     }
   }
 
   private func contentSize(for step: WizardStep) -> NSSize {
     switch step {
     case .permissions: return NSSize(width: 500, height: 440)
-    case .settingUp:   return NSSize(width: 500, height: 260)
-    case .hotkey:      return NSSize(width: 500, height: 240)
+    case .settingUp: return NSSize(width: 500, height: 260)
+    case .hotkey: return NSSize(width: 500, height: 240)
     }
   }
 }

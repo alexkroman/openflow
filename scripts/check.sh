@@ -49,13 +49,13 @@ run_xcodebuild \
   CODE_SIGNING_ALLOWED=NO \
   build
 
-if command -v swiftlint >/dev/null 2>&1; then
-  echo "==> swiftlint"
-  cd "$REPO_ROOT"
-  swiftlint --quiet
-else
-  echo "note: swiftlint not installed; skipping (brew install swiftlint)"
-fi
+echo "==> swift-format"
+cd "$REPO_ROOT"
+# Apple's swift-format (bundled with Xcode 16+) is the project's sole Swift
+# linter/formatter. --strict makes any pending formatting a non-zero exit so
+# this check fails if someone forgot to run swift-format on their diff.
+find Sources Tests App/OpenFlow/OpenFlow scripts -name '*.swift' -print0 \
+  | xargs -0 xcrun swift-format lint --strict
 
 if command -v periphery >/dev/null 2>&1; then
   echo "==> periphery"
