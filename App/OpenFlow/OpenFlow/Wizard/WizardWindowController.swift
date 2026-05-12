@@ -29,8 +29,8 @@ final class WizardWindowController {
     w.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
     // NSHostingController's preferredContentSize is unreliable on first show —
     // SwiftUI hasn't measured yet, so the window opens at ~187pt tall and
-    // clips the Form. Force a sensible size that fits the tallest step.
-    w.setContentSize(NSSize(width: 500, height: 600))
+    // clips the Form. Force an explicit per-step size.
+    w.setContentSize(contentSize(for: controller.step))
     w.center()
     closeDelegate.controller = controller
     closeDelegate.onClose = { [weak self] in self?.stepSyncTask?.cancel() }
@@ -50,6 +50,7 @@ final class WizardWindowController {
         guard let self, let w = self.window else { return }
         w.title = self.title(for: controller.step)
         w.styleMask = self.styleMask(for: controller.step)
+        w.setContentSize(self.contentSize(for: controller.step))
       }
     }
   }
@@ -75,6 +76,14 @@ final class WizardWindowController {
     switch step {
     case .permissions, .settingUp: return [.titled, .closable]
     case .hotkey:                  return [.titled, .closable, .miniaturizable]
+    }
+  }
+
+  private func contentSize(for step: WizardStep) -> NSSize {
+    switch step {
+    case .permissions: return NSSize(width: 500, height: 440)
+    case .settingUp:   return NSSize(width: 500, height: 260)
+    case .hotkey:      return NSSize(width: 500, height: 320)
     }
   }
 }
