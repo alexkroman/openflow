@@ -28,4 +28,9 @@ struct KeyInjectorTrailingSpaceTests {
   func appendsToSingleChar() {
     #expect(KeyInjector.withTrailingSpace("x") == "x ")
   }
+
+  @Test("returns empty string unchanged")
+  func leavesEmptyAlone() {
+    #expect(KeyInjector.withTrailingSpace("") == "")
+  }
 }

@@ -20,6 +20,7 @@ public actor KeyInjector: InjectorProtocol {
   }
 
   public static func withTrailingSpace(_ text: String) -> String {
+    guard !text.isEmpty else { return text }
     guard let last = text.last, last.isWhitespace else { return text + " " }
     return text
   }
