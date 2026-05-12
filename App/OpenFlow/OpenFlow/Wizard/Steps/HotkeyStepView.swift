@@ -8,7 +8,6 @@ struct HotkeyStepView: View {
       Divider()
       Form {
         shortcutSection
-        tipsSection
       }
       .formStyle(.grouped)
       .scrollDisabled(true)
@@ -47,14 +46,4 @@ struct HotkeyStepView: View {
     }
   }
 
-  private var tipsSection: some View {
-    Section {
-      Label(
-        "Speech is transcribed and cleaned up locally on this device.",
-        systemImage: "lock.shield"
-      )
-    } header: {
-      Text("Tips")
-    }
-  }
 }
