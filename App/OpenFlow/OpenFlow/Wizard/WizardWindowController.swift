@@ -6,10 +6,13 @@ import SwiftUI
 final class WizardWindowController {
   private var window: NSWindow?
   private let closeDelegate = WindowCloseObserver()
+  private var stepSyncTask: Task<Void, Never>?
 
   func show(controller: WizardController, coordinator: AppCoordinator) {
     if let window {
       controller.startPolling()
+      // Restart the sync task in case the previous window-close cancelled it.
+      startStepSync(controller: controller)
       bringToFront(window)
       return
     }
@@ -23,11 +26,21 @@ final class WizardWindowController {
     w.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
     w.center()
     closeDelegate.controller = controller
+    closeDelegate.onClose = { [weak self] in self?.stepSyncTask?.cancel() }
     w.delegate = closeDelegate
     window = w
 
-    // Keep the title and style mask in sync with the step.
-    Task { @MainActor [weak self, weak controller] in
+    // Keep the title and style mask in sync with the step. Stored so the
+    // window-close path can cancel it; restarted on next show().
+    startStepSync(controller: controller)
+
+    controller.startPolling()
+    bringToFront(w)
+  }
+
+  private func startStepSync(controller: WizardController) {
+    stepSyncTask?.cancel()
+    stepSyncTask = Task { @MainActor [weak self, weak controller] in
       guard let controller else { return }
       for await _ in controller.$step.values {
         guard let self, let w = self.window else { return }
@@ -35,9 +48,6 @@ final class WizardWindowController {
         w.styleMask = self.styleMask(for: controller.step)
       }
     }
-
-    controller.startPolling()
-    bringToFront(w)
   }
 
   private func bringToFront(_ w: NSWindow) {
@@ -61,12 +71,15 @@ final class WizardWindowController {
   }
 }
 
-/// Stops the controller's permission poll loop when the window closes.
+/// Stops the controller's permission poll loop and the window's step-sync
+/// task when the window closes.
 @MainActor
-final class WindowCloseObserver: NSObject, NSWindowDelegate {
+private final class WindowCloseObserver: NSObject, NSWindowDelegate {
   weak var controller: WizardController?
+  var onClose: (() -> Void)?
 
   func windowWillClose(_ notification: Notification) {
     controller?.stopPolling()
+    onClose?()
   }
 }
