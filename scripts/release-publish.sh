@@ -19,9 +19,14 @@ done
 VERSION="$(awk '/CFBundleShortVersionString:/ {gsub(/"/,"",$2); print $2; exit}' "$APP_DIR/project.yml")"
 [ -n "$VERSION" ] || die "could not parse version"
 DMG="$BUILD_ROOT/OpenFlow-$VERSION.dmg"
+DSYM_ZIP="$BUILD_ROOT/OpenFlow-$VERSION.app.dSYM.zip"
+CHECKSUMS="$BUILD_ROOT/SHA256SUMS"
 [ -f "$DMG" ] || die "DMG not found at $DMG — run scripts/release-build.sh first"
+[ -f "$DSYM_ZIP" ] || die "dSYM zip not found at $DSYM_ZIP — run scripts/release-build.sh first"
+[ -f "$CHECKSUMS" ] || die "SHA256SUMS not found at $CHECKSUMS — run scripts/release-build.sh first"
 info "version: $VERSION"
 info "dmg:     $DMG"
+info "dsym:    $DSYM_ZIP"
 
 step "Validate staple"
 xcrun stapler validate "$DMG" >/dev/null || die "DMG not stapled — rebuild with release-build.sh"
@@ -62,12 +67,15 @@ git -C "$REPO_ROOT" tag -a "$TAG" -m "$TAG"
 git -C "$REPO_ROOT" push origin "$TAG"
 
 step "GitHub Release"
-# Upload under the stable display name OpenFlow.dmg so
-# https://github.com/<owner>/<repo>/releases/latest/download/OpenFlow.dmg
+# Upload under stable display names so
+# https://github.com/<owner>/<repo>/releases/latest/download/<name>
 # always resolves to the current release (README.md links to that URL).
-# The `path#display-name` syntax lets us keep the versioned filename on
-# disk while serving it under the version-less name on the release page.
-gh release create "$TAG" "$DMG#OpenFlow.dmg" \
+# The `path#display-name` syntax lets us keep versioned filenames on disk
+# while serving them under version-less names on the release page.
+gh release create "$TAG" \
+  "$DMG#OpenFlow.dmg" \
+  "$DSYM_ZIP#OpenFlow.app.dSYM.zip" \
+  "$CHECKSUMS#SHA256SUMS" \
   --title "$TAG" \
   --generate-notes \
   --latest
