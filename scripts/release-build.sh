@@ -176,18 +176,20 @@ spctl --assess --type open --context context:primary-signature -v "$DMG"
 
 step "Mount + verify DMG contents"
 # Defense against silent DMG corruption: mount the image, check the bundle
-# inside is signed and stapled, then eject.
-MOUNT_OUTPUT="$(hdiutil attach -nobrowse -noverify -mountrandom /tmp "$DMG")"
-MOUNT_POINT="$(printf '%s\n' "$MOUNT_OUTPUT" | awk '/\/tmp\// {print $3; exit}')"
-[ -n "$MOUNT_POINT" ] || die "could not parse mount point from hdiutil output"
+# inside is signed and stapled, then eject. We pick our own mount point so
+# we don't have to parse hdiutil's output (which reports /private/tmp/...
+# rather than /tmp/... on macOS).
+MOUNT_POINT="$(mktemp -d /tmp/openflow-dmg.XXXXXX)"
+trap 'hdiutil detach "$MOUNT_POINT" >/dev/null 2>&1 || true; rmdir "$MOUNT_POINT" >/dev/null 2>&1 || true' EXIT
+hdiutil attach -nobrowse -noverify -mountpoint "$MOUNT_POINT" "$DMG" >/dev/null
 MOUNTED_APP="$MOUNT_POINT/OpenFlow.app"
-trap 'hdiutil detach "$MOUNT_POINT" >/dev/null 2>&1 || true' EXIT
 [ -d "$MOUNTED_APP" ] || die "mounted DMG missing OpenFlow.app"
 xcrun stapler validate "$MOUNTED_APP" >/dev/null
 codesign --verify --strict --deep "$MOUNTED_APP"
 MOUNTED_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$MOUNTED_APP/Contents/Info.plist")"
 [ "$MOUNTED_VERSION" = "$VERSION" ] || die "version mismatch inside DMG: expected $VERSION, got $MOUNTED_VERSION"
 hdiutil detach "$MOUNT_POINT" >/dev/null
+rmdir "$MOUNT_POINT" >/dev/null 2>&1 || true
 trap - EXIT
 info "dmg contents verified (OpenFlow.app $MOUNTED_VERSION, signed + stapled)"
 
