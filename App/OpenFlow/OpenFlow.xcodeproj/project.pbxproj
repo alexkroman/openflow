@@ -12,9 +12,8 @@
 		043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */; };
 		0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
-		5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AD11B117E39DD5F21BEB69 /* SetupView.swift */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
-		825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */; };
+		8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B51C821A5037C71DEC840A /* WizardController.swift */; };
 		95A5B1DA15D9D8ABC2CAA660 /* StepIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */; };
@@ -24,8 +23,6 @@
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
 		BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */; };
 		C1DC2D9C5757123C314A90CF /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC9526CBA28E0702C1E0C4 /* App.swift */; };
-		C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */; };
-		DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957A32E91D36705B16A719B7 /* SetupWindowController.swift */; };
 		E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8172C344625A9801EE3EDD97 /* ToastPresenter.swift */; };
 		E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */; };
 		F95C61C2B29D7EC790F71654 /* SettingUpStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */; };
@@ -40,23 +37,20 @@
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingUpStepView.swift; sourceTree = "<group>"; };
-		5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
+		5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
 		62F092E712D065AFCB941BD9 /* ModelLoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadState.swift; sourceTree = "<group>"; };
 		65C1315CC840E8EB96963585 /* WizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardView.swift; sourceTree = "<group>"; };
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
 		85BD99F76D74DC83DF42A8C9 /* PermissionsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsStepView.swift; sourceTree = "<group>"; };
-		957A32E91D36705B16A719B7 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
 		99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepIndicator.swift; sourceTree = "<group>"; };
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
-		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
 		B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardWindowController.swift; sourceTree = "<group>"; };
 		C1B51C821A5037C71DEC840A /* WizardController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardController.swift; sourceTree = "<group>"; };
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
 		CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
-		F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
 		FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyStepView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,11 +101,9 @@
 				6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */,
 				62F092E712D065AFCB941BD9 /* ModelLoadState.swift */,
 				DD23241CC3362389725DD4AC /* OpenFlow.entitlements */,
-				5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */,
 				CE1075EC2686C5C4F9396479 /* Hotkey */,
 				73C2C10FA744B263909CFB6B /* Overlay */,
 				E5F8F92281CD90EEFF63EB47 /* Resources */,
-				DA5E6930882DE0043CABB6F1 /* Setup */,
 				0BC1693FDE2B78AABDDAFAB1 /* Shared */,
 				947AA73A0E40545B67404EEF /* Toast */,
 				9A42E96918A6890BF584678A /* Wizard */,
@@ -147,6 +139,7 @@
 		9A42E96918A6890BF584678A /* Wizard */ = {
 			isa = PBXGroup;
 			children = (
+				5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */,
 				99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */,
 				C1B51C821A5037C71DEC840A /* WizardController.swift */,
 				65C1315CC840E8EB96963585 /* WizardView.swift */,
@@ -172,16 +165,6 @@
 				C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */,
 			);
 			path = Hotkey;
-			sourceTree = "<group>";
-		};
-		DA5E6930882DE0043CABB6F1 /* Setup */ = {
-			isa = PBXGroup;
-			children = (
-				F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */,
-				B4AD11B117E39DD5F21BEB69 /* SetupView.swift */,
-				957A32E91D36705B16A719B7 /* SetupWindowController.swift */,
-			);
-			path = Setup;
 			sourceTree = "<group>";
 		};
 		E5F8F92281CD90EEFF63EB47 /* Resources */ = {
@@ -299,15 +282,12 @@
 				E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */,
 				98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */,
 				0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */,
-				825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */,
+				8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */,
 				A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */,
 				1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */,
 				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
 				FA4B59B3D3130D1B1684B1CB /* PermissionsStepView.swift in Sources */,
 				F95C61C2B29D7EC790F71654 /* SettingUpStepView.swift in Sources */,
-				5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */,
-				DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */,
-				C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */,
 				95A5B1DA15D9D8ABC2CAA660 /* StepIndicator.swift in Sources */,
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
 				95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */,
