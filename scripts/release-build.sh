@@ -76,6 +76,7 @@ xcodebuild \
   -project "$APP_DIR/OpenFlow.xcodeproj" \
   -scheme OpenFlow \
   -configuration Release \
+  -destination 'generic/platform=macOS' \
   -derivedDataPath "$DERIVED" \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="$IDENTITY" \
