@@ -141,7 +141,7 @@ final class AppCoordinator: ObservableObject {
     let isRecording: Bool
     if case .recording = phase { isRecording = true } else { isRecording = false }
     if isRecording && !wasRecording {
-      NSSound(named: "Tink")?.play()
+      NSSound(named: "Pop")?.play()
     } else if !isRecording && wasRecording {
       NSSound(named: "Bottle")?.play()
     }
