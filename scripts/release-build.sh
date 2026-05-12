@@ -34,7 +34,7 @@ else
 fi
 
 step "Preflight"
-for cmd in xcodegen xcodebuild xcrun hdiutil codesign awk shasum; do
+for cmd in xcodegen xcodebuild xcrun hdiutil codesign spctl awk shasum; do
   command -v "$cmd" >/dev/null 2>&1 || die "missing required tool: $cmd"
 done
 
@@ -87,6 +87,14 @@ APP_BUILT="$DERIVED/Build/Products/Release/OpenFlow.app"
 [ -d "$APP_BUILT" ] || die "expected app at $APP_BUILT — build did not produce it"
 info "built: $APP_BUILT ($(du -sh "$APP_BUILT" | cut -f1))"
 
+step "Preserve dSYM"
+DSYM_SRC="$DERIVED/Build/Products/Release/OpenFlow.app.dSYM"
+DSYM_DST="$BUILD_ROOT/OpenFlow-$VERSION.app.dSYM"
+[ -d "$DSYM_SRC" ] || die "expected dSYM at $DSYM_SRC — build did not produce it"
+rm -rf "$DSYM_DST"
+cp -R "$DSYM_SRC" "$DSYM_DST"
+info "dsym: $DSYM_DST"
+
 step "Stage"
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
@@ -123,6 +131,10 @@ hdiutil create -volname "OpenFlow $VERSION" \
   -ov -format UDZO \
   "$DMG" >/dev/null
 
+step "Verify DMG"
+hdiutil verify "$DMG" >/dev/null
+info "dmg verified"
+
 step "Sign DMG"
 codesign --force --sign "$IDENTITY" --timestamp "$DMG"
 codesign --verify --verbose=1 "$DMG"
@@ -150,6 +162,11 @@ xcrun stapler staple "$DMG"
 xcrun stapler validate "$DMG"
 info "dmg stapled + validated"
 
+step "Gatekeeper assessment"
+# Simulates what the user's Mac will do on first launch. Catches missed-
+# notarization / mis-signed bundles before they ship.
+spctl --assess --type open --context context:primary-signature -v "$DMG"
+
 step "Summary"
 SIZE="$(du -h "$DMG" | cut -f1)"
 SHA="$(shasum -a 256 "$DMG" | awk '{print $1}')"
@@ -158,6 +175,7 @@ cat <<EOF
   DMG:    $DMG
   Size:   $SIZE
   SHA256: $SHA
+  dSYM:   $DSYM_DST
 
   Publish with:
     scripts/release-publish.sh
