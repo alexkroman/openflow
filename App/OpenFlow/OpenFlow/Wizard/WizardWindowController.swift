@@ -46,7 +46,8 @@ final class WizardWindowController {
     stepSyncTask?.cancel()
     stepSyncTask = Task { @MainActor [weak self, weak controller] in
       guard let controller else { return }
-      for await _ in controller.$step.values {
+      // dropFirst: the initial value was already applied synchronously in show().
+      for await _ in controller.$step.dropFirst().values {
         guard let self, let w = self.window else { return }
         w.title = self.title(for: controller.step)
         w.styleMask = self.styleMask(for: controller.step)

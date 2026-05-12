@@ -62,7 +62,9 @@ final class WizardController: ObservableObject {
   ) {
     let perms = permissions ?? self.permissions
     let models = modelState ?? coordinator?.modelLoadState ?? ModelLoadState()
-    self.permissions = perms
+    if perms != self.permissions {
+      self.permissions = perms
+    }
     let oldStep = self.step
     let newStep = WizardStep.evaluate(permissions: perms, modelState: models)
     if newStep != oldStep {
@@ -73,6 +75,7 @@ final class WizardController: ObservableObject {
     }
     if newStep == .hotkey && oldStep != .hotkey {
       coordinator?.showOverlay()
+      stopPolling()
     }
   }
 

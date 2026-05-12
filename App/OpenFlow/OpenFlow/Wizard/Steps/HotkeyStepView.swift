@@ -4,7 +4,10 @@ import SwiftUI
 struct HotkeyStepView: View {
   var body: some View {
     VStack(spacing: 0) {
-      header
+      WizardStepHeader(
+        title: "OpenFlow",
+        subtitle: "Hold the shortcut anywhere on your Mac and start dictating."
+      )
       Divider()
       Form {
         shortcutSection
@@ -12,24 +15,6 @@ struct HotkeyStepView: View {
       .formStyle(.grouped)
       .scrollDisabled(true)
     }
-  }
-
-  private var header: some View {
-    HStack(alignment: .top, spacing: 16) {
-      Image(nsImage: NSApp.applicationIconImage ?? NSImage())
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 64, height: 64)
-        .accessibilityHidden(true)
-      VStack(alignment: .leading, spacing: 6) {
-        Text("OpenFlow").font(.title).bold()
-        Text("Hold the shortcut anywhere on your Mac and start dictating.")
-          .foregroundStyle(.secondary)
-          .fixedSize(horizontal: false, vertical: true)
-      }
-      Spacer(minLength: 0)
-    }
-    .padding(28)
   }
 
   private var shortcutSection: some View {

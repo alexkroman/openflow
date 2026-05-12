@@ -17,6 +17,7 @@
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B51C821A5037C71DEC840A /* WizardController.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
+		A7E11BA98334AFCB52D6F0DA /* WizardStepHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */; };
 		A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C1315CC840E8EB96963585 /* WizardView.swift */; };
 		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
@@ -37,6 +38,7 @@
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingUpStepView.swift; sourceTree = "<group>"; };
 		5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
+		61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardStepHeader.swift; sourceTree = "<group>"; };
 		62F092E712D065AFCB941BD9 /* ModelLoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadState.swift; sourceTree = "<group>"; };
 		65C1315CC840E8EB96963585 /* WizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardView.swift; sourceTree = "<group>"; };
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -139,6 +141,7 @@
 			children = (
 				5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */,
 				C1B51C821A5037C71DEC840A /* WizardController.swift */,
+				61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */,
 				65C1315CC840E8EB96963585 /* WizardView.swift */,
 				B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */,
 				9ACE04DEDC4BCFB423221D98 /* Steps */,
@@ -287,6 +290,7 @@
 				F95C61C2B29D7EC790F71654 /* SettingUpStepView.swift in Sources */,
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
 				95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */,
+				A7E11BA98334AFCB52D6F0DA /* WizardStepHeader.swift in Sources */,
 				A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */,
 				03A9E8F0EC4DEAD979B7E110 /* WizardWindowController.swift in Sources */,
 			);

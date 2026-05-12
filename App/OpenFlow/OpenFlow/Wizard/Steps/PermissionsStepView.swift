@@ -6,7 +6,11 @@ struct PermissionsStepView: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      header
+      WizardStepHeader(
+        title: "Welcome to OpenFlow",
+        subtitle: "Hold \(DictateHotkey.label) anywhere to dictate. "
+          + "Your voice is transcribed on-device and typed into the app you're using."
+      )
       Divider()
       Form {
         microphoneSection
@@ -17,29 +21,10 @@ struct PermissionsStepView: View {
     }
   }
 
-  private var header: some View {
-    HStack(alignment: .top, spacing: 16) {
-      Image(nsImage: NSApp.applicationIconImage ?? NSImage())
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(width: 64, height: 64)
-        .accessibilityHidden(true)
-      VStack(alignment: .leading, spacing: 6) {
-        Text("Welcome to OpenFlow").font(.title).bold()
-        Text(
-          "Hold \(DictateHotkey.label) anywhere to dictate. "
-            + "Your voice is transcribed on-device and typed into the app you're using."
-        )
-        .foregroundStyle(.secondary)
-        .fixedSize(horizontal: false, vertical: true)
-      }
-    }
-    .padding(28)
-  }
-
   private var microphoneSection: some View {
     Section {
       permissionRow(
+        label: "Microphone",
         symbol: "mic.fill",
         granted: controller.permissions.microphone,
         buttonLabel: "Allow Microphone Access",
@@ -64,6 +49,7 @@ struct PermissionsStepView: View {
   private var accessibilitySection: some View {
     Section {
       permissionRow(
+        label: "Accessibility",
         symbol: "accessibility",
         granted: controller.permissions.accessibility,
         buttonLabel: "Open Accessibility Settings…",
@@ -84,6 +70,7 @@ struct PermissionsStepView: View {
 
   @ViewBuilder
   private func permissionRow(
+    label: String,
     symbol: String,
     granted: Bool,
     buttonLabel: String,
@@ -102,7 +89,7 @@ struct PermissionsStepView: View {
         Button(buttonLabel, action: action)
       }
     } label: {
-      Label("Status", systemImage: symbol)
+      Label(label, systemImage: symbol)
     }
   }
 }
