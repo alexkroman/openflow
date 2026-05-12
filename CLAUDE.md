@@ -44,11 +44,12 @@ HotkeyWatcher → DictationSession (actor) → MicCapture
 **`DictationSession`** (`Sources/OpenFlowEngine/Pipeline/DictationSession.swift`) is the central actor. It exposes `press()` / `release()` / `cancel()` and a `phase: PipelinePhase` (`idle | recording | transcribing | styling | injecting | failed | cancelled`). All four collaborators are protocol-typed (`MicCaptureProtocol`, `TranscriberProtocol`, `StylerProtocol`, `InjectorProtocol`) so tests can stub them — see `Tests/OpenFlowEngineTests/Stubs/`.
 
 **`SafeguardedStyler`** wraps any `StylerProtocol` with three failsafes that should not be removed casually:
+
 - 8-second timeout → emits `.replaceAll(raw)` and throws `stylerTimedOut` (caller treats raw as final text)
 - length cap (2× raw or floor 8) → suppress runaway generations
 - empty-result guard for inputs >3 words → fall back to raw
 
-These exist because the LLM occasionally hallucinates or returns nothing on edge cases; the pipeline must always inject *something* the user said.
+These exist because the LLM occasionally hallucinates or returns nothing on edge cases; the pipeline must always inject _something_ the user said.
 
 **`KeyInjector.insert`** picks between two paths via `InjectionPath.choose`: keystroke-by-keystroke `CGEvent` posting (short text) or clipboard-paste with restore (≥ `longTextThreshold` chars, default 500). The clipboard path saves and restores the prior pasteboard contents.
 
@@ -72,5 +73,5 @@ The README says "Right Option" but the live config is **`HotkeyConfig.controlOpt
 ## Things deliberately not here
 
 - **No menu bar icon, no `LSUIElement`** — OpenFlow is a regular Dock app. A menu-bar variant existed briefly but was reverted because the macOS 26 notch hid the icon. If you find yourself reaching for `NSStatusItem`, stop and ask.
-- **No streaming STT** — `TinyAudio`'s public API doesn't expose it, so the overlay shows "Transcribing…" then jumps to the full text. Styling tokens *do* stream.
+- **No streaming STT** — `TinyAudio`'s public API doesn't expose it, so the overlay shows "Transcribing…" then jumps to the full text. Styling tokens _do_ stream.
 - **No bundled models** — both the ASR weights (`mazesmazes/tiny-audio-swift-bundle`) and the Qwen3.5-2B styling model (`mlx-community/Qwen3.5-2B-OptiQ-4bit`) are downloaded by TinyAudio on first run and cached under `~/Library/Application Support/TinyAudio/Models/`. The Setup window shows progress bars; the hotkey is disabled until both models are ready. To force a re-download, delete the cache directory.
