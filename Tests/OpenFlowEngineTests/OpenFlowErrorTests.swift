@@ -11,7 +11,7 @@ struct OpenFlowErrorTests {
       .microphonePermissionDenied,
       .accessibilityPermissionMissing,
       .stylerTimedOut,
-      .targetAppLost
+      .targetAppLost,
     ]
     for c in cases {
       #expect(!(c.errorDescription ?? "").isEmpty)
@@ -20,15 +20,17 @@ struct OpenFlowErrorTests {
 
   @Test("wrapping cases include the underlying error description")
   func wrappingCasesIncludeUnderlying() {
-    let underlying = NSError(domain: "Test", code: 1, userInfo: [
-      NSLocalizedDescriptionKey: "boom-marker-42"
-    ])
+    let underlying = NSError(
+      domain: "Test", code: 1,
+      userInfo: [
+        NSLocalizedDescriptionKey: "boom-marker-42"
+      ])
     let wrapped: [OpenFlowError] = [
       .modelDownloadFailed(underlying: underlying),
       .modelLoadFailed(underlying: underlying),
       .sttFailed(underlying: underlying),
       .stylerFailed(underlying: underlying),
-      .audioCaptureFailed(underlying: underlying)
+      .audioCaptureFailed(underlying: underlying),
     ]
     for w in wrapped {
       #expect(w.errorDescription?.contains("boom-marker-42") == true)

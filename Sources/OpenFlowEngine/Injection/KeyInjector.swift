@@ -19,6 +19,12 @@ public actor KeyInjector: InjectorProtocol {
     self.config = config
   }
 
+  public static func withTrailingSpace(_ text: String) -> String {
+    guard !text.isEmpty else { return text }
+    guard let last = text.last, last.isWhitespace else { return text + " " }
+    return text
+  }
+
   public func setTargetApp(_ app: NSRunningApplication?) {
     self.targetApp = app
   }
@@ -29,17 +35,18 @@ public actor KeyInjector: InjectorProtocol {
 
   public nonisolated func insert(_ text: String) async throws {
     guard !text.isEmpty else { return }
+    let finalText = KeyInjector.withTrailingSpace(text)
     let cfg = await self.config
-    let path = InjectionPath.choose(for: text, longTextThreshold: cfg.longTextThreshold)
+    let path = InjectionPath.choose(for: finalText, longTextThreshold: cfg.longTextThreshold)
     if let target = await self.targetApp {
       target.activate()
       try? await Task.sleep(nanoseconds: 30_000_000)
     }
     switch path {
     case .typeKeystrokes:
-      await self.typeKeystrokes(text)
+      await self.typeKeystrokes(finalText)
     case .clipboardPaste:
-      await self.clipboardPaste(text)
+      await self.clipboardPaste(finalText)
     }
   }
 

@@ -8,20 +8,25 @@
 
 /* Begin PBXBuildFile section */
 		01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 928B81225BAAB01A9A5A460D /* KeyboardShortcuts */; };
+		03A9E8F0EC4DEAD979B7E110 /* WizardWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */; };
+		043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */; };
+		0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
-		5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AD11B117E39DD5F21BEB69 /* SetupView.swift */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
-		825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */; };
+		8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
+		95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B51C821A5037C71DEC840A /* WizardController.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
+		A7E11BA98334AFCB52D6F0DA /* WizardStepHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */; };
+		A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C1315CC840E8EB96963585 /* WizardView.swift */; };
 		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
 		AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */; };
 		BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */; };
 		C1DC2D9C5757123C314A90CF /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FC9526CBA28E0702C1E0C4 /* App.swift */; };
-		C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */; };
-		DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 957A32E91D36705B16A719B7 /* SetupWindowController.swift */; };
 		E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8172C344625A9801EE3EDD97 /* ToastPresenter.swift */; };
 		E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */; };
+		F95C61C2B29D7EC790F71654 /* SettingUpStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */; };
+		FA4B59B3D3130D1B1684B1CB /* PermissionsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85BD99F76D74DC83DF42A8C9 /* PermissionsStepView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,17 +36,22 @@
 		38EECD10C11AB7A58617CAA1 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
+		44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingUpStepView.swift; sourceTree = "<group>"; };
+		5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
+		61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardStepHeader.swift; sourceTree = "<group>"; };
 		62F092E712D065AFCB941BD9 /* ModelLoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadState.swift; sourceTree = "<group>"; };
+		65C1315CC840E8EB96963585 /* WizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardView.swift; sourceTree = "<group>"; };
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
-		957A32E91D36705B16A719B7 /* SetupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupWindowController.swift; sourceTree = "<group>"; };
+		85BD99F76D74DC83DF42A8C9 /* PermissionsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsStepView.swift; sourceTree = "<group>"; };
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
-		B4AD11B117E39DD5F21BEB69 /* SetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupView.swift; sourceTree = "<group>"; };
+		B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardWindowController.swift; sourceTree = "<group>"; };
+		C1B51C821A5037C71DEC840A /* WizardController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardController.swift; sourceTree = "<group>"; };
 		C1E7E165F035E7C8E7606553 /* DictateShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictateShortcut.swift; sourceTree = "<group>"; };
+		CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
-		F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
+		FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyStepView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,12 +101,12 @@
 				6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */,
 				62F092E712D065AFCB941BD9 /* ModelLoadState.swift */,
 				DD23241CC3362389725DD4AC /* OpenFlow.entitlements */,
-				5D574FBC5BC07BFA67923C68 /* StatusItemController.swift */,
 				CE1075EC2686C5C4F9396479 /* Hotkey */,
 				73C2C10FA744B263909CFB6B /* Overlay */,
-				DA5E6930882DE0043CABB6F1 /* Setup */,
+				E5F8F92281CD90EEFF63EB47 /* Resources */,
 				0BC1693FDE2B78AABDDAFAB1 /* Shared */,
 				947AA73A0E40545B67404EEF /* Toast */,
+				9A42E96918A6890BF584678A /* Wizard */,
 			);
 			path = OpenFlow;
 			sourceTree = "<group>";
@@ -126,6 +136,29 @@
 			path = Toast;
 			sourceTree = "<group>";
 		};
+		9A42E96918A6890BF584678A /* Wizard */ = {
+			isa = PBXGroup;
+			children = (
+				5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */,
+				C1B51C821A5037C71DEC840A /* WizardController.swift */,
+				61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */,
+				65C1315CC840E8EB96963585 /* WizardView.swift */,
+				B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */,
+				9ACE04DEDC4BCFB423221D98 /* Steps */,
+			);
+			path = Wizard;
+			sourceTree = "<group>";
+		};
+		9ACE04DEDC4BCFB423221D98 /* Steps */ = {
+			isa = PBXGroup;
+			children = (
+				FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */,
+				85BD99F76D74DC83DF42A8C9 /* PermissionsStepView.swift */,
+				44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */,
+			);
+			path = Steps;
+			sourceTree = "<group>";
+		};
 		CE1075EC2686C5C4F9396479 /* Hotkey */ = {
 			isa = PBXGroup;
 			children = (
@@ -134,14 +167,12 @@
 			path = Hotkey;
 			sourceTree = "<group>";
 		};
-		DA5E6930882DE0043CABB6F1 /* Setup */ = {
+		E5F8F92281CD90EEFF63EB47 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				F2B753F3C8E07BBBD682B68A /* ModelLoadSection.swift */,
-				B4AD11B117E39DD5F21BEB69 /* SetupView.swift */,
-				957A32E91D36705B16A719B7 /* SetupWindowController.swift */,
+				CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */,
 			);
-			path = Setup;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -152,6 +183,7 @@
 			buildConfigurationList = 9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */;
 			buildPhases = (
 				AC7D5586EC782E9617563944 /* Sources */,
+				3BFA98C486330483C1F3F498 /* Resources */,
 				4A5EF6ECC56ABF134ACFBAE6 /* Frameworks */,
 				053200E5A126F68144BAEFEE /* Install to /Applications */,
 			);
@@ -206,6 +238,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		3BFA98C486330483C1F3F498 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXShellScriptBuildPhase section */
 		053200E5A126F68144BAEFEE /* Install to /Applications */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -238,14 +281,18 @@
 				8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */,
 				E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */,
 				98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */,
-				825DC3D0CE6754A7A924339F /* ModelLoadSection.swift in Sources */,
+				0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */,
+				8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */,
 				A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */,
 				1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */,
 				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
-				5E7F47492D49399D4460AFF4 /* SetupView.swift in Sources */,
-				DC9BE226FEE0EEDE92C549AD /* SetupWindowController.swift in Sources */,
-				C892069DD763A5A58159F61E /* StatusItemController.swift in Sources */,
+				FA4B59B3D3130D1B1684B1CB /* PermissionsStepView.swift in Sources */,
+				F95C61C2B29D7EC790F71654 /* SettingUpStepView.swift in Sources */,
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
+				95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */,
+				A7E11BA98334AFCB52D6F0DA /* WizardStepHeader.swift in Sources */,
+				A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */,
+				03A9E8F0EC4DEAD979B7E110 /* WizardWindowController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,6 +336,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -321,6 +369,7 @@
 				CODE_SIGN_IDENTITY = 640A7F5A9754400D4A0491E7A6FB30542D907806;
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = Y54ZB9JF63;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -342,6 +391,7 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -350,6 +400,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

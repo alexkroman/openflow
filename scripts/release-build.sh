@@ -34,8 +34,8 @@ else
 fi
 
 step "Preflight"
-for cmd in xcodegen xcodebuild xcrun hdiutil codesign awk shasum; do
-  command -v "$cmd" >/dev/null 2>&1 || die "missing required tool: $cmd"
+for cmd in xcodegen xcodebuild xcrun hdiutil codesign spctl create-dmg awk shasum; do
+  command -v "$cmd" >/dev/null 2>&1 || die "missing required tool: $cmd (brew install create-dmg if needed)"
 done
 
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
@@ -87,6 +87,18 @@ APP_BUILT="$DERIVED/Build/Products/Release/OpenFlow.app"
 [ -d "$APP_BUILT" ] || die "expected app at $APP_BUILT — build did not produce it"
 info "built: $APP_BUILT ($(du -sh "$APP_BUILT" | cut -f1))"
 
+step "Preserve dSYM"
+DSYM_SRC="$DERIVED/Build/Products/Release/OpenFlow.app.dSYM"
+DSYM_DST="$BUILD_ROOT/OpenFlow-$VERSION.app.dSYM"
+DSYM_ZIP="$BUILD_ROOT/OpenFlow-$VERSION.app.dSYM.zip"
+[ -d "$DSYM_SRC" ] || die "expected dSYM at $DSYM_SRC — build did not produce it"
+rm -rf "$DSYM_DST" "$DSYM_ZIP"
+cp -R "$DSYM_SRC" "$DSYM_DST"
+# ditto preserves the bundle layout the way macOS expects for dSYMs.
+(cd "$BUILD_ROOT" && ditto -c -k --keepParent "$(basename "$DSYM_DST")" "$(basename "$DSYM_ZIP")")
+info "dsym: $DSYM_DST"
+info "dsym zip: $DSYM_ZIP"
+
 step "Stage"
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
@@ -115,13 +127,22 @@ codesign -dvv "$APP_STAGED" 2>&1 | grep '^Timestamp=' \
 info "signature verified with secure timestamp"
 
 step "Create DMG"
-ln -sf /Applications "$STAGE/Applications"
 DMG="$BUILD_ROOT/OpenFlow-$VERSION.dmg"
 rm -f "$DMG"
-hdiutil create -volname "OpenFlow $VERSION" \
-  -srcfolder "$STAGE" \
-  -ov -format UDZO \
-  "$DMG" >/dev/null
+create-dmg \
+  --volname "OpenFlow $VERSION" \
+  --window-size 540 380 \
+  --icon-size 96 \
+  --icon "OpenFlow.app" 140 180 \
+  --app-drop-link 400 180 \
+  --no-internet-enable \
+  --format UDZO \
+  "$DMG" \
+  "$STAGE" >/dev/null
+
+step "Verify DMG"
+hdiutil verify "$DMG" >/dev/null
+info "dmg verified"
 
 step "Sign DMG"
 codesign --force --sign "$IDENTITY" --timestamp "$DMG"
@@ -139,25 +160,78 @@ NOTARY_STATUS="$(/usr/libexec/PlistBuddy -c 'Print :status' "$NOTARY_PLIST" 2>/d
 SUBMISSION_ID="$(/usr/libexec/PlistBuddy -c 'Print :id' "$NOTARY_PLIST" 2>/dev/null || echo unknown)"
 info "notary status: $NOTARY_STATUS (id $SUBMISSION_ID)"
 
+NOTARY_LOG="$BUILD_ROOT/notary-log.json"
+xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$NOTARY_PROFILE" > "$NOTARY_LOG" 2>&1 || true
 if [ "$NOTARY_STATUS" != "Accepted" ]; then
   step "Notary log"
-  xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$NOTARY_PROFILE" || true
+  cat "$NOTARY_LOG" 2>/dev/null || true
   die "notarization rejected (status: $NOTARY_STATUS)"
 fi
+info "notary log: $NOTARY_LOG"
 
 step "Staple"
 xcrun stapler staple "$DMG"
 xcrun stapler validate "$DMG"
 info "dmg stapled + validated"
 
+step "Gatekeeper assessment"
+# Simulates what the user's Mac will do on first launch. Catches missed-
+# notarization / mis-signed bundles before they ship.
+spctl --assess --type open --context context:primary-signature -v "$DMG"
+
+step "Mount + verify DMG contents"
+# Defense against silent DMG corruption: mount the image, check the bundle
+# inside is signed and stapled, then eject. We pick our own mount point so
+# we don't have to parse hdiutil's output (which reports /private/tmp/...
+# rather than /tmp/... on macOS).
+MOUNT_POINT="$(mktemp -d /tmp/openflow-dmg.XXXXXX)"
+trap 'hdiutil detach "$MOUNT_POINT" >/dev/null 2>&1 || true; rmdir "$MOUNT_POINT" >/dev/null 2>&1 || true' EXIT
+hdiutil attach -nobrowse -noverify -mountpoint "$MOUNT_POINT" "$DMG" >/dev/null
+MOUNTED_APP="$MOUNT_POINT/OpenFlow.app"
+[ -d "$MOUNTED_APP" ] || die "mounted DMG missing OpenFlow.app"
+xcrun stapler validate "$MOUNTED_APP" >/dev/null
+codesign --verify --strict --deep "$MOUNTED_APP"
+MOUNTED_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$MOUNTED_APP/Contents/Info.plist")"
+[ "$MOUNTED_VERSION" = "$VERSION" ] || die "version mismatch inside DMG: expected $VERSION, got $MOUNTED_VERSION"
+hdiutil detach "$MOUNT_POINT" >/dev/null
+rmdir "$MOUNT_POINT" >/dev/null 2>&1 || true
+trap - EXIT
+info "dmg contents verified (OpenFlow.app $MOUNTED_VERSION, signed + stapled)"
+
+step "Provenance"
+PROVENANCE="$BUILD_ROOT/build-info.txt"
+{
+  echo "OpenFlow $VERSION"
+  echo "built:        $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo "git:          $(git -C "$REPO_ROOT" rev-parse HEAD) ($(git -C "$REPO_ROOT" rev-parse --short HEAD))"
+  echo "xcode:        $(xcodebuild -version | tr '\n' ' ')"
+  echo "swift:        $(swift --version | head -1)"
+  echo "macos sdk:    $(xcrun --sdk macosx --show-sdk-version) ($(xcrun --sdk macosx --show-sdk-build-version))"
+  echo
+  echo "Package.resolved sha256:"
+  shasum -a 256 "$REPO_ROOT/App/OpenFlow/OpenFlow.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved" 2>/dev/null \
+    || shasum -a 256 "$REPO_ROOT/Package.resolved" 2>/dev/null \
+    || echo "  (Package.resolved not found)"
+} > "$PROVENANCE"
+info "provenance: $PROVENANCE"
+
+step "Checksums"
+CHECKSUMS="$BUILD_ROOT/SHA256SUMS"
+(cd "$BUILD_ROOT" && shasum -a 256 "$(basename "$DMG")" "$(basename "$DSYM_ZIP")") > "$CHECKSUMS"
+info "checksums: $CHECKSUMS"
+
 step "Summary"
 SIZE="$(du -h "$DMG" | cut -f1)"
 SHA="$(shasum -a 256 "$DMG" | awk '{print $1}')"
 cat <<EOF
 
-  DMG:    $DMG
-  Size:   $SIZE
-  SHA256: $SHA
+  DMG:        $DMG
+  Size:       $SIZE
+  SHA256:     $SHA
+  dSYM:       $DSYM_DST
+  Checksums:  $CHECKSUMS
+  Provenance: $PROVENANCE
+  Notary log: $NOTARY_LOG
 
   Publish with:
     scripts/release-publish.sh

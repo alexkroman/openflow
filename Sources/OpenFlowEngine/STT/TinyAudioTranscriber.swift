@@ -17,7 +17,8 @@ public actor TinyAudioTranscriber: TranscriberProtocol {
   }
 
   public nonisolated func transcribeStream(samples: [Float], sampleRate: Int)
-    -> AsyncThrowingStream<String, Error> {
+    -> AsyncThrowingStream<String, Error>
+  {
     AsyncThrowingStream { continuation in
       Task {
         do {

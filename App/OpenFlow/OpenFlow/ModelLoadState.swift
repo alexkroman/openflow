@@ -1,7 +1,8 @@
 import Foundation
+import OpenFlowEngine
 import TinyAudio
 
-struct ModelLoadState: Sendable, Equatable {
+struct ModelLoadState: Sendable, Equatable, ModelReadiness {
   var stt: ChannelStatus = .progress(.checking)
   var llm: ChannelStatus = .progress(.checking)
 

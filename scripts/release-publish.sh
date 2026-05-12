@@ -19,9 +19,14 @@ done
 VERSION="$(awk '/CFBundleShortVersionString:/ {gsub(/"/,"",$2); print $2; exit}' "$APP_DIR/project.yml")"
 [ -n "$VERSION" ] || die "could not parse version"
 DMG="$BUILD_ROOT/OpenFlow-$VERSION.dmg"
+DSYM_ZIP="$BUILD_ROOT/OpenFlow-$VERSION.app.dSYM.zip"
+CHECKSUMS="$BUILD_ROOT/SHA256SUMS"
 [ -f "$DMG" ] || die "DMG not found at $DMG — run scripts/release-build.sh first"
+[ -f "$DSYM_ZIP" ] || die "dSYM zip not found at $DSYM_ZIP — run scripts/release-build.sh first"
+[ -f "$CHECKSUMS" ] || die "SHA256SUMS not found at $CHECKSUMS — run scripts/release-build.sh first"
 info "version: $VERSION"
 info "dmg:     $DMG"
+info "dsym:    $DSYM_ZIP"
 
 step "Validate staple"
 xcrun stapler validate "$DMG" >/dev/null || die "DMG not stapled — rebuild with release-build.sh"
@@ -62,12 +67,19 @@ git -C "$REPO_ROOT" tag -a "$TAG" -m "$TAG"
 git -C "$REPO_ROOT" push origin "$TAG"
 
 step "GitHub Release"
-# Upload under a stable, version-less name so
-# https://github.com/<owner>/<repo>/releases/latest/download/OpenFlow.dmg
+# Upload under stable, version-less names so
+# https://github.com/<owner>/<repo>/releases/latest/download/<name>
 # always resolves to the current release (README.md links to that URL).
+# gh uses the on-disk basename as the asset's download filename, so we
+# hardlink the versioned files to stable names before uploading.
 STABLE_DMG="$BUILD_ROOT/OpenFlow.dmg"
-cp "$DMG" "$STABLE_DMG"
-gh release create "$TAG" "$STABLE_DMG" \
+STABLE_DSYM="$BUILD_ROOT/OpenFlow.app.dSYM.zip"
+ln -f "$DMG" "$STABLE_DMG"
+ln -f "$DSYM_ZIP" "$STABLE_DSYM"
+gh release create "$TAG" \
+  "$STABLE_DMG" \
+  "$STABLE_DSYM" \
+  "$CHECKSUMS" \
   --title "$TAG" \
   --generate-notes \
   --latest

@@ -13,6 +13,11 @@ settings:
     CODE_SIGN_IDENTITY: "640A7F5A9754400D4A0491E7A6FB30542D907806"
     DEVELOPMENT_TEAM: "Y54ZB9JF63"
     ENABLE_HARDENED_RUNTIME: YES
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  configs:
+    Release:
+      DEAD_CODE_STRIPPING: YES
+      VALIDATE_PRODUCT: YES
 packages:
   OpenFlowEngine:
     path: ../..
@@ -33,7 +38,7 @@ targets:
         CFBundleVersion: "2"
         CFBundleShortVersionString: "0.1.1"
         LSMinimumSystemVersion: "14.0"
-        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.productivity
         NSMicrophoneUsageDescription: OpenFlow uses your microphone to transcribe your dictation locally on this device.
         NSAppleEventsUsageDescription: OpenFlow inserts text into the app you're using.
     entitlements:

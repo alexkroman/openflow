@@ -3,62 +3,56 @@ import Foundation
 import OpenFlowEngine
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+  @MainActor static private(set) var shared: AppDelegate?
+
   @MainActor private var coordinator: AppCoordinator?
-  @MainActor private var setupWindow = SetupWindowController()
-  @MainActor private var statusItem: StatusItemController?
+  @MainActor private var wizardController: WizardController?
+  @MainActor private let wizardWindow = WizardWindowController()
 
   @MainActor
   func applicationDidFinishLaunching(_ notification: Notification) {
+    AppDelegate.shared = self
+
     // Fire the AX-protected call at launch so tccd registers OpenFlow in the
-    // Accessibility list before the user ever opens System Settings — clicking
-    // the button later loses the race against the Settings UI rendering.
+    // Accessibility list before the user ever opens System Settings.
     PermissionsChecker.registerForAccessibilityTCC()
 
     let overlay = OverlayWindowController()
     let toast = ToastPresenter()
-    let setupWindow = self.setupWindow
-
-    // coordinator depends on statusItem, so onShowSetup resolves coordinator at click time.
-    let statusItem = StatusItemController(
-      onShowSetup: { [weak self] in
-        guard let self else { return }
-        MainActor.assumeIsolated {
-          if let coordinator = self.coordinator {
-            setupWindow.show(coordinator: coordinator)
-          }
-        }
-      },
-      onQuit: { NSApp.terminate(nil) }
-    )
-    self.statusItem = statusItem
-
-    let coord = AppCoordinator(
-      overlay: overlay,
-      toast: toast,
-      statusItem: statusItem
-    )
+    let coord = AppCoordinator(overlay: overlay, toast: toast)
     self.coordinator = coord
 
-    // modelLoadState starts not-ready, so Setup opens on every cold launch / cache wipe.
-    if !PermissionsChecker.check().allGranted || !coord.modelLoadState.isReady {
-      setupWindow.show(coordinator: coord)
+    let controller = WizardController(coordinator: coord)
+    self.wizardController = controller
+
+    if controller.step != .hotkey {
+      wizardWindow.show(controller: controller, coordinator: coord)
     }
 
     coord.start()
   }
 
-  // For LSUIElement agent apps, this fires when the user re-launches the .app
-  // from Finder/Spotlight — the user-facing escape hatch for "menu bar icon
-  // hidden by the notch."
   @MainActor
   func applicationShouldHandleReopen(
     _ sender: NSApplication,
     hasVisibleWindows: Bool
   ) -> Bool {
     guard !hasVisibleWindows else { return true }
-    if let coordinator = self.coordinator {
-      setupWindow.show(coordinator: coordinator)
+    if let coordinator = self.coordinator, let controller = self.wizardController {
+      wizardWindow.show(controller: controller, coordinator: coordinator)
     }
-    return true
+    return false
+  }
+
+  @MainActor
+  func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    return false
+  }
+
+  /// Called from the `Settings…` menu command in App.swift.
+  @MainActor
+  func openWizard() {
+    guard let coordinator, let controller = wizardController else { return }
+    wizardWindow.show(controller: controller, coordinator: coordinator)
   }
 }
