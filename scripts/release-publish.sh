@@ -67,15 +67,19 @@ git -C "$REPO_ROOT" tag -a "$TAG" -m "$TAG"
 git -C "$REPO_ROOT" push origin "$TAG"
 
 step "GitHub Release"
-# Upload under stable display names so
+# Upload under stable, version-less names so
 # https://github.com/<owner>/<repo>/releases/latest/download/<name>
 # always resolves to the current release (README.md links to that URL).
-# The `path#display-name` syntax lets us keep versioned filenames on disk
-# while serving them under version-less names on the release page.
+# gh uses the on-disk basename as the asset's download filename, so we
+# hardlink the versioned files to stable names before uploading.
+STABLE_DMG="$BUILD_ROOT/OpenFlow.dmg"
+STABLE_DSYM="$BUILD_ROOT/OpenFlow.app.dSYM.zip"
+ln -f "$DMG" "$STABLE_DMG"
+ln -f "$DSYM_ZIP" "$STABLE_DSYM"
 gh release create "$TAG" \
-  "$DMG#OpenFlow.dmg" \
-  "$DSYM_ZIP#OpenFlow.app.dSYM.zip" \
-  "$CHECKSUMS#SHA256SUMS" \
+  "$STABLE_DMG" \
+  "$STABLE_DSYM" \
+  "$CHECKSUMS" \
   --title "$TAG" \
   --generate-notes \
   --latest
