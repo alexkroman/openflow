@@ -19,7 +19,7 @@ func renderIcon(size: CGFloat) -> NSImage {
     samplesPerPixel: 4,
     hasAlpha: true,
     isPlanar: false,
-    colorSpaceName: .calibratedRGB,
+    colorSpaceName: .deviceRGB,
     bitmapFormat: [],
     bytesPerRow: 0,
     bitsPerPixel: 0
@@ -135,6 +135,7 @@ let contents: [String: Any] = [
   ],
   "info": ["author": "xcode", "version": 1]
 ]
-let json = try JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys])
+var json = try JSONSerialization.data(withJSONObject: contents, options: [.prettyPrinted, .sortedKeys])
+json.append(contentsOf: "\n".utf8)
 try json.write(to: outDir.appendingPathComponent("Contents.json"))
 print("wrote Contents.json")
