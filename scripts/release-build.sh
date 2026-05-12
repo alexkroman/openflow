@@ -34,8 +34,8 @@ else
 fi
 
 step "Preflight"
-for cmd in xcodegen xcodebuild xcrun hdiutil codesign spctl awk shasum; do
-  command -v "$cmd" >/dev/null 2>&1 || die "missing required tool: $cmd"
+for cmd in xcodegen xcodebuild xcrun hdiutil codesign spctl create-dmg awk shasum; do
+  command -v "$cmd" >/dev/null 2>&1 || die "missing required tool: $cmd (brew install create-dmg if needed)"
 done
 
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
@@ -127,13 +127,18 @@ codesign -dvv "$APP_STAGED" 2>&1 | grep '^Timestamp=' \
 info "signature verified with secure timestamp"
 
 step "Create DMG"
-ln -sf /Applications "$STAGE/Applications"
 DMG="$BUILD_ROOT/OpenFlow-$VERSION.dmg"
 rm -f "$DMG"
-hdiutil create -volname "OpenFlow $VERSION" \
-  -srcfolder "$STAGE" \
-  -ov -format UDZO \
-  "$DMG" >/dev/null
+create-dmg \
+  --volname "OpenFlow $VERSION" \
+  --window-size 540 380 \
+  --icon-size 96 \
+  --icon "OpenFlow.app" 140 180 \
+  --app-drop-link 400 180 \
+  --no-internet-enable \
+  --format UDZO \
+  "$DMG" \
+  "$STAGE" >/dev/null
 
 step "Verify DMG"
 hdiutil verify "$DMG" >/dev/null
