@@ -12,7 +12,6 @@
 		043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */; };
 		0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
-		57D11D99BE504A917F6E2790 /* AppRelauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D47CC9D4F31C5B4DDC1D17 /* AppRelauncher.swift */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
 		8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
@@ -38,7 +37,6 @@
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingUpStepView.swift; sourceTree = "<group>"; };
-		48D47CC9D4F31C5B4DDC1D17 /* AppRelauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRelauncher.swift; sourceTree = "<group>"; };
 		5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadSection.swift; sourceTree = "<group>"; };
 		62F092E712D065AFCB941BD9 /* ModelLoadState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadState.swift; sourceTree = "<group>"; };
 		65C1315CC840E8EB96963585 /* WizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardView.swift; sourceTree = "<group>"; };
@@ -72,7 +70,6 @@
 		0BC1693FDE2B78AABDDAFAB1 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				48D47CC9D4F31C5B4DDC1D17 /* AppRelauncher.swift */,
 				0178FD639B92FF2215426A06 /* FloatingPanel.swift */,
 			);
 			path = Shared;
@@ -282,7 +279,6 @@
 				C1DC2D9C5757123C314A90CF /* App.swift in Sources */,
 				7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */,
 				8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */,
-				57D11D99BE504A917F6E2790 /* AppRelauncher.swift in Sources */,
 				E3178147610529DD8D1A89F7 /* DictateShortcut.swift in Sources */,
 				98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */,
 				0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */,

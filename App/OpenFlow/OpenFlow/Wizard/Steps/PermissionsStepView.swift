@@ -86,39 +86,19 @@ struct PermissionsStepView: View {
   private var continueSection: some View {
     Section {
       HStack {
-        Button("Recheck Status") {
-          controller.continueFromPermissions()
-        }
         Spacer()
-        primaryButton
+        if controller.permissions.allGranted {
+          Button("Continue") {
+            controller.continueFromPermissions()
+          }
+          .keyboardShortcut(.defaultAction)
+        } else {
+          Button("Continue") {
+            controller.continueFromPermissions()
+          }
+          .disabled(true)
+        }
       }
-    } footer: {
-      if controller.permissions.microphone && !controller.permissions.accessibility {
-        Text(
-          "Granted Accessibility in System Settings but OpenFlow still shows it "
-            + "as missing? macOS sometimes needs a restart for new Accessibility "
-            + "permissions to take effect."
-        )
-      }
-    }
-  }
-
-  @ViewBuilder
-  private var primaryButton: some View {
-    if controller.permissions.allGranted {
-      Button("Continue") {
-        controller.continueFromPermissions()
-      }
-      .keyboardShortcut(.defaultAction)
-    } else if controller.permissions.microphone {
-      Button("Restart OpenFlow") {
-        AppRelauncher.relaunch()
-      }
-    } else {
-      Button("Continue") {
-        controller.continueFromPermissions()
-      }
-      .disabled(true)
     }
   }
 
