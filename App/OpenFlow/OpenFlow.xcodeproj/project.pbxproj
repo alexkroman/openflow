@@ -16,7 +16,6 @@
 		8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B51C821A5037C71DEC840A /* WizardController.swift */; };
-		95A5B1DA15D9D8ABC2CAA660 /* StepIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
 		A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C1315CC840E8EB96963585 /* WizardView.swift */; };
 		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
@@ -43,7 +42,6 @@
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
 		85BD99F76D74DC83DF42A8C9 /* PermissionsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsStepView.swift; sourceTree = "<group>"; };
-		99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepIndicator.swift; sourceTree = "<group>"; };
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
 		B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardWindowController.swift; sourceTree = "<group>"; };
 		C1B51C821A5037C71DEC840A /* WizardController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardController.swift; sourceTree = "<group>"; };
@@ -140,7 +138,6 @@
 			isa = PBXGroup;
 			children = (
 				5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */,
-				99ECDF7F1959C8D74ABCED81 /* StepIndicator.swift */,
 				C1B51C821A5037C71DEC840A /* WizardController.swift */,
 				65C1315CC840E8EB96963585 /* WizardView.swift */,
 				B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */,
@@ -288,7 +285,6 @@
 				BBD05E84EA1FA379FA17F4CA /* OverlayWindowController.swift in Sources */,
 				FA4B59B3D3130D1B1684B1CB /* PermissionsStepView.swift in Sources */,
 				F95C61C2B29D7EC790F71654 /* SettingUpStepView.swift in Sources */,
-				95A5B1DA15D9D8ABC2CAA660 /* StepIndicator.swift in Sources */,
 				E2F85816C0A8145B31EFD7BC /* ToastPresenter.swift in Sources */,
 				95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */,
 				A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */,

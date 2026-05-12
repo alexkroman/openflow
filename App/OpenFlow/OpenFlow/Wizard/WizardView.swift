@@ -6,12 +6,8 @@ struct WizardView: View {
   @ObservedObject var coordinator: AppCoordinator
 
   var body: some View {
-    VStack(spacing: 0) {
-      StepIndicator(step: controller.step)
-      Divider()
-      content
-    }
-    .frame(width: 500)
+    content
+      .frame(width: 500)
   }
 
   @ViewBuilder
