@@ -27,6 +27,10 @@ final class WizardWindowController {
     w.styleMask = styleMask(for: controller.step)
     w.isReleasedWhenClosed = false
     w.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+    // NSHostingController's preferredContentSize is unreliable on first show —
+    // SwiftUI hasn't measured yet, so the window opens at ~187pt tall and
+    // clips the Form. Force a sensible size that fits the tallest step.
+    w.setContentSize(NSSize(width: 500, height: 600))
     w.center()
     closeDelegate.controller = controller
     closeDelegate.onClose = { [weak self] in self?.stepSyncTask?.cancel() }

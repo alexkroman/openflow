@@ -27,6 +27,8 @@ final class WizardController: ObservableObject {
       }
     if step == .settingUp {
       kickOffModelLoadIfNeeded()
+    } else if step == .hotkey {
+      coordinator.showOverlay()
     }
   }
 
@@ -61,12 +63,16 @@ final class WizardController: ObservableObject {
     let perms = permissions ?? self.permissions
     let models = modelState ?? coordinator?.modelLoadState ?? ModelLoadState()
     self.permissions = perms
+    let oldStep = self.step
     let newStep = WizardStep.evaluate(permissions: perms, modelState: models)
-    if newStep != self.step {
+    if newStep != oldStep {
       self.step = newStep
     }
     if newStep == .settingUp {
       kickOffModelLoadIfNeeded()
+    }
+    if newStep == .hotkey && oldStep != .hotkey {
+      coordinator?.showOverlay()
     }
   }
 

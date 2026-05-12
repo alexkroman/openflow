@@ -44,8 +44,9 @@ final class AppCoordinator: ObservableObject {
   }
 
   func start() {
-    render(.idle)
-
+    // Note: no initial overlay render. The overlay pill stays hidden until
+    // the wizard reports the app is fully configured (WizardController calls
+    // `showOverlay()` on entering `.hotkey`).
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
       guard let self else { return }
       Task { @MainActor in
@@ -68,6 +69,12 @@ final class AppCoordinator: ObservableObject {
         self.render(phase)
       }
     }
+  }
+
+  /// Renders the overlay pill in idle state. Called by the wizard once the
+  /// app is fully configured; before that, no overlay is shown.
+  func showOverlay() {
+    render(.idle)
   }
 
   /// Kicks off STT / LLM / audio warm-up. Idempotent in practice — each
