@@ -8,7 +8,7 @@ import textwrap
 from pathlib import Path
 
 import dspy
-from datasets import Dataset, load_dataset
+from datasets import Dataset, DatasetDict, load_dataset
 
 
 def _levenshtein(a: str, b: str) -> int:
@@ -111,6 +111,10 @@ def load_examples(
     `input_col`/`output_col` are None.
     """
     ds = load_dataset(_DATASET_ID)
+    if not isinstance(ds, DatasetDict):
+        raise TypeError(
+            f"Expected DatasetDict from {_DATASET_ID}, got {type(ds).__name__}"
+        )
 
     if "train" in ds and "test" in ds:
         train_raw = ds["train"]
