@@ -137,10 +137,11 @@ def load_examples(
     def to_examples(d: Dataset, limit: int | None) -> list[dspy.Example]:
         if limit is not None:
             d = d.select(range(min(limit, len(d))))
+        rows: list[dict] = d.to_list()
         return [
             dspy.Example(transcript=row[input_col], cleaned=row[output_col])
             .with_inputs("transcript")
-            for row in d
+            for row in rows
         ]
 
     return (
