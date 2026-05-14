@@ -5,4 +5,8 @@ public protocol MicCaptureProtocol: Sendable {
   func start() async throws
   /// Stop capture and return all captured samples in order.
   func stop() async -> [Float]
+  /// Per-buffer RMS samples emitted on the capture thread while `start()` is active.
+  /// One value per native tap buffer (~10–20 Hz at typical hardware rates). Silent
+  /// between stop and the next start.
+  nonisolated var levels: AsyncStream<Float> { get }
 }

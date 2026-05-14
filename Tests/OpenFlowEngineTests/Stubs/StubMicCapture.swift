@@ -8,6 +8,12 @@ actor StubMicCapture: MicCaptureProtocol {
   var samplesToReturn: [Float] = [0.0, 0.1, 0.2]
   var startError: (any Error & Sendable)?
 
+  nonisolated let levels: AsyncStream<Float> = {
+    let (stream, continuation) = AsyncStream<Float>.makeStream()
+    continuation.finish()
+    return stream
+  }()
+
   nonisolated func start() async throws {
     await incStart()
     if let e = await self.startError { throw e }

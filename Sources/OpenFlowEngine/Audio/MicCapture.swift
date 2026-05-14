@@ -9,6 +9,9 @@ public actor MicCapture: MicCaptureProtocol {
   // so go through the unified logging system instead.
   private static let logger = Logger(subsystem: "dev.alex.OpenFlow", category: "MicCapture")
 
+  public nonisolated let levels: AsyncStream<Float>
+  private nonisolated let levelsContinuation: AsyncStream<Float>.Continuation
+
   private let engine = AVAudioEngine()
   private var rawSamples: [Float] = []
   private var inputSampleRate: Double = 0
@@ -22,7 +25,11 @@ public actor MicCapture: MicCaptureProtocol {
   private let counters = Counters()
   private var appendCalls = 0
 
-  public init() {}
+  public init() {
+    let (stream, continuation) = AsyncStream<Float>.makeStream()
+    self.levels = stream
+    self.levelsContinuation = continuation
+  }
 
   /// Pre-allocate AVAudioEngine resources and cache the input format so the
   /// first `start()` doesn't pay first-time hardware-route discovery and
