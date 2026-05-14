@@ -131,6 +131,7 @@ def load_examples(
     output_col: str | None = None,
     max_train: int | None = None,
     max_val: int | None = None,
+    max_test: int | None = None,
     seed: int = 0,
 ) -> tuple[list[dspy.Example], list[dspy.Example], list[dspy.Example]]:
     """Load the aawaaz dataset and return (train, val, test) as dspy.Example lists.
@@ -172,7 +173,7 @@ def load_examples(
     return (
         to_examples(train_raw, max_train),
         to_examples(val_raw, max_val),
-        to_examples(test_raw, None),
+        to_examples(test_raw, max_test),
     )
 
 
@@ -423,6 +424,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--optimizer", choices=("mipro", "bootstrap"), default="mipro")
     p.add_argument("--max-train", type=int, default=200)
     p.add_argument("--max-val", type=int, default=100)
+    p.add_argument(
+        "--max-test",
+        type=int,
+        default=25,
+        help="held-out test split size (default 25; eval runs 2x LM calls per case)",
+    )
     p.add_argument("--input-col", default=None)
     p.add_argument("--output-col", default=None)
     p.add_argument("--out", type=Path, default=_DEFAULT_OUT)
@@ -448,6 +455,7 @@ def main(argv: list[str] | None = None) -> int:
         output_col=args.output_col,
         max_train=args.max_train,
         max_val=args.max_val,
+        max_test=args.max_test,
     )
     print(f"Train={len(train)}  Val={len(val)}  Test={len(test)}")
 
