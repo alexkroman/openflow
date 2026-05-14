@@ -27,7 +27,28 @@ python optimize_prompt.py --provider openai --model gpt-4o-mini
 
 Output is written to `out/optimized_prompt.txt`.
 
-## Run (local Qwen via mlx-lm.server — no transfer risk, slow)
+## Run (hybrid: Sonnet proposer + local Qwen task — recommended)
+
+Best of both: a frontier model proposes diverse instruction candidates,
+the production Qwen3.5-2B scores them. No transfer risk, faster proposer
+than `--provider local`.
+
+```bash
+# Terminal 1: mlx-lm.server (same as below)
+pip install mlx-lm
+mlx_lm.server --model mlx-community/Qwen3.5-2B-OptiQ-4bit --port 8080
+```
+
+```bash
+# Terminal 2: needs both ANTHROPIC_API_KEY and the running server
+export ANTHROPIC_API_KEY=sk-ant-...
+python optimize_prompt.py --provider hybrid --max-train 20 --max-val 10
+```
+
+Sonnet 4.5 fires only a handful of times (MIPROv2 proposer); the bulk of
+the wall-clock is local Qwen eval.
+
+## Run (local Qwen only — fully on-device)
 
 To drive DSPy directly against the production Qwen3.5-2B model, run an
 mlx-lm.server in another terminal first:
