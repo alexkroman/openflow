@@ -187,11 +187,15 @@ def load_examples(
 
 
 def _build_local_lm(model_name: str) -> dspy.LM:
+    # temperature=0.3 (not 0.0) avoids the repetition loop Qwen3.5 falls into
+    # on greedy decoding — at temp=0 it can fill the entire max_tokens budget
+    # repeating the same token. Mild stochasticity is fine since the metric
+    # aggregates across cases.
     return dspy.LM(
         f"openai/{model_name}",
         api_base=os.environ.get("MLX_LM_BASE_URL", _LOCAL_BASE_URL),
         api_key="not-needed",
-        temperature=0.0,
+        temperature=0.3,
         max_tokens=_LOCAL_MAX_TOKENS,
     )
 
