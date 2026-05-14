@@ -180,3 +180,45 @@ def configure_lm(provider: str, model: str | None) -> dspy.LM:
     lm = dspy.LM(qualified, temperature=0.0, max_tokens=512)
     dspy.configure(lm=lm)
     return lm
+
+
+def build_program(seed_prompt: str) -> dspy.Predict:
+    """Build a dspy.Predict module whose signature instructions are the
+    current production prompt."""
+    sig = dspy.Signature(
+        "transcript -> cleaned",  # pyright: ignore[reportCallIssue]
+        instructions=seed_prompt,
+    )
+    return dspy.Predict(sig)  # pyright: ignore[reportArgumentType]
+
+
+def cleanup_metric(example, pred, trace=None) -> float:
+    """DSPy-compatible metric: similarity between pred.cleaned and the gold
+    example.cleaned. Returns a float in [0, 1]."""
+    predicted = getattr(pred, "cleaned", "") or ""
+    return similarity(predicted, example.cleaned)
+
+
+def optimize(
+    program: dspy.Predict,
+    trainset: list[dspy.Example],
+    valset: list[dspy.Example],
+    method: str = "mipro",
+) -> dspy.Predict:
+    """Run the chosen optimizer and return the compiled program."""
+    if method == "mipro":
+        optimizer = dspy.MIPROv2(metric=cleanup_metric, auto="light")
+        return optimizer.compile(
+            student=program,
+            trainset=trainset,
+            valset=valset,
+            requires_permission_to_run=False,
+        )
+    if method == "bootstrap":
+        optimizer = dspy.BootstrapFewShotWithRandomSearch(
+            metric=cleanup_metric,
+            max_bootstrapped_demos=4,
+            num_candidate_programs=8,
+        )
+        return optimizer.compile(student=program, trainset=trainset, valset=valset)
+    raise ValueError(f"Unknown optimizer method {method!r}")
