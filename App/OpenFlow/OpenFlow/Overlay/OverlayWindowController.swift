@@ -3,13 +3,23 @@ import SwiftUI
 
 @MainActor
 final class OverlayBridge: ObservableObject {
-  @Published var state: OverlayState = .init(phase: .idle)
+  @Published var state: OverlayUIState = .idle
+  @Published var levels: [Float] = Array(repeating: 0, count: 9)
+  @Published var hotkeyLabel: String = ""
+
+  /// Append a new RMS sample, dropping the oldest. Buffer length is fixed at 9.
+  func pushLevel(_ value: Float) {
+    var next = levels
+    next.removeFirst()
+    next.append(value)
+    levels = next
+  }
 }
 
 private struct OverlayHost: View {
   @ObservedObject var bridge: OverlayBridge
   var body: some View {
-    OverlayView(state: bridge.state)
+    OverlayView(state: bridge.state, levels: bridge.levels, hotkeyLabel: bridge.hotkeyLabel)
   }
 }
 
@@ -17,17 +27,18 @@ private struct OverlayHost: View {
 final class OverlayWindowController {
   private static let customOriginXKey = "OpenFlowOverlayCustomOriginX"
   private static let customOriginYKey = "OpenFlowOverlayCustomOriginY"
+  private static let panelSize = CGSize(width: 120, height: 28)
 
   private let panel: NSPanel
   private let hosting: NSHostingView<OverlayHost>
-  private let bridge = OverlayBridge()
+  let bridge = OverlayBridge()
   private var suppressOriginPersist = false
 
   init() {
     let host = OverlayHost(bridge: bridge)
     self.hosting = NSHostingView(rootView: host)
     self.panel = FloatingPanel.make(
-      size: CGSize(width: 260, height: 36),
+      size: Self.panelSize,
       collectionBehavior: [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary],
       contentView: hosting
     )
@@ -45,8 +56,9 @@ final class OverlayWindowController {
     }
   }
 
-  func show(state: OverlayState) {
+  func show(state: OverlayUIState, hotkeyLabel: String) {
     bridge.state = state
+    bridge.hotkeyLabel = hotkeyLabel
     guard !panel.isVisible else { return }
     reposition()
     if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {

@@ -73,7 +73,7 @@ final class AppCoordinator: ObservableObject {
   /// Renders the overlay pill in idle state. Called by the wizard once the
   /// app is fully configured; before that, no overlay is shown.
   func showOverlay() {
-    render(.idle)
+    overlay.show(state: .idle, hotkeyLabel: DictateHotkey.label)
   }
 
   /// Kicks off STT / LLM / audio warm-up. Idempotent in practice — each
@@ -149,18 +149,18 @@ final class AppCoordinator: ObservableObject {
     wasRecording = isRecording
 
     let label = DictateHotkey.label
+    let ui: OverlayUIState
     switch phase {
-    case .idle, .injecting, .cancelled:
-      overlay.show(state: .init(phase: .idle, hotkeyLabel: label))
+    case .idle, .cancelled, .injecting:
+      ui = .idle
     case .recording:
-      overlay.show(state: .init(phase: .recording, hotkeyLabel: label))
-    case .transcribing:
-      overlay.show(state: .init(phase: .transcribing, hotkeyLabel: label))
-    case .styling:
-      overlay.show(state: .init(phase: .styling, hotkeyLabel: label))
+      ui = .recording
+    case .transcribing, .styling:
+      ui = .processing
     case .failed(let err):
-      overlay.show(state: .init(phase: .idle, hotkeyLabel: label))
+      ui = .idle
       toast.show(err.errorDescription ?? "Error")
     }
+    overlay.show(state: ui, hotkeyLabel: label)
   }
 }
