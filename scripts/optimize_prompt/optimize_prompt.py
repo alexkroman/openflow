@@ -7,6 +7,9 @@ import re
 import textwrap
 from pathlib import Path
 
+import dspy
+from datasets import Dataset, load_dataset
+
 
 def _levenshtein(a: str, b: str) -> int:
     """Two-row DP edit distance over Unicode chars. Matches the Swift
@@ -73,6 +76,8 @@ def extract_seed_prompt(swift_path: Path) -> str:
 _INPUT_CANDIDATES = ("raw", "input", "transcript", "original", "source")
 _OUTPUT_CANDIDATES = ("cleaned", "output", "target", "clean", "corrected")
 
+_DATASET_ID = "shantanugoel/aawaaz-transcript-cleanup-dataset"
+
 
 def detect_columns(column_names: list[str]) -> tuple[str, str]:
     """Pick (input, output) column names from a HF dataset's schema.
@@ -90,3 +95,52 @@ def detect_columns(column_names: list[str]) -> tuple[str, str]:
             f"Pass --input-col and --output-col explicitly."
         )
     return input_col, output_col
+
+
+def load_examples(
+    input_col: str | None = None,
+    output_col: str | None = None,
+    max_train: int | None = None,
+    max_val: int | None = None,
+    seed: int = 0,
+) -> tuple[list[dspy.Example], list[dspy.Example], list[dspy.Example]]:
+    """Load the aawaaz dataset and return (train, val, test) as dspy.Example lists.
+
+    If the dataset provides train+test, split test 50/50 into val/test.
+    Otherwise split the single split 60/20/20. Auto-detect columns when
+    `input_col`/`output_col` are None.
+    """
+    ds = load_dataset(_DATASET_ID)
+
+    if "train" in ds and "test" in ds:
+        train_raw = ds["train"]
+        rest_split = ds["test"].train_test_split(test_size=0.5, seed=seed)
+        val_raw = rest_split["train"]
+        test_raw = rest_split["test"]
+    else:
+        full: Dataset = ds["train"] if "train" in ds else next(iter(ds.values()))
+        first = full.train_test_split(test_size=0.4, seed=seed)
+        train_raw = first["train"]
+        second = first["test"].train_test_split(test_size=0.5, seed=seed)
+        val_raw = second["train"]
+        test_raw = second["test"]
+
+    if not input_col or not output_col:
+        detected_in, detected_out = detect_columns(list(train_raw.column_names))
+        input_col = input_col or detected_in
+        output_col = output_col or detected_out
+
+    def to_examples(d: Dataset, limit: int | None) -> list[dspy.Example]:
+        if limit is not None:
+            d = d.select(range(min(limit, len(d))))
+        return [
+            dspy.Example(transcript=row[input_col], cleaned=row[output_col])
+            .with_inputs("transcript")
+            for row in d
+        ]
+
+    return (
+        to_examples(train_raw, max_train),
+        to_examples(val_raw, max_val),
+        to_examples(test_raw, None),
+    )
