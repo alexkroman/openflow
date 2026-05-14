@@ -9,6 +9,9 @@ public actor MicCapture: MicCaptureProtocol {
   // so go through the unified logging system instead.
   private static let logger = Logger(subsystem: "dev.alex.OpenFlow", category: "MicCapture")
 
+  public nonisolated let levels: AsyncStream<Float>
+  private nonisolated let levelsContinuation: AsyncStream<Float>.Continuation
+
   private let engine = AVAudioEngine()
   private var rawSamples: [Float] = []
   private var inputSampleRate: Double = 0
@@ -22,7 +25,11 @@ public actor MicCapture: MicCaptureProtocol {
   private let counters = Counters()
   private var appendCalls = 0
 
-  public init() {}
+  public init() {
+    let (stream, continuation) = AsyncStream<Float>.makeStream()
+    self.levels = stream
+    self.levelsContinuation = continuation
+  }
 
   /// Pre-allocate AVAudioEngine resources and cache the input format so the
   /// first `start()` doesn't pay first-time hardware-route discovery and
@@ -63,11 +70,14 @@ public actor MicCapture: MicCaptureProtocol {
     // Per-buffer SRC with endOfStream after each call drops most output frames
     // (the polyphase filter never accumulates enough state).
     let counters = self.counters
+    let levelsContinuation = self.levelsContinuation
     input.installTap(onBus: 0, bufferSize: 4_096, format: inputFormat) { [weak self] buffer, _ in
       counters.tapFired += 1
       // Take channel 0 as mono (input may be stereo on built-in/USB mics).
       guard let chan = buffer.floatChannelData?[0] else { return }
-      let chunk = Array(UnsafeBufferPointer(start: chan, count: Int(buffer.frameLength)))
+      let ptr = UnsafeBufferPointer(start: chan, count: Int(buffer.frameLength))
+      levelsContinuation.yield(Self.rms(ptr))
+      let chunk = Array(ptr)
       Task { [weak self] in await self?.append(chunk) }
     }
 
@@ -94,8 +104,7 @@ public actor MicCapture: MicCaptureProtocol {
 
     let durationMs = Int((Double(result.count) / targetSampleRate) * 1000)
     let peak = result.map { abs($0) }.max() ?? 0
-    let rms =
-      result.isEmpty ? 0 : sqrt(result.reduce(0) { $0 + $1 * $1 } / Float(result.count))
+    let rms = result.withUnsafeBufferPointer(Self.rms)
     Self.logger.info(
       """
       stop rawSamples=\(raw.count) outSamples=\(result.count) durationMs=\(durationMs) \
@@ -109,6 +118,13 @@ public actor MicCapture: MicCaptureProtocol {
   private func append(_ chunk: [Float]) {
     rawSamples.append(contentsOf: chunk)
     appendCalls += 1
+  }
+
+  private static func rms(_ samples: UnsafeBufferPointer<Float>) -> Float {
+    if samples.isEmpty { return 0 }
+    var sumSq: Float = 0
+    for s in samples { sumSq += s * s }
+    return (sumSq / Float(samples.count)).squareRoot()
   }
 
   private static func downsample(_ raw: [Float], fromRate: Double, toRate: Double) -> [Float] {

@@ -7,3 +7,6 @@ xcuserdata/
 .claude/
 docs/
 build/
+scripts/optimize_prompt/out/
+scripts/optimize_prompt/__pycache__/
+scripts/optimize_prompt/.pytest_cache/

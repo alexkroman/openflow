@@ -1,0 +1,4 @@
+{
+  "include": ["scripts/optimize_prompt"],
+  "extraPaths": ["scripts/optimize_prompt"]
+}

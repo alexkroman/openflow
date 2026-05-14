@@ -3,13 +3,21 @@ import SwiftUI
 
 @MainActor
 final class OverlayBridge: ObservableObject {
-  @Published var state: OverlayState = .init(phase: .idle)
+  static let waveformBarCount = 9
+
+  @Published var state: OverlayUIState = .idle
+  @Published var levels: [Float] = Array(repeating: 0, count: waveformBarCount)
+
+  func pushLevel(_ value: Float) {
+    levels.removeFirst()
+    levels.append(value)
+  }
 }
 
 private struct OverlayHost: View {
   @ObservedObject var bridge: OverlayBridge
   var body: some View {
-    OverlayView(state: bridge.state)
+    OverlayView(state: bridge.state, levels: bridge.levels, hotkeyLabel: DictateHotkey.label)
   }
 }
 
@@ -17,6 +25,7 @@ private struct OverlayHost: View {
 final class OverlayWindowController {
   private static let customOriginXKey = "OpenFlowOverlayCustomOriginX"
   private static let customOriginYKey = "OpenFlowOverlayCustomOriginY"
+  private static let panelSize = CGSize(width: 120, height: 28)
 
   private let panel: NSPanel
   private let hosting: NSHostingView<OverlayHost>
@@ -27,7 +36,7 @@ final class OverlayWindowController {
     let host = OverlayHost(bridge: bridge)
     self.hosting = NSHostingView(rootView: host)
     self.panel = FloatingPanel.make(
-      size: CGSize(width: 260, height: 36),
+      size: Self.panelSize,
       collectionBehavior: [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary],
       contentView: hosting
     )
@@ -45,7 +54,7 @@ final class OverlayWindowController {
     }
   }
 
-  func show(state: OverlayState) {
+  func show(state: OverlayUIState) {
     bridge.state = state
     guard !panel.isVisible else { return }
     reposition()
@@ -60,6 +69,10 @@ final class OverlayWindowController {
         panel.animator().alphaValue = 1
       }
     }
+  }
+
+  func pushLevel(_ value: Float) {
+    bridge.pushLevel(value)
   }
 
   private func reposition() {

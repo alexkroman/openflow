@@ -1,90 +1,120 @@
 import SwiftUI
 
-struct OverlayState: Equatable {
-  enum Phase: Equatable {
-    case idle
-    case recording
-    case transcribing
-    case styling
-  }
-  let phase: Phase
-  let hotkeyLabel: String
-
-  init(phase: Phase, hotkeyLabel: String = "") {
-    self.phase = phase
-    self.hotkeyLabel = hotkeyLabel
-  }
+enum OverlayUIState: Equatable {
+  case idle
+  case recording
+  case processing
 }
 
 struct OverlayView: View {
-  let state: OverlayState
+  let state: OverlayUIState
+  let levels: [Float]
+  let hotkeyLabel: String
 
-  var body: some View {
-    HStack(spacing: 10) {
-      icon
-      content
-        .frame(maxWidth: .infinity, alignment: .leading)
+  @State private var isHovered = false
+  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+  private let expandedWidth: CGFloat = 120
+  private let expandedHeight: CGFloat = 28
+  private let collapsedWidth: CGFloat = 32
+  private let collapsedHeight: CGFloat = 8
+
+  private var isExpanded: Bool {
+    switch state {
+    case .recording, .processing: return true
+    case .idle: return isHovered
     }
-    .padding(.horizontal, 14).padding(.vertical, 10)
-    .frame(width: 260, height: 36)
-    .modifier(OverlayCapsule())
-    .accessibilityElement(children: .ignore)
-    .accessibilityLabel(accessibilityLabel)
   }
 
-  @ViewBuilder
-  private var icon: some View {
-    switch state.phase {
-    case .idle:
-      Image(systemName: "mic").foregroundStyle(.secondary)
-    case .recording:
-      Image(systemName: "mic.fill")
-        .foregroundStyle(.red)
-        .symbolEffect(.pulse, options: .repeating)
-    case .transcribing:
-      Image(systemName: "waveform").foregroundStyle(.orange)
-    case .styling:
-      Image(systemName: "sparkles").foregroundStyle(.blue)
-    }
+  var body: some View {
+    capsule
+      .frame(
+        width: isExpanded ? expandedWidth : collapsedWidth,
+        height: isExpanded ? expandedHeight : collapsedHeight
+      )
+      .animation(
+        reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.85),
+        value: isExpanded
+      )
+      .overlay(content)
+      .frame(width: expandedWidth, height: expandedHeight)
+      .contentShape(Rectangle())
+      .onHover { isHovered = $0 }
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(accessibilityLabel)
+  }
+
+  private var capsule: some View {
+    Capsule()
+      .fill(Color.black)
+      .overlay(
+        Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+      )
+      .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
   }
 
   @ViewBuilder
   private var content: some View {
-    switch state.phase {
-    case .idle:
-      HStack(spacing: 6) {
-        Text("Hold").foregroundStyle(.secondary)
-        Text(state.hotkeyLabel).monospaced().fontWeight(.semibold)
-        Text("to dictate").foregroundStyle(.secondary)
+    if isExpanded {
+      switch state {
+      case .idle:
+        HStack(spacing: 6) {
+          Image(systemName: "mic.fill")
+            .font(.callout)
+            .foregroundStyle(Color.white.opacity(0.7))
+          Text(hotkeyLabel)
+            .font(.callout.monospaced().weight(.semibold))
+            .foregroundStyle(Color.white)
+        }
+        .transition(.opacity)
+      case .recording:
+        WaveformBars(levels: levels)
+          .transition(.opacity)
+      case .processing:
+        ProgressView()
+          .controlSize(.small)
+          .tint(Color.white)
+          .transition(.opacity)
       }
-      .font(.callout)
-    case .recording:
-      Text("Listening…").font(.callout)
-    case .transcribing:
-      Text("Transcribing…").font(.callout)
-    case .styling:
-      Text("Polishing…").font(.callout)
     }
   }
 
   private var accessibilityLabel: String {
-    switch state.phase {
-    case .idle: return "OpenFlow ready. Hold \(state.hotkeyLabel) to dictate."
+    switch state {
+    case .idle: return "OpenFlow ready. Hold \(hotkeyLabel) to dictate."
     case .recording: return "Recording."
-    case .transcribing: return "Transcribing."
-    case .styling: return "Polishing."
+    case .processing: return "Processing."
     }
   }
 }
 
-private struct OverlayCapsule: ViewModifier {
-  func body(content: Content) -> some View {
-    if #available(macOS 26.0, *) {
-      content.glassEffect(in: Capsule())
-    } else {
-      content
-        .background(.regularMaterial, in: Capsule())
-        .shadow(color: .black.opacity(0.2), radius: 12, y: 4)
+private struct WaveformBars: View {
+  let levels: [Float]
+
+  private let barWidth: CGFloat = 2
+  private let barSpacing: CGFloat = 3
+  private let maxBarHeight: CGFloat = 18
+  private let minBarHeightFraction: CGFloat = 0.10
+
+  var body: some View {
+    HStack(spacing: barSpacing) {
+      ForEach(0..<OverlayBridge.waveformBarCount, id: \.self) { idx in
+        Capsule()
+          .fill(Color.white)
+          .frame(width: barWidth, height: barHeight(at: idx))
+      }
     }
+    .frame(height: maxBarHeight)
+    .animation(.linear(duration: 0.06), value: levels)
+  }
+
+  private func barHeight(at index: Int) -> CGFloat {
+    let raw = index < levels.count ? CGFloat(levels[index]) : 0
+    // sqrt response: RMS of normal speech is ~0.02–0.15 and feels too compressed
+    // under linear scaling. Square-root expands the bottom of the range so quiet
+    // syllables still visibly move the bars.
+    let scaled = min(1, sqrt(raw * 4))
+    let fraction = max(minBarHeightFraction, scaled)
+    return maxBarHeight * fraction
   }
 }
