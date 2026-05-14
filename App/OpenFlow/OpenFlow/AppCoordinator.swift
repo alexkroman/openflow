@@ -18,6 +18,7 @@ final class AppCoordinator: ObservableObject {
   private let injector: KeyInjector
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
+  private var levelsObserver: Task<Void, Never>?
 
   @Published private(set) var modelLoadState = ModelLoadState()
 
@@ -66,6 +67,15 @@ final class AppCoordinator: ObservableObject {
         guard let self else { return }
         if Task.isCancelled { return }
         self.render(phase)
+      }
+    }
+
+    let levels = mic.levels
+    levelsObserver = Task { @MainActor [weak self] in
+      for await level in levels {
+        guard let self else { return }
+        if Task.isCancelled { return }
+        self.overlay.bridge.pushLevel(level)
       }
     }
   }
