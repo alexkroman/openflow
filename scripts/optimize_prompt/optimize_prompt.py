@@ -3,7 +3,9 @@
 See scripts/optimize_prompt/README.md for usage.
 """
 
+import os
 import re
+import sys
 import textwrap
 from pathlib import Path
 
@@ -78,6 +80,16 @@ _OUTPUT_CANDIDATES = ("cleaned", "output", "target", "clean", "corrected")
 
 _DATASET_ID = "shantanugoel/aawaaz-transcript-cleanup-dataset"
 
+_DEFAULT_MODELS = {
+    "anthropic": "claude-haiku-4-5",
+    "openai": "gpt-4o-mini",
+}
+
+_API_KEY_VARS = {
+    "anthropic": "ANTHROPIC_API_KEY",
+    "openai": "OPENAI_API_KEY",
+}
+
 
 def detect_columns(column_names: list[str]) -> tuple[str, str]:
     """Pick (input, output) column names from a HF dataset's schema.
@@ -149,3 +161,22 @@ def load_examples(
         to_examples(val_raw, max_val),
         to_examples(test_raw, None),
     )
+
+
+def configure_lm(provider: str, model: str | None) -> dspy.LM:
+    """Build and register a dspy.LM. Exits 2 if the required env var is unset."""
+    if provider not in _API_KEY_VARS:
+        print(
+            f"Unknown provider {provider!r}; expected one of {list(_API_KEY_VARS)}.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    env_var = _API_KEY_VARS[provider]
+    if not os.environ.get(env_var):
+        print(f"Missing {env_var}. Export it and re-run.", file=sys.stderr)
+        sys.exit(2)
+    model_name = model or _DEFAULT_MODELS[provider]
+    qualified = f"{provider}/{model_name}"
+    lm = dspy.LM(qualified, temperature=0.0, max_tokens=512)
+    dspy.configure(lm=lm)
+    return lm
