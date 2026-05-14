@@ -44,15 +44,13 @@ struct OverlayView: View {
       .accessibilityLabel(accessibilityLabel)
   }
 
-  @ViewBuilder
   private var capsule: some View {
-    if #available(macOS 26.0, *) {
-      Capsule().fill(.clear).glassEffect(in: Capsule())
-    } else {
-      Capsule()
-        .fill(.regularMaterial)
-        .shadow(color: .black.opacity(0.2), radius: 12, y: 4)
-    }
+    Capsule()
+      .fill(Color.black)
+      .overlay(
+        Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+      )
+      .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
   }
 
   @ViewBuilder
@@ -60,16 +58,22 @@ struct OverlayView: View {
     if isExpanded {
       switch state {
       case .idle:
-        Text(hotkeyLabel)
-          .font(.callout.monospaced().weight(.semibold))
-          .foregroundStyle(.primary)
-          .transition(.opacity)
+        HStack(spacing: 6) {
+          Image(systemName: "mic.fill")
+            .font(.callout)
+            .foregroundStyle(Color.white.opacity(0.7))
+          Text(hotkeyLabel)
+            .font(.callout.monospaced().weight(.semibold))
+            .foregroundStyle(Color.white)
+        }
+        .transition(.opacity)
       case .recording:
         WaveformBars(levels: levels)
           .transition(.opacity)
       case .processing:
         ProgressView()
           .controlSize(.small)
+          .tint(Color.white)
           .transition(.opacity)
       }
     }
@@ -96,7 +100,7 @@ private struct WaveformBars: View {
     HStack(spacing: barSpacing) {
       ForEach(0..<OverlayBridge.waveformBarCount, id: \.self) { idx in
         Capsule()
-          .fill(Color.primary)
+          .fill(Color.white)
           .frame(width: barWidth, height: barHeight(at: idx))
       }
     }
@@ -106,8 +110,10 @@ private struct WaveformBars: View {
 
   private func barHeight(at index: Int) -> CGFloat {
     let raw = index < levels.count ? CGFloat(levels[index]) : 0
-    // RMS of speech rarely exceeds ~0.3 — scale generously so quiet speech still reads.
-    let scaled = min(1, raw * 3.0)
+    // sqrt response: RMS of normal speech is ~0.02–0.15 and feels too compressed
+    // under linear scaling. Square-root expands the bottom of the range so quiet
+    // syllables still visibly move the bars.
+    let scaled = min(1, sqrt(raw * 4))
     let fraction = max(minBarHeightFraction, scaled)
     return maxBarHeight * fraction
   }
