@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import textwrap
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -131,17 +132,13 @@ def load_examples(
         )
 
     if "train" in ds and "test" in ds:
-        train_raw = ds["train"]
-        rest_split = ds["test"].train_test_split(test_size=0.5, seed=seed)
-        val_raw = rest_split["train"]
-        test_raw = rest_split["test"]
+        train_raw, rest = ds["train"], ds["test"]
     else:
         full: Dataset = ds["train"] if "train" in ds else next(iter(ds.values()))
         first = full.train_test_split(test_size=0.4, seed=seed)
-        train_raw = first["train"]
-        second = first["test"].train_test_split(test_size=0.5, seed=seed)
-        val_raw = second["train"]
-        test_raw = second["test"]
+        train_raw, rest = first["train"], first["test"]
+    split = rest.train_test_split(test_size=0.5, seed=seed)
+    val_raw, test_raw = split["train"], split["test"]
 
     if not input_col or not output_col:
         detected_in, detected_out = detect_columns(list(train_raw.column_names))
@@ -197,7 +194,7 @@ def build_program(seed_prompt: str) -> dspy.Predict:
 def cleanup_metric(example, pred, trace=None) -> float:  # noqa: ARG001
     """DSPy-compatible metric: similarity between pred.cleaned and the gold
     example.cleaned. `trace` is part of the DSPy metric contract; unused here."""
-    del trace
+    _ = trace
     predicted = getattr(pred, "cleaned", "") or ""
     return similarity(predicted, example.cleaned)
 
@@ -242,23 +239,33 @@ class CaseResult:
         return self.optimized_score - self.baseline_score
 
 
+_EVAL_THREADS = 8
+
+
+def _safe_predict(program: dspy.Predict, transcript: str) -> str:
+    """Run one prediction; convert any failure into an `<<error: …>>` string so
+    a single bad row does not abort the whole evaluation."""
+    try:
+        return program(transcript=transcript).cleaned or ""  # pyright: ignore[reportCallIssue]
+    except Exception as exc:  # noqa: BLE001
+        return f"<<error: {exc}>>"
+
+
 def evaluate(
     baseline: dspy.Predict,
     optimized: dspy.Predict,
     testset: list[dspy.Example],
 ) -> list[CaseResult]:
-    """Run both programs over the test set and collect per-case scores."""
-    results: list[CaseResult] = []
-    for i, ex in enumerate(testset):
-        try:
-            b_out = baseline(transcript=ex.transcript).cleaned or ""  # pyright: ignore[reportCallIssue]
-        except Exception as exc:  # noqa: BLE001 — surface failure as empty pred
-            b_out = f"<<error: {exc}>>"
-        try:
-            o_out = optimized(transcript=ex.transcript).cleaned or ""  # pyright: ignore[reportCallIssue]
-        except Exception as exc:  # noqa: BLE001
-            o_out = f"<<error: {exc}>>"
-        results.append(CaseResult(
+    """Run both programs over the test set and collect per-case scores.
+
+    Cases are evaluated in a thread pool; DSPy's LM client is thread-safe
+    (MIPROv2's own evaluator uses the same pattern). Order is preserved.
+    """
+    def score(item: tuple[int, dspy.Example]) -> CaseResult:
+        i, ex = item
+        b_out = _safe_predict(baseline, ex.transcript)
+        o_out = _safe_predict(optimized, ex.transcript)
+        return CaseResult(
             example_id=i,
             transcript=ex.transcript,
             gold=ex.cleaned,
@@ -266,8 +273,10 @@ def evaluate(
             optimized=o_out,
             baseline_score=similarity(b_out, ex.cleaned),
             optimized_score=similarity(o_out, ex.cleaned),
-        ))
-    return results
+        )
+
+    with ThreadPoolExecutor(max_workers=_EVAL_THREADS) as pool:
+        return list(pool.map(score, enumerate(testset)))
 
 
 def print_report(results: list[CaseResult]) -> None:
