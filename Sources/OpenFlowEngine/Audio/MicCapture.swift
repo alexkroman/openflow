@@ -76,12 +76,13 @@ public actor MicCapture: MicCaptureProtocol {
       // Take channel 0 as mono (input may be stereo on built-in/USB mics).
       guard let chan = buffer.floatChannelData?[0] else { return }
       let n = Int(buffer.frameLength)
-      let chunk = Array(UnsafeBufferPointer(start: chan, count: n))
-      // Single-pass RMS for the live meter. Cheap; runs on the audio thread.
+      let ptr = UnsafeBufferPointer(start: chan, count: n)
+      // Single-pass RMS computed against the AVFoundation buffer (no allocation).
       var sumSq: Float = 0
-      for s in chunk { sumSq += s * s }
+      for s in ptr { sumSq += s * s }
       let rms = n > 0 ? (sumSq / Float(n)).squareRoot() : 0
       levelsContinuation.yield(rms)
+      let chunk = Array(ptr)
       Task { [weak self] in await self?.append(chunk) }
     }
 
