@@ -154,3 +154,49 @@ def test_detect_columns_ignores_extras():
 def test_detect_columns_raises_on_no_match():
     with pytest.raises(ValueError, match="Could not auto-detect"):
         detect_columns(["foo", "bar"])
+
+
+from types import SimpleNamespace
+from optimize_prompt import render_prompt
+
+
+class _FakePredictor:
+    def __init__(self, instructions, demos):
+        self.signature = SimpleNamespace(instructions=instructions)
+        self.demos = demos
+
+
+class _FakeProgram:
+    def __init__(self, predictor):
+        self._p = predictor
+
+    def predictors(self):
+        return [self._p]
+
+
+def test_render_prompt_no_demos():
+    p = _FakeProgram(_FakePredictor("Clean the input.", []))
+    out = render_prompt(p)
+    assert "Clean the input." in out
+    # No EXAMPLES section when there are no demos.
+    assert "EXAMPLES" not in out
+
+
+def test_render_prompt_with_demos():
+    demos = [
+        SimpleNamespace(transcript="um hello", cleaned="Hello."),
+        SimpleNamespace(transcript="uh world", cleaned="World."),
+    ]
+    p = _FakeProgram(_FakePredictor("Clean the input.", demos))
+    out = render_prompt(p)
+    assert "Clean the input." in out
+    assert "EXAMPLES" in out
+    assert "<transcript>um hello</transcript> → Hello." in out
+    assert "<transcript>uh world</transcript> → World." in out
+
+
+def test_render_prompt_strips_trailing_whitespace():
+    p = _FakeProgram(_FakePredictor("Clean.   \n\n", []))
+    out = render_prompt(p)
+    assert not out.endswith(" ")
+    assert not out.endswith("\n\n\n")

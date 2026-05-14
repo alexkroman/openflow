@@ -294,3 +294,24 @@ def print_report(results: list[CaseResult]) -> None:
             print(f"    gold:      {r.gold!r}")
             print(f"    baseline:  {r.baseline!r}")
             print(f"    optimized: {r.optimized!r}")
+
+
+def render_prompt(compiled) -> str:
+    """Serialize a compiled DSPy program back into a single text block
+    suitable for pasting into StylingPrompt.swift.
+
+    Format: instructions, then (if demos exist) a blank line, "EXAMPLES",
+    and one `<transcript>X</transcript> → Y` line per demo.
+    """
+    predictor = compiled.predictors()[0]
+    instructions = (predictor.signature.instructions or "").rstrip()
+    demos = list(predictor.demos or [])
+    parts = [instructions]
+    if demos:
+        parts.append("")
+        parts.append("EXAMPLES")
+        for d in demos:
+            transcript = getattr(d, "transcript", "")
+            cleaned = getattr(d, "cleaned", "")
+            parts.append(f"<transcript>{transcript}</transcript> → {cleaned}")
+    return "\n".join(parts).rstrip() + "\n"
