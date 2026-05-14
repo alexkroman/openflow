@@ -3,6 +3,7 @@
 See scripts/optimize_prompt/README.md for usage.
 """
 
+import argparse
 import os
 import re
 import sys
@@ -315,3 +316,74 @@ def render_prompt(compiled) -> str:
             cleaned = getattr(d, "cleaned", "")
             parts.append(f"<transcript>{transcript}</transcript> → {cleaned}")
     return "\n".join(parts).rstrip() + "\n"
+
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_SWIFT_PROMPT = _REPO_ROOT / "Sources/OpenFlowEngine/LLM/StylingPrompt.swift"
+_DEFAULT_OUT = Path(__file__).resolve().parent / "out" / "optimized_prompt.txt"
+
+
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Optimize the OpenFlow cleanup prompt against the aawaaz dataset.",
+    )
+    p.add_argument("--provider", choices=("anthropic", "openai"), default="anthropic")
+    p.add_argument(
+        "--model",
+        default=None,
+        help="model name (default: claude-haiku-4-5 / gpt-4o-mini)",
+    )
+    p.add_argument("--optimizer", choices=("mipro", "bootstrap"), default="mipro")
+    p.add_argument("--max-train", type=int, default=200)
+    p.add_argument("--max-val", type=int, default=100)
+    p.add_argument("--input-col", default=None)
+    p.add_argument("--output-col", default=None)
+    p.add_argument("--out", type=Path, default=_DEFAULT_OUT)
+    p.add_argument("--swift-prompt", type=Path, default=_SWIFT_PROMPT)
+    return p.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
+
+    print(f"Reading seed prompt from {args.swift_prompt}")
+    seed = extract_seed_prompt(args.swift_prompt)
+    print(f"Seed prompt: {len(seed)} chars")
+
+    print(f"Configuring LM: {args.provider}")
+    configure_lm(args.provider, args.model)
+
+    print("Loading dataset...")
+    train, val, test = load_examples(
+        input_col=args.input_col,
+        output_col=args.output_col,
+        max_train=args.max_train,
+        max_val=args.max_val,
+    )
+    print(f"Train={len(train)}  Val={len(val)}  Test={len(test)}")
+
+    baseline = build_program(seed)
+
+    print(f"Running optimizer ({args.optimizer})...")
+    try:
+        optimized = optimize(baseline, train, val, method=args.optimizer)
+    except Exception:
+        # Save the baseline render as a partial so a long run isn't lost.
+        partial = args.out.with_suffix(".partial.txt")
+        partial.parent.mkdir(parents=True, exist_ok=True)
+        partial.write_text(render_prompt(baseline))
+        print(f"Optimizer failed; saved baseline render to {partial}", file=sys.stderr)
+        raise
+
+    print("Evaluating on held-out test split...")
+    results = evaluate(baseline, optimized, test)
+    print_report(results)
+
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(render_prompt(optimized))
+    print(f"\nWrote optimized prompt to {args.out}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
