@@ -75,13 +75,8 @@ public actor MicCapture: MicCaptureProtocol {
       counters.tapFired += 1
       // Take channel 0 as mono (input may be stereo on built-in/USB mics).
       guard let chan = buffer.floatChannelData?[0] else { return }
-      let n = Int(buffer.frameLength)
-      let ptr = UnsafeBufferPointer(start: chan, count: n)
-      // Single-pass RMS computed against the AVFoundation buffer (no allocation).
-      var sumSq: Float = 0
-      for s in ptr { sumSq += s * s }
-      let rms = n > 0 ? (sumSq / Float(n)).squareRoot() : 0
-      levelsContinuation.yield(rms)
+      let ptr = UnsafeBufferPointer(start: chan, count: Int(buffer.frameLength))
+      levelsContinuation.yield(Self.rms(ptr))
       let chunk = Array(ptr)
       Task { [weak self] in await self?.append(chunk) }
     }
@@ -109,8 +104,7 @@ public actor MicCapture: MicCaptureProtocol {
 
     let durationMs = Int((Double(result.count) / targetSampleRate) * 1000)
     let peak = result.map { abs($0) }.max() ?? 0
-    let rms =
-      result.isEmpty ? 0 : sqrt(result.reduce(0) { $0 + $1 * $1 } / Float(result.count))
+    let rms = result.withUnsafeBufferPointer(Self.rms)
     Self.logger.info(
       """
       stop rawSamples=\(raw.count) outSamples=\(result.count) durationMs=\(durationMs) \
@@ -124,6 +118,13 @@ public actor MicCapture: MicCaptureProtocol {
   private func append(_ chunk: [Float]) {
     rawSamples.append(contentsOf: chunk)
     appendCalls += 1
+  }
+
+  private static func rms(_ samples: UnsafeBufferPointer<Float>) -> Float {
+    if samples.isEmpty { return 0 }
+    var sumSq: Float = 0
+    for s in samples { sumSq += s * s }
+    return (sumSq / Float(samples.count)).squareRoot()
   }
 
   private static func downsample(_ raw: [Float], fromRate: Double, toRate: Double) -> [Float] {

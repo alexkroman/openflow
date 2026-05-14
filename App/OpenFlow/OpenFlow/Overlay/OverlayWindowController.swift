@@ -3,23 +3,21 @@ import SwiftUI
 
 @MainActor
 final class OverlayBridge: ObservableObject {
-  @Published var state: OverlayUIState = .idle
-  @Published var levels: [Float] = Array(repeating: 0, count: 9)
-  @Published var hotkeyLabel: String = ""
+  static let waveformBarCount = 9
 
-  /// Append a new RMS sample, dropping the oldest. Buffer length is fixed at 9.
+  @Published var state: OverlayUIState = .idle
+  @Published var levels: [Float] = Array(repeating: 0, count: waveformBarCount)
+
   func pushLevel(_ value: Float) {
-    var next = levels
-    next.removeFirst()
-    next.append(value)
-    levels = next
+    levels.removeFirst()
+    levels.append(value)
   }
 }
 
 private struct OverlayHost: View {
   @ObservedObject var bridge: OverlayBridge
   var body: some View {
-    OverlayView(state: bridge.state, levels: bridge.levels, hotkeyLabel: bridge.hotkeyLabel)
+    OverlayView(state: bridge.state, levels: bridge.levels, hotkeyLabel: DictateHotkey.label)
   }
 }
 
@@ -31,7 +29,7 @@ final class OverlayWindowController {
 
   private let panel: NSPanel
   private let hosting: NSHostingView<OverlayHost>
-  let bridge = OverlayBridge()
+  private let bridge = OverlayBridge()
   private var suppressOriginPersist = false
 
   init() {
@@ -56,9 +54,8 @@ final class OverlayWindowController {
     }
   }
 
-  func show(state: OverlayUIState, hotkeyLabel: String) {
+  func show(state: OverlayUIState) {
     bridge.state = state
-    bridge.hotkeyLabel = hotkeyLabel
     guard !panel.isVisible else { return }
     reposition()
     if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
@@ -72,6 +69,10 @@ final class OverlayWindowController {
         panel.animator().alphaValue = 1
       }
     }
+  }
+
+  func pushLevel(_ value: Float) {
+    bridge.pushLevel(value)
   }
 
   private func reposition() {

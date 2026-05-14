@@ -14,6 +14,11 @@ struct OverlayView: View {
   @State private var isHovered = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
+  private let expandedWidth: CGFloat = 120
+  private let expandedHeight: CGFloat = 28
+  private let collapsedWidth: CGFloat = 32
+  private let collapsedHeight: CGFloat = 8
+
   private var isExpanded: Bool {
     switch state {
     case .recording, .processing: return true
@@ -22,23 +27,21 @@ struct OverlayView: View {
   }
 
   var body: some View {
-    ZStack {
-      capsule
-        .frame(
-          width: isExpanded ? 120 : 32,
-          height: isExpanded ? 28 : 8
-        )
-        .animation(
-          reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.85),
-          value: isExpanded
-        )
-        .overlay(content)
-    }
-    .frame(width: 120, height: 28)
-    .contentShape(Rectangle())
-    .onHover { isHovered = $0 }
-    .accessibilityElement(children: .ignore)
-    .accessibilityLabel(accessibilityLabel)
+    capsule
+      .frame(
+        width: isExpanded ? expandedWidth : collapsedWidth,
+        height: isExpanded ? expandedHeight : collapsedHeight
+      )
+      .animation(
+        reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.85),
+        value: isExpanded
+      )
+      .overlay(content)
+      .frame(width: expandedWidth, height: expandedHeight)
+      .contentShape(Rectangle())
+      .onHover { isHovered = $0 }
+      .accessibilityElement(children: .ignore)
+      .accessibilityLabel(accessibilityLabel)
   }
 
   @ViewBuilder
@@ -55,20 +58,20 @@ struct OverlayView: View {
   @ViewBuilder
   private var content: some View {
     if isExpanded {
-      Group {
-        switch state {
-        case .idle:
-          Text(hotkeyLabel)
-            .font(.callout.monospaced().weight(.semibold))
-            .foregroundStyle(.primary)
-        case .recording:
-          WaveformBars(levels: levels)
-        case .processing:
-          ProgressView()
-            .controlSize(.small)
-        }
+      switch state {
+      case .idle:
+        Text(hotkeyLabel)
+          .font(.callout.monospaced().weight(.semibold))
+          .foregroundStyle(.primary)
+          .transition(.opacity)
+      case .recording:
+        WaveformBars(levels: levels)
+          .transition(.opacity)
+      case .processing:
+        ProgressView()
+          .controlSize(.small)
+          .transition(.opacity)
       }
-      .transition(.opacity)
     }
   }
 
@@ -84,8 +87,6 @@ struct OverlayView: View {
 private struct WaveformBars: View {
   let levels: [Float]
 
-  // Visual constants.
-  private let barCount = 9
   private let barWidth: CGFloat = 2
   private let barSpacing: CGFloat = 3
   private let maxBarHeight: CGFloat = 18
@@ -93,14 +94,14 @@ private struct WaveformBars: View {
 
   var body: some View {
     HStack(spacing: barSpacing) {
-      ForEach(0..<barCount, id: \.self) { idx in
+      ForEach(0..<OverlayBridge.waveformBarCount, id: \.self) { idx in
         Capsule()
           .fill(Color.primary)
           .frame(width: barWidth, height: barHeight(at: idx))
-          .animation(.linear(duration: 0.06), value: levels)
       }
     }
     .frame(height: maxBarHeight)
+    .animation(.linear(duration: 0.06), value: levels)
   }
 
   private func barHeight(at index: Int) -> CGFloat {

@@ -75,7 +75,7 @@ final class AppCoordinator: ObservableObject {
       for await level in levels {
         guard let self else { return }
         if Task.isCancelled { return }
-        self.overlay.bridge.pushLevel(level)
+        self.overlay.pushLevel(level)
       }
     }
   }
@@ -83,7 +83,7 @@ final class AppCoordinator: ObservableObject {
   /// Renders the overlay pill in idle state. Called by the wizard once the
   /// app is fully configured; before that, no overlay is shown.
   func showOverlay() {
-    overlay.show(state: .idle, hotkeyLabel: DictateHotkey.label)
+    overlay.show(state: .idle)
   }
 
   /// Kicks off STT / LLM / audio warm-up. Idempotent in practice — each
@@ -158,7 +158,6 @@ final class AppCoordinator: ObservableObject {
     }
     wasRecording = isRecording
 
-    let label = DictateHotkey.label
     let ui: OverlayUIState
     switch phase {
     case .idle, .cancelled, .injecting:
@@ -171,6 +170,6 @@ final class AppCoordinator: ObservableObject {
       ui = .idle
       toast.show(err.errorDescription ?? "Error")
     }
-    overlay.show(state: ui, hotkeyLabel: label)
+    overlay.show(state: ui)
   }
 }
