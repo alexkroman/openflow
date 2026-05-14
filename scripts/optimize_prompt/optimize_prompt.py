@@ -192,9 +192,10 @@ def build_program(seed_prompt: str) -> dspy.Predict:
     return dspy.Predict(sig)  # pyright: ignore[reportArgumentType]
 
 
-def cleanup_metric(example, pred, trace=None) -> float:
+def cleanup_metric(example, pred, trace=None) -> float:  # noqa: ARG001
     """DSPy-compatible metric: similarity between pred.cleaned and the gold
-    example.cleaned. Returns a float in [0, 1]."""
+    example.cleaned. `trace` is part of the DSPy metric contract; unused here."""
+    del trace
     predicted = getattr(pred, "cleaned", "") or ""
     return similarity(predicted, example.cleaned)
 
