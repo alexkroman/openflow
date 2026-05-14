@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import textwrap
+from dataclasses import dataclass
 from pathlib import Path
 
 import dspy
@@ -223,3 +224,73 @@ def optimize(
         )
         return optimizer.compile(student=program, trainset=trainset, valset=valset)
     raise ValueError(f"Unknown optimizer method {method!r}")
+
+
+@dataclass
+class CaseResult:
+    example_id: int
+    transcript: str
+    gold: str
+    baseline: str
+    optimized: str
+    baseline_score: float
+    optimized_score: float
+
+    @property
+    def delta(self) -> float:
+        return self.optimized_score - self.baseline_score
+
+
+def evaluate(
+    baseline: dspy.Predict,
+    optimized: dspy.Predict,
+    testset: list[dspy.Example],
+) -> list[CaseResult]:
+    """Run both programs over the test set and collect per-case scores."""
+    results: list[CaseResult] = []
+    for i, ex in enumerate(testset):
+        try:
+            b_out = baseline(transcript=ex.transcript).cleaned or ""  # pyright: ignore[reportCallIssue]
+        except Exception as exc:  # noqa: BLE001 — surface failure as empty pred
+            b_out = f"<<error: {exc}>>"
+        try:
+            o_out = optimized(transcript=ex.transcript).cleaned or ""  # pyright: ignore[reportCallIssue]
+        except Exception as exc:  # noqa: BLE001
+            o_out = f"<<error: {exc}>>"
+        results.append(CaseResult(
+            example_id=i,
+            transcript=ex.transcript,
+            gold=ex.cleaned,
+            baseline=b_out,
+            optimized=o_out,
+            baseline_score=similarity(b_out, ex.cleaned),
+            optimized_score=similarity(o_out, ex.cleaned),
+        ))
+    return results
+
+
+def print_report(results: list[CaseResult]) -> None:
+    """Print per-case scores and aggregate means + regression list."""
+    print(f"\n{'id':>4}  {'baseline':>8}  {'optimized':>9}  {'delta':>6}  preview")
+    print("-" * 78)
+    for r in results:
+        preview = r.transcript[:40].replace("\n", " ")
+        print(
+            f"{r.example_id:>4}  {r.baseline_score:>8.3f}  "
+            f"{r.optimized_score:>9.3f}  {r.delta:>+6.3f}  {preview}"
+        )
+    n = max(len(results), 1)
+    base_mean = sum(r.baseline_score for r in results) / n
+    opt_mean = sum(r.optimized_score for r in results) / n
+    print("-" * 78)
+    print(f"mean baseline:  {base_mean:.3f}")
+    print(f"mean optimized: {opt_mean:.3f}")
+    print(f"delta:          {opt_mean - base_mean:+.3f}")
+    regressions = [r for r in results if r.delta < -0.05]
+    if regressions:
+        print(f"\n{len(regressions)} regression(s) (delta < -0.05):")
+        for r in regressions:
+            print(f"  case {r.example_id}: {r.delta:+.3f}")
+            print(f"    gold:      {r.gold!r}")
+            print(f"    baseline:  {r.baseline!r}")
+            print(f"    optimized: {r.optimized!r}")
