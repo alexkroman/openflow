@@ -177,16 +177,19 @@ def load_examples(
 
 
 def _build_local_lm(model_name: str) -> dspy.LM:
-    # chat_template_kwargs.enable_thinking=false is the Qwen team's official
-    # mechanism for skipping the reasoning preamble. The `/no_think` string
-    # directive is ignored by the OptiQ fine-tune (it generates a `reasoning`
-    # field anyway and never writes `content`). mlx-lm.server passes
-    # chat_template_kwargs straight through to the Qwen tokenizer's template.
+    # chat_template_kwargs.enable_thinking=false: Qwen team's official switch
+    # for skipping the reasoning preamble. `/no_think` is ignored by the OptiQ
+    # fine-tune (it writes a `reasoning` field and leaves `content` empty).
+    # temperature=0.3 (not 0.0): DSPy's chat adapter expects responses wrapped
+    # in [[ ## field ## ]] markers, but the production prompt says "Output
+    # ONLY the cleaned text, no preamble, no XML tags." The model gets stuck
+    # in a repetition loop reconciling the two at greedy decoding. Mild
+    # stochasticity breaks the loop; aggregate scoring still ranks reliably.
     return dspy.LM(
         f"openai/{model_name}",
         api_base=os.environ.get("MLX_LM_BASE_URL", _LOCAL_BASE_URL),
         api_key="not-needed",
-        temperature=0.0,
+        temperature=0.3,
         max_tokens=_LOCAL_MAX_TOKENS,
         extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
