@@ -62,8 +62,7 @@ struct OverlayView: View {
             .font(.callout.monospaced().weight(.semibold))
             .foregroundStyle(.primary)
         case .recording:
-          // Placeholder — replaced by waveform in Task 5.
-          Circle().fill(.red).frame(width: 8, height: 8)
+          WaveformBars(levels: levels)
         case .processing:
           ProgressView()
             .controlSize(.small)
@@ -79,5 +78,36 @@ struct OverlayView: View {
     case .recording: return "Recording."
     case .processing: return "Processing."
     }
+  }
+}
+
+private struct WaveformBars: View {
+  let levels: [Float]
+
+  // Visual constants.
+  private let barCount = 9
+  private let barWidth: CGFloat = 2
+  private let barSpacing: CGFloat = 3
+  private let maxBarHeight: CGFloat = 18
+  private let minBarHeightFraction: CGFloat = 0.10
+
+  var body: some View {
+    HStack(spacing: barSpacing) {
+      ForEach(0..<barCount, id: \.self) { idx in
+        Capsule()
+          .fill(Color.primary)
+          .frame(width: barWidth, height: barHeight(at: idx))
+          .animation(.linear(duration: 0.06), value: levels)
+      }
+    }
+    .frame(height: maxBarHeight)
+  }
+
+  private func barHeight(at index: Int) -> CGFloat {
+    let raw = index < levels.count ? CGFloat(levels[index]) : 0
+    // RMS of speech rarely exceeds ~0.3 — scale generously so quiet speech still reads.
+    let scaled = min(1, raw * 3.0)
+    let fraction = max(minBarHeightFraction, scaled)
+    return maxBarHeight * fraction
   }
 }
