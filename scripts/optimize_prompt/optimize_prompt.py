@@ -176,7 +176,7 @@ def configure_lm(provider: str, model: str | None) -> dspy.LM:
         sys.exit(2)
     model_name = model or _DEFAULT_MODELS[provider]
     qualified = f"{provider}/{model_name}"
-    lm = dspy.LM(qualified, temperature=0.0, max_tokens=512)
+    lm = dspy.LM(qualified, temperature=0.0, max_tokens=4096)
     dspy.configure(lm=lm)
     return lm
 
