@@ -101,11 +101,10 @@ _LOCAL_BASE_URL = "http://localhost:8080/v1"
 # of times and benefits from more creative reformulations.
 _HYBRID_PROPOSER_MODEL = "anthropic/claude-sonnet-4-5"
 
-# Local Qwen3.5 emits long `<think>...</think>` chains before answering.
-# Production uses a `/no_think` suffix to suppress it; DSPy doesn't expose
-# per-call suffixes, so we give it room instead. 16K is well under Qwen's
-# 32K context and local inference is unbilled.
-_LOCAL_MAX_TOKENS = 16384
+# Thinking is disabled via chat_template_kwargs (see _build_local_lm), so
+# outputs are short — just the cleaned text. 2048 covers any reasonable
+# transcript length with headroom.
+_LOCAL_MAX_TOKENS = 2048
 _HOSTED_MAX_TOKENS = 4096
 
 
@@ -178,16 +177,18 @@ def load_examples(
 
 
 def _build_local_lm(model_name: str) -> dspy.LM:
-    # temperature=0.3 (not 0.0) avoids the repetition loop Qwen3.5 falls into
-    # on greedy decoding — at temp=0 it can fill the entire max_tokens budget
-    # repeating the same token. Mild stochasticity is fine since the metric
-    # aggregates across cases.
+    # chat_template_kwargs.enable_thinking=false is the Qwen team's official
+    # mechanism for skipping the reasoning preamble. The `/no_think` string
+    # directive is ignored by the OptiQ fine-tune (it generates a `reasoning`
+    # field anyway and never writes `content`). mlx-lm.server passes
+    # chat_template_kwargs straight through to the Qwen tokenizer's template.
     return dspy.LM(
         f"openai/{model_name}",
         api_base=os.environ.get("MLX_LM_BASE_URL", _LOCAL_BASE_URL),
         api_key="not-needed",
-        temperature=0.3,
+        temperature=0.0,
         max_tokens=_LOCAL_MAX_TOKENS,
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
     )
 
 
@@ -378,13 +379,10 @@ def render_prompt(compiled) -> str:
     suitable for pasting into StylingPrompt.swift.
 
     Format: instructions, then (if demos exist) a blank line, "EXAMPLES",
-    and one `<transcript>X</transcript> → Y` line per demo. The Qwen-only
-    `/no_think` directive is stripped — production runtime doesn't use it
-    and it shouldn't ship into Swift.
+    and one `<transcript>X</transcript> → Y` line per demo.
     """
     predictor = compiled.predictors()[0]
-    raw_instructions = predictor.signature.instructions or ""
-    instructions = re.sub(r"\n*\s*/no_think\s*$", "", raw_instructions).rstrip()
+    instructions = (predictor.signature.instructions or "").rstrip()
     demos = list(predictor.demos or [])
     parts = [instructions]
     if demos:
@@ -434,14 +432,6 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Reading seed prompt from {args.swift_prompt}")
     seed = extract_seed_prompt(args.swift_prompt)
-    qwen_local = args.provider in ("local", "hybrid")
-    if qwen_local:
-        # Qwen3.5 thinking-skip directive. Production puts this on the user
-        # message; placed at the END of the system prompt here so MIPROv2's
-        # paraphraser is less likely to drop it (tail directives survive better
-        # than mid-prompt ones in practice).
-        seed = seed.rstrip() + "\n\n/no_think"
-        print("Appended `/no_think` to system prompt (Qwen3.5 thinking-skip)")
     print(f"Seed prompt: {len(seed)} chars")
 
     print(f"Configuring LM: {args.provider}")
