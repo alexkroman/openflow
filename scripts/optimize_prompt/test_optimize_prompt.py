@@ -83,3 +83,46 @@ def test_extract_seed_prompt_against_real_file():
     assert body.startswith("You are a transcript-cleanup function.")
     # Line continuations applied: this phrase spans a `\` in the source.
     assert "dictated speech. Output: ONLY the cleaned text" in body
+
+
+def test_extract_seed_prompt_decodes_escaped_backslash(tmp_path):
+    """Swift `\\\\n` source → `\\n` runtime (literal backslash + n)."""
+    swift = tmp_path / "StylingPrompt.swift"
+    # Source on disk: the body contains the 3 chars `\`, `\`, `n`.
+    swift.write_text(
+        '  public static let system: String = """\n'
+        '    new line\\\\n done\n'
+        '    """\n'
+    )
+    body = extract_seed_prompt(swift)
+    # Runtime value should be 2 chars `\n`, not the 3-char source `\\n`.
+    assert body == "new line\\n done"
+
+
+def test_extract_seed_prompt_preserves_blank_line_after_continuation(tmp_path):
+    """Swift `\\<nl>` drops only the trailing newline of THAT line.
+    A blank line on the following line is preserved."""
+    swift = tmp_path / "StylingPrompt.swift"
+    swift.write_text(
+        '  public static let system: String = """\n'
+        '    a \\\n'
+        '    \n'
+        '    b\n'
+        '    """\n'
+    )
+    body = extract_seed_prompt(swift)
+    # `\<nl>` joins line 1 to line 2; line 2 dedents to empty; line 3 stays.
+    assert body == "a \nb"
+
+
+def test_extract_seed_prompt_real_file_has_decoded_newline_token():
+    """Regression: the real prompt's `"new line"→\\n` rule should appear in
+    the extracted body as the 2-char `\\n`, not the 3-char `\\\\n`."""
+    from pathlib import Path
+    here = Path(__file__).resolve()
+    repo_root = here.parents[2]
+    real = repo_root / "Sources/OpenFlowEngine/LLM/StylingPrompt.swift"
+    body = extract_seed_prompt(real)
+    # 2 chars: backslash + n. Not the 3-char source form.
+    assert '"new line"→\\n' in body
+    assert '"new line"→\\\\n' not in body

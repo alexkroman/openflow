@@ -46,17 +46,25 @@ _PROMPT_RE = re.compile(
 def extract_seed_prompt(swift_path: Path) -> str:
     """Read StylingPrompt.swift and return the runtime value of `system`.
 
-    Handles two Swift string features:
+    Handles three Swift string features:
       - leading indentation matching the closing `\"\"\"` is stripped
-      - `\\<newline><whitespace>` line continuations join lines with no space
-        added (which is why the Swift source must include a trailing space
-        before the `\\` when it wants spacing)
+      - `\\<newline><horizontal-ws>` line continuations join lines with no
+        space added (Swift drops the trailing newline of that line only;
+        blank lines further down are preserved)
+      - `\\\\` source → `\\` runtime (the only Swift escape currently used
+        in the prompt — `\\n` source becomes the 2-char string `\\n`)
     """
     text = Path(swift_path).read_text()
     m = _PROMPT_RE.search(text)
     if not m:
         raise ValueError(f"Could not find system prompt in {swift_path}")
     body = textwrap.dedent(m.group(1))
-    # Swift line-continuation: `\` + newline + leading whitespace → ""
-    body = re.sub(r"\\\n\s*", "", body)
+    # Line continuations: `\` at end of line + horizontal whitespace on the
+    # next line only. Do NOT use `\s*` here — that would also eat newlines,
+    # collapsing genuine blank lines after a continuation.
+    body = re.sub(r"\\\n[ \t]*", "", body)
+    # Swift `\\` source → `\` runtime. Applied after continuations so a
+    # source `\\<nl>` (escaped backslash followed by a real newline)
+    # survives the first pass and decodes correctly here.
+    body = body.replace("\\\\", "\\")
     return body
