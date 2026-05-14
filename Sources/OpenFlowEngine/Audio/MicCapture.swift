@@ -70,11 +70,18 @@ public actor MicCapture: MicCaptureProtocol {
     // Per-buffer SRC with endOfStream after each call drops most output frames
     // (the polyphase filter never accumulates enough state).
     let counters = self.counters
+    let levelsContinuation = self.levelsContinuation
     input.installTap(onBus: 0, bufferSize: 4_096, format: inputFormat) { [weak self] buffer, _ in
       counters.tapFired += 1
       // Take channel 0 as mono (input may be stereo on built-in/USB mics).
       guard let chan = buffer.floatChannelData?[0] else { return }
-      let chunk = Array(UnsafeBufferPointer(start: chan, count: Int(buffer.frameLength)))
+      let n = Int(buffer.frameLength)
+      let chunk = Array(UnsafeBufferPointer(start: chan, count: n))
+      // Single-pass RMS for the live meter. Cheap; runs on the audio thread.
+      var sumSq: Float = 0
+      for s in chunk { sumSq += s * s }
+      let rms = n > 0 ? (sumSq / Float(n)).squareRoot() : 0
+      levelsContinuation.yield(rms)
       Task { [weak self] in await self?.append(chunk) }
     }
 
