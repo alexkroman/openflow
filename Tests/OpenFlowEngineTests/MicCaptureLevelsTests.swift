@@ -18,7 +18,7 @@ struct MicCaptureLevelsTests {
       let deadline = Date().addingTimeInterval(0.7)
       for await level in mic.levels {
         collected.append(level)
-        if collected.count >= 3 || Date() > deadline { break }
+        if collected.count >= 3 || Date() > deadline || Task.isCancelled { break }
       }
       return collected
     }
@@ -26,6 +26,7 @@ struct MicCaptureLevelsTests {
     try await mic.start()
     try await Task.sleep(for: .milliseconds(500))
     _ = await mic.stop()
+    collector.cancel()
 
     let levels = await collector.value
     #expect(!levels.isEmpty, "expected at least one RMS sample during 500ms of capture")
