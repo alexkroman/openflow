@@ -68,3 +68,25 @@ def extract_seed_prompt(swift_path: Path) -> str:
     # survives the first pass and decodes correctly here.
     body = body.replace("\\\\", "\\")
     return body
+
+
+_INPUT_CANDIDATES = ("raw", "input", "transcript", "original", "source")
+_OUTPUT_CANDIDATES = ("cleaned", "output", "target", "clean", "corrected")
+
+
+def detect_columns(column_names: list[str]) -> tuple[str, str]:
+    """Pick (input, output) column names from a HF dataset's schema.
+
+    Match is case-insensitive; the returned strings preserve the original
+    casing in `column_names` because `datasets` is case-sensitive when
+    indexing rows.
+    """
+    by_lower = {name.lower(): name for name in column_names}
+    input_col = next((by_lower[c] for c in _INPUT_CANDIDATES if c in by_lower), None)
+    output_col = next((by_lower[c] for c in _OUTPUT_CANDIDATES if c in by_lower), None)
+    if not input_col or not output_col:
+        raise ValueError(
+            f"Could not auto-detect input/output columns from {column_names}. "
+            f"Pass --input-col and --output-col explicitly."
+        )
+    return input_col, output_col

@@ -126,3 +126,31 @@ def test_extract_seed_prompt_real_file_has_decoded_newline_token():
     # 2 chars: backslash + n. Not the 3-char source form.
     assert '"new line"→\\n' in body
     assert '"new line"→\\\\n' not in body
+
+
+from optimize_prompt import detect_columns
+
+
+def test_detect_columns_raw_cleaned():
+    assert detect_columns(["raw", "cleaned"]) == ("raw", "cleaned")
+
+
+def test_detect_columns_input_output():
+    assert detect_columns(["input", "output"]) == ("input", "output")
+
+
+def test_detect_columns_transcript_target():
+    assert detect_columns(["transcript", "target"]) == ("transcript", "target")
+
+
+def test_detect_columns_case_insensitive():
+    assert detect_columns(["Raw", "Cleaned"]) == ("Raw", "Cleaned")
+
+
+def test_detect_columns_ignores_extras():
+    assert detect_columns(["id", "raw", "cleaned", "speaker"]) == ("raw", "cleaned")
+
+
+def test_detect_columns_raises_on_no_match():
+    with pytest.raises(ValueError, match="Could not auto-detect"):
+        detect_columns(["foo", "bar"])
