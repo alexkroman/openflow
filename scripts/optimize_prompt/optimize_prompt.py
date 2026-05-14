@@ -86,12 +86,15 @@ _DATASET_ID = "shantanugoel/aawaaz-transcript-cleanup-dataset"
 _DEFAULT_MODELS = {
     "anthropic": "claude-haiku-4-5",
     "openai": "gpt-4o-mini",
+    "local": "mlx-community/Qwen3.5-2B-OptiQ-4bit",
 }
 
 _API_KEY_VARS = {
     "anthropic": "ANTHROPIC_API_KEY",
     "openai": "OPENAI_API_KEY",
 }
+
+_LOCAL_BASE_URL = "http://localhost:8080/v1"
 
 
 def detect_columns(column_names: list[str]) -> tuple[str, str]:
@@ -163,20 +166,33 @@ def load_examples(
 
 
 def configure_lm(provider: str, model: str | None) -> dspy.LM:
-    """Build and register a dspy.LM. Exits 2 if the required env var is unset."""
-    if provider not in _API_KEY_VARS:
+    """Build and register a dspy.LM. Exits 2 if the required env var is unset.
+
+    `local` provider talks to mlx-lm.server over its OpenAI-compatible
+    endpoint at $MLX_LM_BASE_URL (default http://localhost:8080/v1). The
+    server must be running before this is called.
+    """
+    if provider not in _DEFAULT_MODELS:
         print(
-            f"Unknown provider {provider!r}; expected one of {list(_API_KEY_VARS)}.",
+            f"Unknown provider {provider!r}; expected one of {list(_DEFAULT_MODELS)}.",
             file=sys.stderr,
         )
         sys.exit(2)
-    env_var = _API_KEY_VARS[provider]
-    if not os.environ.get(env_var):
-        print(f"Missing {env_var}. Export it and re-run.", file=sys.stderr)
-        sys.exit(2)
     model_name = model or _DEFAULT_MODELS[provider]
-    qualified = f"{provider}/{model_name}"
-    lm = dspy.LM(qualified, temperature=0.0, max_tokens=4096)
+    if provider == "local":
+        lm = dspy.LM(
+            f"openai/{model_name}",
+            api_base=os.environ.get("MLX_LM_BASE_URL", _LOCAL_BASE_URL),
+            api_key="not-needed",
+            temperature=0.0,
+            max_tokens=4096,
+        )
+    else:
+        env_var = _API_KEY_VARS[provider]
+        if not os.environ.get(env_var):
+            print(f"Missing {env_var}. Export it and re-run.", file=sys.stderr)
+            sys.exit(2)
+        lm = dspy.LM(f"{provider}/{model_name}", temperature=0.0, max_tokens=4096)
     dspy.configure(lm=lm)
     return lm
 
@@ -255,11 +271,14 @@ def evaluate(
     baseline: dspy.Predict,
     optimized: dspy.Predict,
     testset: list[dspy.Example],
+    threads: int = _EVAL_THREADS,
 ) -> list[CaseResult]:
     """Run both programs over the test set and collect per-case scores.
 
     Cases are evaluated in a thread pool; DSPy's LM client is thread-safe
     (MIPROv2's own evaluator uses the same pattern). Order is preserved.
+    Pass `threads=1` for a single-GPU local server where parallel requests
+    just queue.
     """
     def score(item: tuple[int, dspy.Example]) -> CaseResult:
         i, ex = item
@@ -275,7 +294,7 @@ def evaluate(
             optimized_score=similarity(o_out, ex.cleaned),
         )
 
-    with ThreadPoolExecutor(max_workers=_EVAL_THREADS) as pool:
+    with ThreadPoolExecutor(max_workers=threads) as pool:
         return list(pool.map(score, enumerate(testset)))
 
 
@@ -336,11 +355,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Optimize the OpenFlow cleanup prompt against the aawaaz dataset.",
     )
-    p.add_argument("--provider", choices=("anthropic", "openai"), default="anthropic")
+    p.add_argument(
+        "--provider", choices=("anthropic", "openai", "local"), default="anthropic"
+    )
     p.add_argument(
         "--model",
         default=None,
-        help="model name (default: claude-haiku-4-5 / gpt-4o-mini)",
+        help="model name (default per provider: claude-haiku-4-5 / "
+             "gpt-4o-mini / mlx-community/Qwen3.5-2B-OptiQ-4bit)",
     )
     p.add_argument("--optimizer", choices=("mipro", "bootstrap"), default="mipro")
     p.add_argument("--max-train", type=int, default=200)
@@ -385,7 +407,9 @@ def main(argv: list[str] | None = None) -> int:
         raise
 
     print("Evaluating on held-out test split...")
-    results = evaluate(baseline, optimized, test)
+    # mlx-lm.server serializes requests on a single GPU; parallel eval just queues.
+    eval_threads = 1 if args.provider == "local" else _EVAL_THREADS
+    results = evaluate(baseline, optimized, test, threads=eval_threads)
     print_report(results)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
