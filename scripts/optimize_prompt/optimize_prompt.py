@@ -133,12 +133,18 @@ def load_examples(
     max_train: int | None = None,
     max_val: int | None = None,
     seed: int = 0,
+    no_think: bool = False,
 ) -> tuple[list[dspy.Example], list[dspy.Example], list[dspy.Example]]:
     """Load the aawaaz dataset and return (train, val, test) as dspy.Example lists.
 
     If the dataset provides train+test, split test 50/50 into val/test.
     Otherwise split the single split 60/20/20. Auto-detect columns when
     `input_col`/`output_col` are None.
+
+    `no_think=True` appends ` /no_think` to every transcript — Qwen3.5's
+    convention for skipping the `<think>…</think>` preamble. Matches what
+    `openflow-prompt-test --no-think` does. Only set this when the task
+    model is a Qwen3.5 variant.
     """
     ds = load_dataset(_DATASET_ID)
     if not isinstance(ds, DatasetDict):
@@ -160,13 +166,16 @@ def load_examples(
         input_col = input_col or detected_in
         output_col = output_col or detected_out
 
+    suffix = " /no_think" if no_think else ""
+
     def to_examples(d: Dataset, limit: int | None) -> list[dspy.Example]:
         if limit is not None:
             d = d.select(range(min(limit, len(d))))
         rows: list[dict] = d.to_list()
         return [
-            dspy.Example(transcript=row[input_col], cleaned=row[output_col])
-            .with_inputs("transcript")
+            dspy.Example(
+                transcript=row[input_col] + suffix, cleaned=row[output_col]
+            ).with_inputs("transcript")
             for row in rows
         ]
 
@@ -347,7 +356,7 @@ def print_report(results: list[CaseResult]) -> None:
     print(f"\n{'id':>4}  {'baseline':>8}  {'optimized':>9}  {'delta':>6}  preview")
     print("-" * 78)
     for r in results:
-        preview = r.transcript[:40].replace("\n", " ")
+        preview = r.transcript.replace(" /no_think", "")[:40].replace("\n", " ")
         print(
             f"{r.example_id:>4}  {r.baseline_score:>8.3f}  "
             f"{r.optimized_score:>9.3f}  {r.delta:>+6.3f}  {preview}"
@@ -435,11 +444,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Hybrid mode: proposer = {_HYBRID_PROPOSER_MODEL}")
 
     print("Loading dataset...")
+    qwen_local = args.provider in ("local", "hybrid")
+    if qwen_local:
+        print("Appending ` /no_think` to every transcript (Qwen3.5 thinking-skip)")
     train, val, test = load_examples(
         input_col=args.input_col,
         output_col=args.output_col,
         max_train=args.max_train,
         max_val=args.max_val,
+        no_think=qwen_local,
     )
     print(f"Train={len(train)}  Val={len(val)}  Test={len(test)}")
 
