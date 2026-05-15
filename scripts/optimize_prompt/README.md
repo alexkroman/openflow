@@ -68,6 +68,7 @@ Override the server URL with `MLX_LM_BASE_URL=http://...:port/v1` if you
 run it elsewhere.
 
 Tradeoffs vs hosted:
+
 - **No transfer risk** — DSPy and the production app see the same weights.
 - **Much slower** — per-call latency is dominated by local inference. A
   full MIPROv2 run on `--max-train 200` can take hours.
