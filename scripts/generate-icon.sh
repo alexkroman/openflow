@@ -1,5 +1,5 @@
 #!/bin/bash
-# Generate AppIcon.appiconset from the mic.fill SF Symbol on a solid brand-color
+# Generate AppIcon.appiconset from the mic.fill SF Symbol on a solid black
 # squircle. Re-runnable; safe to commit the output.
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

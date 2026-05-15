@@ -12,11 +12,14 @@
 		043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */; };
 		0D01CB2F52A1A7EC58FFA360 /* HotkeyStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */; };
 		1C33BC9FB4B9670218906B4A /* OverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EECD10C11AB7A58617CAA1 /* OverlayView.swift */; };
+		374BF691F6B644903A9044FE /* OpenFlowEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 04146380047D78F17BFCD15D /* OpenFlowEngine */; };
+		55FC7902AA0A94D05A69E8EE /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3978081217C3C8E478F6E112 /* AppIcon.icon */; };
 		7C72B4DD6BD824535A0C4E76 /* AppCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139AA26A8F4B73857470E2C /* AppCoordinator.swift */; };
 		8DDD3212372A87C38AEC8C28 /* ModelLoadSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CA4BD53C8B4382DD3EAE8E6 /* ModelLoadSection.swift */; };
 		8E0D83AF1DB843906488FF7D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D02828C113256A90A18D1C /* AppDelegate.swift */; };
 		95074FA6AE11D6A4B3B4DC34 /* WizardController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B51C821A5037C71DEC840A /* WizardController.swift */; };
 		98CF00B2751D2A1BE71B899E /* FloatingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0178FD639B92FF2215426A06 /* FloatingPanel.swift */; };
+		9E87EC0FC74C8F645139FFCD /* PromptTestRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E27382DD12B60F907AC7EE /* PromptTestRunner.swift */; };
 		A7E11BA98334AFCB52D6F0DA /* WizardStepHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61CA98B201DBFB6C87BB07E3 /* WizardStepHeader.swift */; };
 		A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C1315CC840E8EB96963585 /* WizardView.swift */; };
 		A8C4E631A3B5253E79F25E5C /* ModelLoadState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F092E712D065AFCB941BD9 /* ModelLoadState.swift */; };
@@ -34,6 +37,7 @@
 		0DE182084E4ACF12A47020FE /* openflow */ = {isa = PBXFileReference; lastKnownFileType = folder; name = openflow; path = ../..; sourceTree = SOURCE_ROOT; };
 		25D02828C113256A90A18D1C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		38EECD10C11AB7A58617CAA1 /* OverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayView.swift; sourceTree = "<group>"; };
+		3978081217C3C8E478F6E112 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		3C98A9912C900B827A70525B /* OpenFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40FC9526CBA28E0702C1E0C4 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		44E4C1A65E1FF411001E1861 /* SettingUpStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingUpStepView.swift; sourceTree = "<group>"; };
@@ -44,6 +48,7 @@
 		6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8172C344625A9801EE3EDD97 /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
 		85BD99F76D74DC83DF42A8C9 /* PermissionsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsStepView.swift; sourceTree = "<group>"; };
+		91FFFD3374D1E3AD08AF6997 /* OpenFlowPromptTest */ = {isa = PBXFileReference; includeInIndex = 0; path = OpenFlowPromptTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B36D4FFE0020A0ACFA3EDE28 /* OverlayWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayWindowController.swift; sourceTree = "<group>"; };
 		B6884DBF867CBD4178E667D8 /* WizardWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardWindowController.swift; sourceTree = "<group>"; };
 		C1B51C821A5037C71DEC840A /* WizardController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WizardController.swift; sourceTree = "<group>"; };
@@ -51,6 +56,7 @@
 		CA816238DA3A9B22FA8A6FA6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D139AA26A8F4B73857470E2C /* AppCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCoordinator.swift; sourceTree = "<group>"; };
 		DD23241CC3362389725DD4AC /* OpenFlow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OpenFlow.entitlements; sourceTree = "<group>"; };
+		F2E27382DD12B60F907AC7EE /* PromptTestRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptTestRunner.swift; sourceTree = "<group>"; };
 		FBDE5CBA21D8CB13BF952C55 /* HotkeyStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyStepView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -61,6 +67,14 @@
 			files = (
 				AF7B374FF0B763C535E0965F /* OpenFlowEngine in Frameworks */,
 				01A8EE163040EC6870EDAA8F /* KeyboardShortcuts in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A06AD36D4AFB1C55D15CDB5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				374BF691F6B644903A9044FE /* OpenFlowEngine in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				3C98A9912C900B827A70525B /* OpenFlow.app */,
+				91FFFD3374D1E3AD08AF6997 /* OpenFlowPromptTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				5D389FE8BCB1A44149295D52 /* OpenFlow */,
+				E7DFCAF06D40AC5853AE0EC7 /* OpenFlowPromptTest */,
 				8891488D8BCA8EC7E841DE30 /* Packages */,
 				262F9F73BE590BF00927C90D /* Products */,
 			);
@@ -98,6 +114,7 @@
 				40FC9526CBA28E0702C1E0C4 /* App.swift */,
 				D139AA26A8F4B73857470E2C /* AppCoordinator.swift */,
 				25D02828C113256A90A18D1C /* AppDelegate.swift */,
+				3978081217C3C8E478F6E112 /* AppIcon.icon */,
 				6AF766D9BBC8DDDDD0B6F4FF /* Info.plist */,
 				62F092E712D065AFCB941BD9 /* ModelLoadState.swift */,
 				DD23241CC3362389725DD4AC /* OpenFlow.entitlements */,
@@ -175,9 +192,37 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		E7DFCAF06D40AC5853AE0EC7 /* OpenFlowPromptTest */ = {
+			isa = PBXGroup;
+			children = (
+				F2E27382DD12B60F907AC7EE /* PromptTestRunner.swift */,
+			);
+			name = OpenFlowPromptTest;
+			path = ../../Sources/OpenFlowPromptTest;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5ED3124D05AFD391DF629179 /* OpenFlowPromptTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1AAD6A5F9126755764D2938 /* Build configuration list for PBXNativeTarget "OpenFlowPromptTest" */;
+			buildPhases = (
+				B1D20C66B0B113EA2B5114A5 /* Sources */,
+				5A06AD36D4AFB1C55D15CDB5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenFlowPromptTest;
+			packageProductDependencies = (
+				04146380047D78F17BFCD15D /* OpenFlowEngine */,
+			);
+			productName = OpenFlowPromptTest;
+			productReference = 91FFFD3374D1E3AD08AF6997 /* OpenFlowPromptTest */;
+			productType = "com.apple.product-type.tool";
+		};
 		DBE3E26DF40FAC5974189496 /* OpenFlow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9B1423A7C6FA498F7DBB1104 /* Build configuration list for PBXNativeTarget "OpenFlow" */;
@@ -209,6 +254,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					5ED3124D05AFD391DF629179 = {
+						DevelopmentTeam = Y54ZB9JF63;
+						ProvisioningStyle = Automatic;
+					};
 					DBE3E26DF40FAC5974189496 = {
 						DevelopmentTeam = Y54ZB9JF63;
 						ProvisioningStyle = Manual;
@@ -234,6 +283,7 @@
 			projectRoot = "";
 			targets = (
 				DBE3E26DF40FAC5974189496 /* OpenFlow */,
+				5ED3124D05AFD391DF629179 /* OpenFlowPromptTest */,
 			);
 		};
 /* End PBXProject section */
@@ -243,6 +293,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55FC7902AA0A94D05A69E8EE /* AppIcon.icon in Resources */,
 				043F35DC1E377DCA7B5A5700 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -293,6 +344,14 @@
 				A7E11BA98334AFCB52D6F0DA /* WizardStepHeader.swift in Sources */,
 				A7E56C995D0E67E83B630135 /* WizardView.swift in Sources */,
 				03A9E8F0EC4DEAD979B7E110 /* WizardWindowController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1D20C66B0B113EA2B5114A5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E87EC0FC74C8F645139FFCD /* PromptTestRunner.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,6 +454,23 @@
 			};
 			name = Release;
 		};
+		BFA1F9ACBDEFE8548B2F3C20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.alex.OpenFlowPromptTest;
+				PRODUCT_NAME = "openflow-prompt-test";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
 		C7D1C15C2B16E1F7C3FCE15A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -433,6 +509,7 @@
 				CODE_SIGN_IDENTITY = 640A7F5A9754400D4A0491E7A6FB30542D907806;
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = Y54ZB9JF63;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -464,6 +541,23 @@
 			};
 			name = Debug;
 		};
+		FCCCC32DB31241F80246C83E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.alex.OpenFlowPromptTest;
+				PRODUCT_NAME = "openflow-prompt-test";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -481,6 +575,15 @@
 			buildConfigurations = (
 				04C1CD20AA4D5DD0AE4C01EB /* Debug */,
 				78F26285A70EBFF8CC23C380 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B1AAD6A5F9126755764D2938 /* Build configuration list for PBXNativeTarget "OpenFlowPromptTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BFA1F9ACBDEFE8548B2F3C20 /* Debug */,
+				FCCCC32DB31241F80246C83E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -506,6 +609,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		04146380047D78F17BFCD15D /* OpenFlowEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OpenFlowEngine;
+		};
 		5FD31D9560F5F2F87E38FEC4 /* OpenFlowEngine */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = OpenFlowEngine;

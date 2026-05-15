@@ -2,19 +2,17 @@
 import AppKit
 import Foundation
 
-// Brand color: saturated indigo (#4A5BE0).
-let brandColor = NSColor(srgbRed: 0x4A / 255.0, green: 0x5B / 255.0, blue: 0xE0 / 255.0, alpha: 1.0)
-// Apple's macOS app-icon template inscribes an 824×824 squircle inside the
-// 1024×1024 canvas, leaving a 100px margin all around for the Dock's shadow
-// and consistent visual sizing alongside built-in apps.
+// Black background with a white mic.fill SF Symbol, inscribed in the macOS
+// 1024×1024 template (824×824 live area, 100px margin) so the Dock's drop
+// shadow and Tahoe's icon chrome have somewhere to live without overlapping
+// the glyph.
+let brandColor = NSColor.black
 let liveAreaFraction: CGFloat = 824.0 / 1024.0
-let cornerRadiusFraction: CGFloat = 0.225  // of live area (Big Sur+ spec)
-let glyphFraction: CGFloat = 0.55  // of live area
+let cornerRadiusFraction: CGFloat = 0.225
+let glyphFraction: CGFloat = 0.55
 
 func renderIcon(size: CGFloat) -> NSImage {
   let intSize = Int(size)
-  // Draw directly into an NSBitmapImageRep so the pixel dimensions are
-  // exactly `size × size` regardless of the display's backing scale factor.
   let bmp = NSBitmapImageRep(
     bitmapDataPlanes: nil,
     pixelsWide: intSize,
@@ -35,7 +33,6 @@ func renderIcon(size: CGFloat) -> NSImage {
   ctx.imageInterpolation = .high
   NSGraphicsContext.current = ctx
 
-  // Squircle background, inset from the canvas to match the macOS template.
   let liveArea = size * liveAreaFraction
   let inset = (size - liveArea) / 2
   let rect = NSRect(x: inset, y: inset, width: liveArea, height: liveArea)
@@ -44,7 +41,6 @@ func renderIcon(size: CGFloat) -> NSImage {
   brandColor.setFill()
   path.fill()
 
-  // mic.fill SF Symbol, white, centered in the live area.
   let glyphPointSize = liveArea * glyphFraction
   let config = NSImage.SymbolConfiguration(pointSize: glyphPointSize, weight: .semibold)
   guard
@@ -56,7 +52,6 @@ func renderIcon(size: CGFloat) -> NSImage {
     img.addRepresentation(bmp)
     return img
   }
-  // Tint the symbol white.
   let tinted = NSImage(size: glyph.size, flipped: false) { drawRect in
     glyph.draw(in: drawRect)
     NSColor.white.set()
@@ -79,7 +74,6 @@ func renderIcon(size: CGFloat) -> NSImage {
 }
 
 func writePNG(_ image: NSImage, to url: URL) throws {
-  // Prefer the bitmap rep we attached directly (exact pixel size).
   let rep: NSBitmapImageRep
   if let bmp = image.representations.compactMap({ $0 as? NSBitmapImageRep }).first {
     rep = bmp

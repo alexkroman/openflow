@@ -8,9 +8,18 @@ final class OverlayBridge: ObservableObject {
   @Published var state: OverlayUIState = .idle
   @Published var levels: [Float] = Array(repeating: 0, count: waveformBarCount)
 
+  // Auto-gain: a running peak decays slowly between pushes so the bars stay
+  // responsive regardless of the user's mic input gain. Floor prevents
+  // divide-by-zero amplification of silence-floor noise into visible bars.
+  private var peak: Float = peakFloor
+  private static let peakFloor: Float = 0.0005
+  private static let peakDecay: Float = 0.97
+
   func pushLevel(_ value: Float) {
+    peak = max(value, max(Self.peakFloor, peak * Self.peakDecay))
+    let normalized = min(1, value / peak)
     levels.removeFirst()
-    levels.append(value)
+    levels.append(normalized)
   }
 }
 

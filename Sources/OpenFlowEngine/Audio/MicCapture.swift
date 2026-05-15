@@ -100,19 +100,31 @@ public actor MicCapture: MicCaptureProtocol {
     let raw = rawSamples
     rawSamples.removeAll(keepingCapacity: false)
 
-    let result = Self.downsample(raw, fromRate: inputSampleRate, toRate: targetSampleRate)
+    let downsampled = Self.downsample(raw, fromRate: inputSampleRate, toRate: targetSampleRate)
+    // Peak-normalize before handing off to STT: macOS mic gain can leave samples
+    // 100-1000x quieter than the ASR encoder expects, dragging mel features into
+    // the noise floor. 0.95 target leaves headroom against clipping artifacts.
+    let result = Self.peakNormalize(downsampled, target: 0.95)
 
     let durationMs = Int((Double(result.count) / targetSampleRate) * 1000)
-    let peak = result.map { abs($0) }.max() ?? 0
+    let preNormPeak = downsampled.map { abs($0) }.max() ?? 0
     let rms = result.withUnsafeBufferPointer(Self.rms)
     Self.logger.info(
       """
       stop rawSamples=\(raw.count) outSamples=\(result.count) durationMs=\(durationMs) \
-      peak=\(peak) rms=\(rms) tap=\(self.counters.tapFired) appended=\(self.appendCalls)
+      preNormPeak=\(preNormPeak) rms=\(rms) tap=\(self.counters.tapFired) appended=\(self.appendCalls)
       """)
     counters.tapFired = 0
     appendCalls = 0
     return result
+  }
+
+  private static func peakNormalize(_ samples: [Float], target: Float) -> [Float] {
+    guard let peak = samples.lazy.map({ abs($0) }).max(), peak > 1e-6 else {
+      return samples
+    }
+    let gain = target / peak
+    return samples.map { $0 * gain }
   }
 
   private func append(_ chunk: [Float]) {

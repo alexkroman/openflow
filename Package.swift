@@ -20,7 +20,8 @@ let package = Package(
         ),
         .executableTarget(
             name: "OpenFlowPromptTest",
-            dependencies: ["OpenFlowEngine"]
+            dependencies: ["OpenFlowEngine"],
+            exclude: ["cases.json"]
         ),
         .testTarget(
             name: "OpenFlowEngineTests",

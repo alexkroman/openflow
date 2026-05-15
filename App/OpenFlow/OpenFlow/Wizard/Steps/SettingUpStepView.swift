@@ -7,7 +7,10 @@ struct SettingUpStepView: View {
 
   var body: some View {
     VStack(spacing: 0) {
-      header
+      WizardStepHeader(
+        title: "Setting up OpenFlow",
+        subtitle: "We're downloading the on-device models. This happens once."
+      )
       Divider()
       Form {
         ModelLoadSection(
@@ -19,16 +22,5 @@ struct SettingUpStepView: View {
       .formStyle(.grouped)
       .scrollDisabled(true)
     }
-  }
-
-  private var header: some View {
-    VStack(alignment: .leading, spacing: 6) {
-      Text("Setting up OpenFlow").font(.title).bold()
-      Text("We're downloading the on-device models. This happens once.")
-        .foregroundStyle(.secondary)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-    .frame(maxWidth: .infinity, alignment: .leading)
-    .padding(28)
   }
 }

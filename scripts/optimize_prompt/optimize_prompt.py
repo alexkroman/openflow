@@ -86,12 +86,26 @@ _DATASET_ID = "shantanugoel/aawaaz-transcript-cleanup-dataset"
 _DEFAULT_MODELS = {
     "anthropic": "claude-haiku-4-5",
     "openai": "gpt-4o-mini",
+    "local": "mlx-community/Qwen3.5-2B-OptiQ-4bit",
 }
 
 _API_KEY_VARS = {
     "anthropic": "ANTHROPIC_API_KEY",
     "openai": "OPENAI_API_KEY",
 }
+
+_LOCAL_BASE_URL = "http://localhost:8080/v1"
+
+# Hybrid: smart frontier model proposes instruction candidates, local Qwen
+# scores them. Sonnet over Haiku because the proposer only fires a handful
+# of times and benefits from more creative reformulations.
+_HYBRID_PROPOSER_MODEL = "anthropic/claude-sonnet-4-5"
+
+# Thinking is disabled via chat_template_kwargs (see _build_local_lm), so
+# outputs are short — just the cleaned text. 2048 covers any reasonable
+# transcript length with headroom.
+_LOCAL_MAX_TOKENS = 2048
+_HOSTED_MAX_TOKENS = 4096
 
 
 def detect_columns(column_names: list[str]) -> tuple[str, str]:
@@ -117,6 +131,7 @@ def load_examples(
     output_col: str | None = None,
     max_train: int | None = None,
     max_val: int | None = None,
+    max_test: int | None = None,
     seed: int = 0,
 ) -> tuple[list[dspy.Example], list[dspy.Example], list[dspy.Example]]:
     """Load the aawaaz dataset and return (train, val, test) as dspy.Example lists.
@@ -158,27 +173,72 @@ def load_examples(
     return (
         to_examples(train_raw, max_train),
         to_examples(val_raw, max_val),
-        to_examples(test_raw, None),
+        to_examples(test_raw, max_test),
     )
 
 
-def configure_lm(provider: str, model: str | None) -> dspy.LM:
-    """Build and register a dspy.LM. Exits 2 if the required env var is unset."""
-    if provider not in _API_KEY_VARS:
-        print(
-            f"Unknown provider {provider!r}; expected one of {list(_API_KEY_VARS)}.",
-            file=sys.stderr,
-        )
-        sys.exit(2)
+def _build_local_lm(model_name: str) -> dspy.LM:
+    # chat_template_kwargs.enable_thinking=false: Qwen team's official switch
+    # for skipping the reasoning preamble. `/no_think` is ignored by the OptiQ
+    # fine-tune (it writes a `reasoning` field and leaves `content` empty).
+    # temperature=0.3 (not 0.0): DSPy's chat adapter expects responses wrapped
+    # in [[ ## field ## ]] markers, but the production prompt says "Output
+    # ONLY the cleaned text, no preamble, no XML tags." The model gets stuck
+    # in a repetition loop reconciling the two at greedy decoding. Mild
+    # stochasticity breaks the loop; aggregate scoring still ranks reliably.
+    return dspy.LM(
+        f"openai/{model_name}",
+        api_base=os.environ.get("MLX_LM_BASE_URL", _LOCAL_BASE_URL),
+        api_key="not-needed",
+        temperature=0.3,
+        max_tokens=_LOCAL_MAX_TOKENS,
+        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+    )
+
+
+def _build_hosted_lm(provider: str, model_name: str) -> dspy.LM:
     env_var = _API_KEY_VARS[provider]
     if not os.environ.get(env_var):
         print(f"Missing {env_var}. Export it and re-run.", file=sys.stderr)
         sys.exit(2)
-    model_name = model or _DEFAULT_MODELS[provider]
-    qualified = f"{provider}/{model_name}"
-    lm = dspy.LM(qualified, temperature=0.0, max_tokens=4096)
-    dspy.configure(lm=lm)
-    return lm
+    return dspy.LM(
+        f"{provider}/{model_name}", temperature=0.0, max_tokens=_HOSTED_MAX_TOKENS
+    )
+
+
+def configure_lm(provider: str, model: str | None) -> tuple[dspy.LM, dspy.LM | None]:
+    """Build and register the task LM; return (task_lm, proposer_lm).
+
+    proposer_lm is non-None only for `hybrid`, where Sonnet generates
+    instruction candidates and the local Qwen scores them.
+
+    Providers:
+      - `anthropic` / `openai`: single hosted model for both proposer and task.
+      - `local`: single mlx-lm.server-hosted Qwen for both roles. Requires
+        $MLX_LM_BASE_URL or http://localhost:8080/v1.
+      - `hybrid`: Sonnet proposer + local Qwen task model. Requires both
+        ANTHROPIC_API_KEY and a running mlx-lm.server.
+    """
+    if provider not in (*_DEFAULT_MODELS, "hybrid"):
+        print(
+            f"Unknown provider {provider!r}; expected one of "
+            f"{[*_DEFAULT_MODELS, 'hybrid']}.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    proposer: dspy.LM | None = None
+    if provider == "hybrid":
+        task = _build_local_lm(model or _DEFAULT_MODELS["local"])
+        # Force ANTHROPIC_API_KEY check via the hosted builder.
+        proposer = _build_hosted_lm("anthropic", _HYBRID_PROPOSER_MODEL.split("/", 1)[1])
+    elif provider == "local":
+        task = _build_local_lm(model or _DEFAULT_MODELS["local"])
+    else:
+        task = _build_hosted_lm(provider, model or _DEFAULT_MODELS[provider])
+
+    dspy.configure(lm=task)
+    return task, proposer
 
 
 def build_program(seed_prompt: str) -> dspy.Predict:
@@ -204,10 +264,19 @@ def optimize(
     trainset: list[dspy.Example],
     valset: list[dspy.Example],
     method: str = "mipro",
+    prompt_model: dspy.LM | None = None,
 ) -> dspy.Predict:
-    """Run the chosen optimizer and return the compiled program."""
+    """Run the chosen optimizer and return the compiled program.
+
+    `prompt_model`, when provided, drives MIPROv2's instruction proposer.
+    The globally-configured `dspy.LM` still drives task evaluation. Useful
+    for the hybrid setup (Sonnet proposer + local Qwen task model).
+    """
     if method == "mipro":
-        optimizer = dspy.MIPROv2(metric=cleanup_metric, auto="light")
+        kwargs = {"metric": cleanup_metric, "auto": "light"}
+        if prompt_model is not None:
+            kwargs["prompt_model"] = prompt_model
+        optimizer = dspy.MIPROv2(**kwargs)
         return optimizer.compile(
             student=program,
             trainset=trainset,
@@ -255,11 +324,14 @@ def evaluate(
     baseline: dspy.Predict,
     optimized: dspy.Predict,
     testset: list[dspy.Example],
+    threads: int = _EVAL_THREADS,
 ) -> list[CaseResult]:
     """Run both programs over the test set and collect per-case scores.
 
     Cases are evaluated in a thread pool; DSPy's LM client is thread-safe
     (MIPROv2's own evaluator uses the same pattern). Order is preserved.
+    Pass `threads=1` for a single-GPU local server where parallel requests
+    just queue.
     """
     def score(item: tuple[int, dspy.Example]) -> CaseResult:
         i, ex = item
@@ -275,7 +347,7 @@ def evaluate(
             optimized_score=similarity(o_out, ex.cleaned),
         )
 
-    with ThreadPoolExecutor(max_workers=_EVAL_THREADS) as pool:
+    with ThreadPoolExecutor(max_workers=threads) as pool:
         return list(pool.map(score, enumerate(testset)))
 
 
@@ -336,15 +408,28 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description="Optimize the OpenFlow cleanup prompt against the aawaaz dataset.",
     )
-    p.add_argument("--provider", choices=("anthropic", "openai"), default="anthropic")
+    p.add_argument(
+        "--provider",
+        choices=("anthropic", "openai", "local", "hybrid"),
+        default="anthropic",
+        help="anthropic|openai = hosted, fast; local = mlx-lm.server, no "
+             "transfer risk; hybrid = Sonnet proposer + local Qwen task model",
+    )
     p.add_argument(
         "--model",
         default=None,
-        help="model name (default: claude-haiku-4-5 / gpt-4o-mini)",
+        help="model name (default per provider: claude-haiku-4-5 / "
+             "gpt-4o-mini / mlx-community/Qwen3.5-2B-OptiQ-4bit)",
     )
     p.add_argument("--optimizer", choices=("mipro", "bootstrap"), default="mipro")
     p.add_argument("--max-train", type=int, default=200)
     p.add_argument("--max-val", type=int, default=100)
+    p.add_argument(
+        "--max-test",
+        type=int,
+        default=25,
+        help="held-out test split size (default 25; eval runs 2x LM calls per case)",
+    )
     p.add_argument("--input-col", default=None)
     p.add_argument("--output-col", default=None)
     p.add_argument("--out", type=Path, default=_DEFAULT_OUT)
@@ -360,7 +445,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Seed prompt: {len(seed)} chars")
 
     print(f"Configuring LM: {args.provider}")
-    configure_lm(args.provider, args.model)
+    _, proposer_lm = configure_lm(args.provider, args.model)
+    if proposer_lm is not None:
+        print(f"Hybrid mode: proposer = {_HYBRID_PROPOSER_MODEL}")
 
     print("Loading dataset...")
     train, val, test = load_examples(
@@ -368,6 +455,7 @@ def main(argv: list[str] | None = None) -> int:
         output_col=args.output_col,
         max_train=args.max_train,
         max_val=args.max_val,
+        max_test=args.max_test,
     )
     print(f"Train={len(train)}  Val={len(val)}  Test={len(test)}")
 
@@ -375,7 +463,9 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"Running optimizer ({args.optimizer})...")
     try:
-        optimized = optimize(baseline, train, val, method=args.optimizer)
+        optimized = optimize(
+            baseline, train, val, method=args.optimizer, prompt_model=proposer_lm
+        )
     except Exception:
         # Save the baseline render as a partial so a long run isn't lost.
         partial = args.out.with_suffix(".partial.txt")
@@ -385,7 +475,9 @@ def main(argv: list[str] | None = None) -> int:
         raise
 
     print("Evaluating on held-out test split...")
-    results = evaluate(baseline, optimized, test)
+    # mlx-lm.server serializes requests on a single GPU; parallel eval just queues.
+    eval_threads = 1 if args.provider in ("local", "hybrid") else _EVAL_THREADS
+    results = evaluate(baseline, optimized, test, threads=eval_threads)
     print_report(results)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
