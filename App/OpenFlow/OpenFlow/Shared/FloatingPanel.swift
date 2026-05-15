@@ -16,6 +16,7 @@ enum FloatingPanel {
     )
     p.isOpaque = false
     p.backgroundColor = .clear
+    p.hasShadow = false
     p.level = .floating
     p.collectionBehavior = collectionBehavior
     p.hidesOnDeactivate = false
