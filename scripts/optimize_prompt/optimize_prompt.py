@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import dspy
-from datasets import Dataset, DatasetDict, load_dataset
+from datasets import Dataset, DatasetDict, concatenate_datasets, load_dataset
 
 
 def _levenshtein(a: str, b: str) -> int:
@@ -83,6 +83,21 @@ _OUTPUT_CANDIDATES = ("cleaned", "output", "target", "clean", "corrected")
 
 _DATASET_ID = "shantanugoel/aawaaz-transcript-cleanup-dataset"
 
+# Categories we train/eval against. The HF dataset has no category column —
+# each category is its own JSONL file at the repo root, so we load an explicit
+# allowlist. Excluded: recipe_cooking, shopping_lists, medical_clinical,
+# legal_contract.
+_DATASET_CATEGORIES = (
+    "academic_research",
+    "casual_conversation",
+    "creative_writing",
+    "email_professional",
+    "financial_business",
+    "meeting_notes",
+    "self_corrections_heavy",
+    "technical_code",
+)
+
 _DEFAULT_MODELS = {
     "anthropic": "claude-haiku-4-5",
     "openai": "gpt-4o-mini",
@@ -126,6 +141,15 @@ def detect_columns(column_names: list[str]) -> tuple[str, str]:
     return input_col, output_col
 
 
+def _split_evenly(total: int, buckets: int) -> list[int]:
+    """Distribute `total` into `buckets` quantities differing by at most 1.
+
+    Earlier buckets get the +1 when the split isn't exact.
+    """
+    base, extra = divmod(total, buckets)
+    return [base + (1 if i < extra else 0) for i in range(buckets)]
+
+
 def load_examples(
     input_col: str | None = None,
     output_col: str | None = None,
@@ -136,24 +160,41 @@ def load_examples(
 ) -> tuple[list[dspy.Example], list[dspy.Example], list[dspy.Example]]:
     """Load the aawaaz dataset and return (train, val, test) as dspy.Example lists.
 
-    If the dataset provides train+test, split test 50/50 into val/test.
-    Otherwise split the single split 60/20/20. Auto-detect columns when
-    `input_col`/`output_col` are None.
-    """
-    ds = load_dataset(_DATASET_ID)
-    if not isinstance(ds, DatasetDict):
-        raise TypeError(
-            f"Expected DatasetDict from {_DATASET_ID}, got {type(ds).__name__}"
-        )
+    Each category in `_DATASET_CATEGORIES` is split 60/20/20 independently
+    with the same seed. Train and val are concatenated then shuffled before
+    the global cap is applied (so categories aren't ordered head-first).
+    Test is stratified: `max_test` is divided as evenly as possible across
+    categories so eval coverage doesn't skew toward the larger ones.
 
-    if "train" in ds and "test" in ds:
-        train_raw, rest = ds["train"], ds["test"]
-    else:
-        full: Dataset = ds["train"] if "train" in ds else next(iter(ds.values()))
+    Auto-detect columns when `input_col`/`output_col` are None.
+    """
+    test_caps = _split_evenly(max_test, len(_DATASET_CATEGORIES)) \
+        if max_test is not None else [None] * len(_DATASET_CATEGORIES)
+
+    train_parts: list[Dataset] = []
+    val_parts: list[Dataset] = []
+    test_parts: list[Dataset] = []
+    for name, test_cap in zip(_DATASET_CATEGORIES, test_caps):
+        ds = load_dataset(_DATASET_ID, data_files=f"{name}.jsonl")
+        if not isinstance(ds, DatasetDict):
+            raise TypeError(
+                f"Expected DatasetDict from {_DATASET_ID}/{name}.jsonl, "
+                f"got {type(ds).__name__}"
+            )
+        full: Dataset = ds["train"]
         first = full.train_test_split(test_size=0.4, seed=seed)
-        train_raw, rest = first["train"], first["test"]
-    split = rest.train_test_split(test_size=0.5, seed=seed)
-    val_raw, test_raw = split["train"], split["test"]
+        train_part, rest = first["train"], first["test"]
+        split = rest.train_test_split(test_size=0.5, seed=seed)
+        val_part, test_part = split["train"], split["test"]
+        if test_cap is not None:
+            test_part = test_part.select(range(min(test_cap, len(test_part))))
+        train_parts.append(train_part)
+        val_parts.append(val_part)
+        test_parts.append(test_part)
+
+    train_raw = concatenate_datasets(train_parts).shuffle(seed=seed)
+    val_raw = concatenate_datasets(val_parts).shuffle(seed=seed)
+    test_raw = concatenate_datasets(test_parts)
 
     if not input_col or not output_col:
         detected_in, detected_out = detect_columns(list(train_raw.column_names))
@@ -173,7 +214,7 @@ def load_examples(
     return (
         to_examples(train_raw, max_train),
         to_examples(val_raw, max_val),
-        to_examples(test_raw, max_test),
+        to_examples(test_raw, None),
     )
 
 
@@ -427,8 +468,8 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--max-test",
         type=int,
-        default=25,
-        help="held-out test split size (default 25; eval runs 2x LM calls per case)",
+        default=100,
+        help="held-out test split size (default 100; eval runs 2x LM calls per case)",
     )
     p.add_argument("--input-col", default=None)
     p.add_argument("--output-col", default=None)
