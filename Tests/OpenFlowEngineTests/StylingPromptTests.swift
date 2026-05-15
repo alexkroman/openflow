@@ -7,7 +7,7 @@ struct StylingPromptTests {
   @Test("system prompt forbids commentary")
   func systemForbidsCommentary() {
     #expect(StylingPrompt.system.contains("ONLY"))
-    #expect(StylingPrompt.system.contains("nothing else"))
+    #expect(StylingPrompt.system.contains("no commentary"))
   }
 
   @Test("user message wraps transcript in tags")
