@@ -76,38 +76,4 @@ public enum PermissionsChecker {
       element, kAXFocusedUIElementAttribute as CFString, &value)
   }
 
-  @MainActor
-  public static func openMicrophoneSettings() {
-    openPrivacyPane(suffix: "Privacy_Microphone")
-  }
-
-  @MainActor
-  private static func openPrivacyPane(suffix: String) {
-    // The x-apple.systempreferences URL scheme is unreliable on macOS 26;
-    // AppleScript's "reveal anchor" is the path that actually works.
-    let pane = "com.apple.settings.PrivacySecurity.extension"
-    let source = """
-      tell application "System Settings"
-        activate
-        reveal anchor "\(suffix)" of pane id "\(pane)"
-      end tell
-      """
-    if let script = NSAppleScript(source: source) {
-      var error: NSDictionary?
-      script.executeAndReturnError(&error)
-      if error == nil { return }
-    }
-    legacyOpenPrivacyPane(suffix: suffix)
-  }
-
-  @MainActor
-  private static func legacyOpenPrivacyPane(suffix: String) {
-    let modern = URL(
-      string: "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?\(suffix)")!
-    let legacy = URL(
-      string: "x-apple.systempreferences:com.apple.preference.security?\(suffix)")!
-    if !NSWorkspace.shared.open(modern) {
-      _ = NSWorkspace.shared.open(legacy)
-    }
-  }
 }

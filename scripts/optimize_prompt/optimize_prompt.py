@@ -314,7 +314,7 @@ def optimize(
     for the hybrid setup (Sonnet proposer + local Qwen task model).
     """
     if method == "mipro":
-        kwargs = {"metric": cleanup_metric, "auto": "light"}
+        kwargs = {"metric": cleanup_metric, "auto": "medium"}
         if prompt_model is not None:
             kwargs["prompt_model"] = prompt_model
         optimizer = dspy.MIPROv2(**kwargs)
@@ -419,6 +419,32 @@ def print_report(results: list[CaseResult]) -> None:
             print(f"    optimized: {r.optimized!r}")
 
 
+def write_swift_prompt(swift_path: Path, prompt: str) -> None:
+    """Replace the `system` block in StylingPrompt.swift with `prompt`.
+
+    Inverse of `extract_seed_prompt`: escapes runtime `\\` back to source
+    `\\\\` and indents each non-blank line to match the closing `\"\"\"`.
+    Skips the cosmetic `\\<newline>` line wrapping the hand-written file
+    uses — Swift accepts long lines, and round-trips don't need to mirror
+    the original wrapping.
+    """
+    text = swift_path.read_text()
+    m = _PROMPT_RE.search(text)
+    if not m:
+        raise ValueError(f"Could not find system prompt in {swift_path}")
+    indent = "    "
+    for line in m.group(1).split("\n"):
+        if line.strip():
+            indent = line[: len(line) - len(line.lstrip(" \t"))]
+            break
+    escaped = prompt.rstrip("\n").replace("\\", "\\\\")
+    new_body = "\n".join(
+        (indent + line) if line.strip() else ""
+        for line in escaped.split("\n")
+    )
+    swift_path.write_text(text[: m.start(1)] + new_body + text[m.end(1) :])
+
+
 def render_prompt(compiled) -> str:
     """Serialize a compiled DSPy program back into a single text block
     suitable for pasting into StylingPrompt.swift.
@@ -464,12 +490,12 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument("--optimizer", choices=("mipro", "bootstrap"), default="mipro")
     p.add_argument("--max-train", type=int, default=200)
-    p.add_argument("--max-val", type=int, default=100)
+    p.add_argument("--max-val", type=int, default=300)
     p.add_argument(
         "--max-test",
         type=int,
-        default=100,
-        help="held-out test split size (default 100; eval runs 2x LM calls per case)",
+        default=500,
+        help="held-out test split size (default 500; eval runs 2x LM calls per case)",
     )
     p.add_argument("--input-col", default=None)
     p.add_argument("--output-col", default=None)
@@ -521,9 +547,13 @@ def main(argv: list[str] | None = None) -> int:
     results = evaluate(baseline, optimized, test, threads=eval_threads)
     print_report(results)
 
+    rendered = render_prompt(optimized)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(render_prompt(optimized))
+    args.out.write_text(rendered)
     print(f"\nWrote optimized prompt to {args.out}")
+
+    write_swift_prompt(args.swift_prompt, rendered)
+    print(f"Updated {args.swift_prompt}")
     return 0
 
 
