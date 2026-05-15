@@ -15,7 +15,6 @@ public actor MicCapture: MicCaptureProtocol {
   private let engine = AVAudioEngine()
   private var rawSamples: [Float] = []
   private var inputSampleRate: Double = 0
-  private var cachedInputFormat: AVAudioFormat?
   private var prepared = false
   private let targetSampleRate: Double = 16_000
 
@@ -40,7 +39,6 @@ public actor MicCapture: MicCaptureProtocol {
     if prepared { return }
     let input = engine.inputNode
     let inputFormat = input.outputFormat(forBus: 0)
-    self.cachedInputFormat = inputFormat
     self.inputSampleRate = inputFormat.sampleRate
     engine.prepare()
     prepared = true
@@ -51,8 +49,13 @@ public actor MicCapture: MicCaptureProtocol {
   public func start() async throws {
     rawSamples.removeAll(keepingCapacity: true)
     let input = engine.inputNode
-    let inputFormat = cachedInputFormat ?? input.outputFormat(forBus: 0)
-    self.cachedInputFormat = inputFormat
+    // Always re-read the live input format here. AVAudioEngine's inputNode
+    // output format follows the active audio device, and the user can switch
+    // devices (AirPods, Bluetooth mic, USB interface) at any point between
+    // warmUp() and start(). Calling installTap with a format that no longer
+    // matches the node's current output raises an uncatchable NSException
+    // from AVAudioEngineImpl::InstallTapOnNode and aborts the process.
+    let inputFormat = input.outputFormat(forBus: 0)
     self.inputSampleRate = inputFormat.sampleRate
 
     Self.logger.info(
@@ -60,6 +63,12 @@ public actor MicCapture: MicCaptureProtocol {
       start sampleRate=\(inputFormat.sampleRate) channels=\(inputFormat.channelCount) \
       interleaved=\(inputFormat.isInterleaved)
       """)
+
+    // Defensive: installTap onto a bus that already has a tap also raises.
+    // Stale taps shouldn't normally survive stop(), but if a previous start()
+    // threw after installTap (e.g. engine.start() failed) the catch path
+    // already removes it; this is the safety net for any path we missed.
+    input.removeTap(onBus: 0)
 
     // The tap callback runs on a real-time audio thread (not the actor).
     // Ship a Sendable [Float] chunk to the actor via Task.
