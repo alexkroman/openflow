@@ -40,6 +40,11 @@ struct OverlayView: View {
       .frame(width: expandedWidth, height: expandedHeight)
       .contentShape(Rectangle())
       .onHover { isHovered = $0 }
+      // Transparent margin so the capsule's drop shadow has room to render
+      // without being clipped by the panel's contentRect (most visible at the
+      // rounded ends when the pill is fully expanded). Matches
+      // OverlayWindowController.shadowMargin.
+      .padding(OverlayWindowController.shadowMargin)
       .accessibilityElement(children: .ignore)
       .accessibilityLabel(accessibilityLabel)
   }

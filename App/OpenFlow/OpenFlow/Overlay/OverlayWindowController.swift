@@ -34,7 +34,15 @@ private struct OverlayHost: View {
 final class OverlayWindowController {
   private static let customOriginXKey = "OpenFlowOverlayCustomOriginX"
   private static let customOriginYKey = "OpenFlowOverlayCustomOriginY"
-  private static let panelSize = CGSize(width: 120, height: 28)
+  // The panel is sized larger than the visible pill so SwiftUI's drop shadow
+  // (radius 12, y-offset 4) has room to render without being clipped by the
+  // window's contentRect — especially around the capsule's rounded ends, where
+  // the shadow extends furthest from the pill body.
+  static let pillSize = CGSize(width: 120, height: 28)
+  static let shadowMargin: CGFloat = 16
+  private static let panelSize = CGSize(
+    width: pillSize.width + shadowMargin * 2,
+    height: pillSize.height + shadowMargin * 2)
 
   private let panel: NSPanel
   private let hosting: NSHostingView<OverlayHost>
@@ -44,6 +52,8 @@ final class OverlayWindowController {
   init() {
     let host = OverlayHost(bridge: bridge)
     self.hosting = NSHostingView(rootView: host)
+    self.hosting.wantsLayer = true
+    self.hosting.layer?.backgroundColor = .clear
     self.panel = FloatingPanel.make(
       size: Self.panelSize,
       collectionBehavior: [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary],
@@ -93,7 +103,7 @@ final class OverlayWindowController {
     } else {
       origin = NSPoint(
         x: screen.visibleFrame.midX - frame.width / 2,
-        y: screen.visibleFrame.minY + 80)
+        y: screen.visibleFrame.minY + 80 - Self.shadowMargin)
     }
     suppressOriginPersist = true
     panel.setFrameOrigin(origin)
