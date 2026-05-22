@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum OverlayUIState: Equatable {
@@ -6,18 +7,31 @@ enum OverlayUIState: Equatable {
   case processing
 }
 
+/// Which hotkey started the current (or most recent) recording session.
+/// Drives the stop-hint copy on the recording card.
+enum RecordingMode: Equatable {
+  case pushToTalk
+  case handsFree
+}
+
 struct OverlayView: View {
   let state: OverlayUIState
+  let recordingMode: RecordingMode
   let levels: [Float]
-  let hotkeyLabel: String
+  let holdHotkeySpelled: String
+  let tapHotkeySpelled: String
 
   @State private var isHovered = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-  private let expandedWidth: CGFloat = 120
-  private let expandedHeight: CGFloat = 28
+  // Idle-not-hovered: a small empty capsule. Acts as an unobtrusive cursor
+  // target — the surrounding hit area expands the pill on hover.
   private let collapsedWidth: CGFloat = 32
   private let collapsedHeight: CGFloat = 8
+  // Expanded info card: mode-name labels and spelled-out hotkeys, or the
+  // waveform + a mode-specific stop hint during recording.
+  private let expandedWidth: CGFloat = 130
+  private let expandedHeight: CGFloat = 50
 
   private var isExpanded: Bool {
     switch state {
@@ -26,24 +40,34 @@ struct OverlayView: View {
     }
   }
 
+  private var currentSize: CGSize {
+    isExpanded
+      ? CGSize(width: expandedWidth, height: expandedHeight)
+      : CGSize(width: collapsedWidth, height: collapsedHeight)
+  }
+
   var body: some View {
     capsule
-      .frame(
-        width: isExpanded ? expandedWidth : collapsedWidth,
-        height: isExpanded ? expandedHeight : collapsedHeight
-      )
+      .frame(width: currentSize.width, height: currentSize.height)
       .animation(
         reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.85),
-        value: isExpanded
+        value: currentSize
       )
       .overlay(content)
+      // Outer frame holds the largest possible footprint so the panel doesn't
+      // need to resize when the pill grows/shrinks. shadowMargin in
+      // OverlayWindowController matches expandedWidth × expandedHeight.
       .frame(width: expandedWidth, height: expandedHeight)
       .contentShape(Rectangle())
-      .onHover { isHovered = $0 }
-      // Transparent margin so the capsule's drop shadow has room to render
-      // without being clipped by the panel's contentRect (most visible at the
-      // rounded ends when the pill is fully expanded). Matches
-      // OverlayWindowController.shadowMargin.
+      .onHover { hovered in
+        isHovered = hovered
+        if hovered {
+          NSCursor.openHand.push()
+        } else {
+          NSCursor.pop()
+        }
+      }
+      .help("Drag to reposition")
       .padding(OverlayWindowController.shadowMargin)
       .accessibilityElement(children: .ignore)
       .accessibilityLabel(accessibilityLabel)
@@ -55,40 +79,75 @@ struct OverlayView: View {
       .overlay(
         Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
       )
-      .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
+      .shadow(color: .black.opacity(0.18), radius: 8, y: 2)
   }
 
   @ViewBuilder
   private var content: some View {
-    if isExpanded {
-      switch state {
-      case .idle:
-        HStack(spacing: 6) {
-          Image(systemName: "mic.fill")
-            .font(.callout)
-            .foregroundStyle(Color.white.opacity(0.7))
-          Text(hotkeyLabel)
-            .font(.callout.monospaced().weight(.semibold))
-            .foregroundStyle(Color.white)
-        }
-        .transition(.opacity)
-      case .recording:
-        WaveformBars(levels: levels)
-          .transition(.opacity)
-      case .processing:
-        ProgressView()
-          .controlSize(.small)
-          .tint(Color.white)
-          .transition(.opacity)
+    switch state {
+    case .idle:
+      if isHovered {
+        expandedIdleCard.transition(.opacity)
       }
+      // Idle and not hovered: render nothing — the capsule itself is the
+      // entire visual, a small empty dot.
+    case .recording:
+      recordingCard.transition(.opacity)
+    case .processing:
+      ProgressView()
+        .controlSize(.small)
+        .tint(Color.white)
+        .transition(.opacity)
+    }
+  }
+
+  private var expandedIdleCard: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      hotkeyRow(mode: "Push to talk", value: holdHotkeySpelled)
+      hotkeyRow(mode: "Hands-free", value: tapHotkeySpelled)
+    }
+    .padding(.horizontal, 12)
+  }
+
+  private var recordingCard: some View {
+    VStack(spacing: 2) {
+      WaveformBars(levels: levels)
+      Text(stopHint)
+        .font(.system(size: 8, weight: .medium))
+        .foregroundStyle(Color.white.opacity(0.75))
+        .lineLimit(1)
+    }
+  }
+
+  private var stopHint: String {
+    switch recordingMode {
+    case .pushToTalk: return "Release to stop"
+    case .handsFree: return "\(tapHotkeySpelled) to stop"
+    }
+  }
+
+  private func hotkeyRow(mode: String, value: String) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Text(mode)
+        .font(.system(size: 6, weight: .semibold))
+        .foregroundStyle(Color.white.opacity(0.6))
+      Text(value)
+        .font(.system(size: 7, weight: .medium))
+        .foregroundStyle(Color.white)
     }
   }
 
   private var accessibilityLabel: String {
     switch state {
-    case .idle: return "OpenFlow ready. Hold \(hotkeyLabel) to dictate."
-    case .recording: return "Recording."
-    case .processing: return "Processing."
+    case .idle:
+      return "OpenFlow ready. Push to talk with \(holdHotkeySpelled), or hands-free with \(tapHotkeySpelled)."
+    case .recording:
+      switch recordingMode {
+      case .pushToTalk: return "Recording. Release \(holdHotkeySpelled) to stop."
+      case .handsFree: return "Recording. Tap \(tapHotkeySpelled) to stop."
+      }
+    case .processing:
+      return "Processing."
     }
   }
 }
@@ -97,9 +156,8 @@ private struct WaveformBars: View {
   let levels: [Float]
 
   private let barWidth: CGFloat = 2
-  private let barSpacing: CGFloat = 3
-  private let maxBarHeight: CGFloat = 18
-  private let minBarHeightFraction: CGFloat = 0.10
+  private let barSpacing: CGFloat = 2
+  private let maxBarHeight: CGFloat = 12
 
   var body: some View {
     HStack(spacing: barSpacing) {
@@ -114,12 +172,11 @@ private struct WaveformBars: View {
   }
 
   private func barHeight(at index: Int) -> CGFloat {
-    let raw = index < levels.count ? CGFloat(levels[index]) : 0
     // sqrt response: RMS of normal speech is ~0.02–0.15 and feels too compressed
     // under linear scaling. Square-root expands the bottom of the range so quiet
     // syllables still visibly move the bars.
+    let raw = CGFloat(levels[index])
     let scaled = min(1, sqrt(raw * 4))
-    let fraction = max(minBarHeightFraction, scaled)
-    return maxBarHeight * fraction
+    return maxBarHeight * scaled
   }
 }

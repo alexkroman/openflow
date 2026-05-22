@@ -19,6 +19,8 @@ final class AppCoordinator: ObservableObject {
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
   private var levelsObserver: Task<Void, Never>?
+  private var pendingRelease: Task<Void, Never>?
+  private static let releaseDebounce: Duration = .milliseconds(130)
 
   @Published private(set) var modelLoadState = ModelLoadState()
 
@@ -50,15 +52,51 @@ final class AppCoordinator: ObservableObject {
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
       guard let self else { return }
       Task { @MainActor in
+        // Carbon's kEventHotKeyReleased fires spuriously while the user is
+        // still holding (focus jitter, HID glitches). A keyDown inside the
+        // debounce window means the prior keyUp was phantom — keep recording.
+        if let pending = self.pendingRelease {
+          pending.cancel()
+          self.pendingRelease = nil
+          return
+        }
         guard self.modelLoadState.isReady else {
           self.toast.show("Still preparing models — please wait")
           return
         }
+        self.overlay.setRecordingMode(.pushToTalk)
         await self.session.press()
       }
     }
     KeyboardShortcuts.onKeyUp(for: .dictate) { [weak self] in
-      Task { @MainActor in await self?.session.release() }
+      guard let self else { return }
+      Task { @MainActor in
+        self.pendingRelease?.cancel()
+        self.pendingRelease = Task { @MainActor [weak self] in
+          try? await Task.sleep(for: Self.releaseDebounce)
+          guard let self, !Task.isCancelled else { return }
+          self.pendingRelease = nil
+          await self.session.release()
+        }
+      }
+    }
+    KeyboardShortcuts.onKeyDown(for: .handsFree) { [weak self] in
+      guard let self else { return }
+      Task { @MainActor in
+        guard self.modelLoadState.isReady else {
+          self.toast.show("Still preparing models — please wait")
+          return
+        }
+        switch await self.session.phase {
+        case .idle, .failed, .cancelled:
+          self.overlay.setRecordingMode(.handsFree)
+          await self.session.press()
+        case .recording:
+          await self.session.release()
+        case .transcribing, .styling, .injecting:
+          break  // Mid-pipeline: ignore until current dictation lands.
+        }
+      }
     }
 
     let phases = session.phases
@@ -145,8 +183,14 @@ final class AppCoordinator: ObservableObject {
   // MARK: - Dictation render
 
   private var wasRecording = false
-  private let recordStartSound = NSSound(named: "Pop")
-  private let recordStopSound = NSSound(named: "Bottle")
+  private let recordStartSound = NSSound(named: "Purr")
+  private let recordStopSound = NSSound(named: "Purr")
+  // Floor the spinner's visible duration: transcribe+style can finish in
+  // under 100ms on hot caches, which is too fast to read as a deliberate
+  // "processing" beat before the pill collapses back to idle.
+  private static let minProcessingDuration: Duration = .milliseconds(500)
+  private var processingStartedAt: ContinuousClock.Instant?
+  private var pendingUITransition: Task<Void, Never>?
 
   private func render(_ phase: PipelinePhase) {
     let isRecording: Bool
@@ -160,16 +204,47 @@ final class AppCoordinator: ObservableObject {
 
     let ui: OverlayUIState
     switch phase {
-    case .idle, .cancelled, .injecting:
+    case .idle, .cancelled:
       ui = .idle
     case .recording:
       ui = .recording
-    case .transcribing, .styling:
+    case .transcribing, .styling, .injecting:
       ui = .processing
     case .failed(let err):
       ui = .idle
       toast.show(err.errorDescription ?? "Error")
     }
+    applyUIState(ui)
+  }
+
+  private func applyUIState(_ ui: OverlayUIState) {
+    if ui == .processing {
+      pendingUITransition?.cancel()
+      pendingUITransition = nil
+      if processingStartedAt == nil {
+        processingStartedAt = .now
+      }
+      overlay.show(state: ui)
+      return
+    }
+
+    if let startedAt = processingStartedAt {
+      let remaining = Self.minProcessingDuration - startedAt.duration(to: .now)
+      if remaining > .zero {
+        pendingUITransition?.cancel()
+        pendingUITransition = Task { @MainActor [weak self] in
+          try? await Task.sleep(for: remaining)
+          guard let self, !Task.isCancelled else { return }
+          self.processingStartedAt = nil
+          self.overlay.show(state: ui)
+        }
+        return
+      }
+    }
+
+    pendingUITransition?.cancel()
+    pendingUITransition = nil
+    processingStartedAt = nil
     overlay.show(state: ui)
   }
 }

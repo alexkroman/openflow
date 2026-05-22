@@ -3,9 +3,10 @@ import SwiftUI
 
 @MainActor
 final class OverlayBridge: ObservableObject {
-  static let waveformBarCount = 9
+  static let waveformBarCount = 21
 
   @Published var state: OverlayUIState = .idle
+  @Published var recordingMode: RecordingMode = .pushToTalk
   @Published var levels: [Float] = Array(repeating: 0, count: waveformBarCount)
 
   // Auto-gain: a running peak decays slowly between pushes so the bars stay
@@ -26,7 +27,13 @@ final class OverlayBridge: ObservableObject {
 private struct OverlayHost: View {
   @ObservedObject var bridge: OverlayBridge
   var body: some View {
-    OverlayView(state: bridge.state, levels: bridge.levels, hotkeyLabel: DictateHotkey.label)
+    OverlayView(
+      state: bridge.state,
+      recordingMode: bridge.recordingMode,
+      levels: bridge.levels,
+      holdHotkeySpelled: DictateHotkey.holdSpelledOut,
+      tapHotkeySpelled: DictateHotkey.tapSpelledOut
+    )
   }
 }
 
@@ -34,11 +41,13 @@ private struct OverlayHost: View {
 final class OverlayWindowController {
   private static let customOriginXKey = "OpenFlowOverlayCustomOriginX"
   private static let customOriginYKey = "OpenFlowOverlayCustomOriginY"
-  // The panel is sized larger than the visible pill so SwiftUI's drop shadow
-  // (radius 12, y-offset 4) has room to render without being clipped by the
-  // window's contentRect — especially around the capsule's rounded ends, where
-  // the shadow extends furthest from the pill body.
-  static let pillSize = CGSize(width: 120, height: 28)
+  // The panel is sized to the pill's *largest* visible footprint (the
+  // expanded info card with both hotkeys spelled out) plus a margin for the
+  // drop shadow. Keeping the panel a constant size avoids window-resize
+  // jitter when the SwiftUI view animates between compact and expanded
+  // states. shadowMargin must stay comfortably larger than the shadow's
+  // (radius + |y|) so the shadow isn't clipped at any edge.
+  static let pillSize = CGSize(width: 130, height: 50)
   static let shadowMargin: CGFloat = 16
   private static let panelSize = CGSize(
     width: pillSize.width + shadowMargin * 2,
@@ -90,6 +99,13 @@ final class OverlayWindowController {
     }
   }
 
+  /// Records which hotkey is responsible for the upcoming/current session.
+  /// Should be set before `session.press()` so the overlay's recording-card
+  /// stop hint reflects the gesture the user just made.
+  func setRecordingMode(_ mode: RecordingMode) {
+    bridge.recordingMode = mode
+  }
+
   func pushLevel(_ value: Float) {
     bridge.pushLevel(value)
   }
@@ -118,6 +134,11 @@ final class OverlayWindowController {
   }
 
   private func storedCustomOrigin() -> NSPoint? {
+    // A `pillSize` increase between app versions can leave a stored origin
+    // that no longer keeps the (now wider/taller) panel on-screen; clamp()
+    // pulls it back into the visible frame, which manifests as the pill
+    // visibly shifting from where the user last dragged it. Accepted —
+    // users can re-drag.
     let defaults = UserDefaults.standard
     guard
       defaults.object(forKey: Self.customOriginXKey) != nil,

@@ -84,7 +84,7 @@ final class WizardWindowController {
     switch step {
     case .permissions: return NSSize(width: 500, height: 440)
     case .settingUp: return NSSize(width: 500, height: 320)
-    case .hotkey: return NSSize(width: 500, height: 240)
+    case .hotkey: return NSSize(width: 500, height: 320)
     }
   }
 }
