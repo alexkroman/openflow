@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 final class OverlayBridge: ObservableObject {
-  static let waveformBarCount = 9
+  static let waveformBarCount = 21
 
   @Published var state: OverlayUIState = .idle
   @Published var recordingMode: RecordingMode = .pushToTalk
@@ -47,7 +47,7 @@ final class OverlayWindowController {
   // jitter when the SwiftUI view animates between compact and expanded
   // states. shadowMargin must stay comfortably larger than the shadow's
   // (radius + |y|) so the shadow isn't clipped at any edge.
-  static let pillSize = CGSize(width: 300, height: 52)
+  static let pillSize = CGSize(width: 130, height: 50)
   static let shadowMargin: CGFloat = 16
   private static let panelSize = CGSize(
     width: pillSize.width + shadowMargin * 2,

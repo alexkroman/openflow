@@ -185,6 +185,12 @@ final class AppCoordinator: ObservableObject {
   private var wasRecording = false
   private let recordStartSound = NSSound(named: "Purr")
   private let recordStopSound = NSSound(named: "Purr")
+  // Floor the spinner's visible duration: transcribe+style can finish in
+  // under 100ms on hot caches, which is too fast to read as a deliberate
+  // "processing" beat before the pill collapses back to idle.
+  private static let minProcessingDuration: Duration = .milliseconds(500)
+  private var processingStartedAt: ContinuousClock.Instant?
+  private var pendingUITransition: Task<Void, Never>?
 
   private func render(_ phase: PipelinePhase) {
     let isRecording: Bool
@@ -198,16 +204,47 @@ final class AppCoordinator: ObservableObject {
 
     let ui: OverlayUIState
     switch phase {
-    case .idle, .cancelled, .injecting:
+    case .idle, .cancelled:
       ui = .idle
     case .recording:
       ui = .recording
-    case .transcribing, .styling:
+    case .transcribing, .styling, .injecting:
       ui = .processing
     case .failed(let err):
       ui = .idle
       toast.show(err.errorDescription ?? "Error")
     }
+    applyUIState(ui)
+  }
+
+  private func applyUIState(_ ui: OverlayUIState) {
+    if ui == .processing {
+      pendingUITransition?.cancel()
+      pendingUITransition = nil
+      if processingStartedAt == nil {
+        processingStartedAt = .now
+      }
+      overlay.show(state: ui)
+      return
+    }
+
+    if let startedAt = processingStartedAt {
+      let remaining = Self.minProcessingDuration - startedAt.duration(to: .now)
+      if remaining > .zero {
+        pendingUITransition?.cancel()
+        pendingUITransition = Task { @MainActor [weak self] in
+          try? await Task.sleep(for: remaining)
+          guard let self, !Task.isCancelled else { return }
+          self.processingStartedAt = nil
+          self.overlay.show(state: ui)
+        }
+        return
+      }
+    }
+
+    pendingUITransition?.cancel()
+    pendingUITransition = nil
+    processingStartedAt = nil
     overlay.show(state: ui)
   }
 }

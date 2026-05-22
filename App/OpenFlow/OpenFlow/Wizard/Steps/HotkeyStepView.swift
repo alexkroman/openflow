@@ -14,7 +14,7 @@ struct HotkeyStepView: View {
       }
       .formStyle(.grouped)
       .scrollDisabled(true)
-      .padding(.bottom, 24)
+      .padding(.bottom, 12)
     }
   }
 

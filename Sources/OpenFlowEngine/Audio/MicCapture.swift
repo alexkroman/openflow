@@ -38,6 +38,20 @@ public actor MicCapture: MicCaptureProtocol {
   public func warmUp() {
     if prepared { return }
     let input = engine.inputNode
+    // Engage Apple's voice processing (echo cancellation, noise suppression,
+    // AGC) before we read the input format or install any tap. Same pipeline
+    // FaceTime/Zoom use; strictly better at separating speech from room
+    // tone, keyboard, and HVAC than an RMS-threshold gate. Must be toggled
+    // while the engine is stopped — warmUp is the only point we can rely
+    // on that. Failures fall through to raw capture (some aggregate/loopback
+    // devices reject voice processing).
+    do {
+      try input.setVoiceProcessingEnabled(true)
+      Self.logger.info("voiceProcessing enabled")
+    } catch {
+      Self.logger.warning(
+        "voiceProcessing unavailable, using raw capture: \(error.localizedDescription)")
+    }
     let inputFormat = input.outputFormat(forBus: 0)
     self.inputSampleRate = inputFormat.sampleRate
     engine.prepare()

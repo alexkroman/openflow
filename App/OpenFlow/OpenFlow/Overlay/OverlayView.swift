@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum OverlayUIState: Equatable {
@@ -29,8 +30,8 @@ struct OverlayView: View {
   private let collapsedHeight: CGFloat = 8
   // Expanded info card: mode-name labels and spelled-out hotkeys, or the
   // waveform + a mode-specific stop hint during recording.
-  private let expandedWidth: CGFloat = 300
-  private let expandedHeight: CGFloat = 52
+  private let expandedWidth: CGFloat = 130
+  private let expandedHeight: CGFloat = 50
 
   private var isExpanded: Bool {
     switch state {
@@ -58,7 +59,15 @@ struct OverlayView: View {
       // OverlayWindowController matches expandedWidth × expandedHeight.
       .frame(width: expandedWidth, height: expandedHeight)
       .contentShape(Rectangle())
-      .onHover { isHovered = $0 }
+      .onHover { hovered in
+        isHovered = hovered
+        if hovered {
+          NSCursor.openHand.push()
+        } else {
+          NSCursor.pop()
+        }
+      }
+      .help("Drag to reposition")
       .padding(OverlayWindowController.shadowMargin)
       .accessibilityElement(children: .ignore)
       .accessibilityLabel(accessibilityLabel)
@@ -93,18 +102,18 @@ struct OverlayView: View {
   }
 
   private var expandedIdleCard: some View {
-    VStack(alignment: .leading, spacing: 3) {
+    VStack(alignment: .leading, spacing: 4) {
       hotkeyRow(mode: "Push to talk", value: holdHotkeySpelled)
       hotkeyRow(mode: "Hands-free", value: tapHotkeySpelled)
     }
-    .padding(.horizontal, 16)
+    .padding(.horizontal, 12)
   }
 
   private var recordingCard: some View {
     VStack(spacing: 2) {
       WaveformBars(levels: levels)
       Text(stopHint)
-        .font(.system(size: 10, weight: .medium))
+        .font(.system(size: 8, weight: .medium))
         .foregroundStyle(Color.white.opacity(0.75))
         .lineLimit(1)
     }
@@ -113,21 +122,18 @@ struct OverlayView: View {
   private var stopHint: String {
     switch recordingMode {
     case .pushToTalk: return "Release to stop"
-    case .handsFree: return "Tap \(tapHotkeySpelled) to stop"
+    case .handsFree: return "\(tapHotkeySpelled) to stop"
     }
   }
 
   private func hotkeyRow(mode: String, value: String) -> some View {
-    HStack(spacing: 8) {
+    VStack(alignment: .leading, spacing: 0) {
       Text(mode)
-        .font(.system(size: 11, weight: .semibold))
-        .foregroundStyle(Color.white)
-      Text("·")
-        .font(.system(size: 11))
-        .foregroundStyle(Color.white.opacity(0.4))
+        .font(.system(size: 6, weight: .semibold))
+        .foregroundStyle(Color.white.opacity(0.6))
       Text(value)
-        .font(.system(size: 11, weight: .medium))
-        .foregroundStyle(Color.white.opacity(0.75))
+        .font(.system(size: 7, weight: .medium))
+        .foregroundStyle(Color.white)
     }
   }
 
@@ -150,9 +156,8 @@ private struct WaveformBars: View {
   let levels: [Float]
 
   private let barWidth: CGFloat = 2
-  private let barSpacing: CGFloat = 3
-  private let maxBarHeight: CGFloat = 18
-  private let minBarHeightFraction: CGFloat = 0.10
+  private let barSpacing: CGFloat = 2
+  private let maxBarHeight: CGFloat = 12
 
   var body: some View {
     HStack(spacing: barSpacing) {
@@ -167,21 +172,11 @@ private struct WaveformBars: View {
   }
 
   private func barHeight(at index: Int) -> CGFloat {
-    // Mirror around the center bar so the waveform reads as a symmetric wave
-    // expanding from the middle (matches Wispr Flow's overlay), instead of a
-    // ticker-tape drifting left-to-right. levels is oldest→newest; the center
-    // bar shows the newest sample and each pair on either side shows
-    // progressively older samples.
-    let count = OverlayBridge.waveformBarCount
-    let mid = count / 2
-    let distanceFromCenter = abs(index - mid)
-    let sourceIndex = (levels.count - 1) - distanceFromCenter
-    let raw = (sourceIndex >= 0 && sourceIndex < levels.count) ? CGFloat(levels[sourceIndex]) : 0
     // sqrt response: RMS of normal speech is ~0.02–0.15 and feels too compressed
     // under linear scaling. Square-root expands the bottom of the range so quiet
     // syllables still visibly move the bars.
+    let raw = CGFloat(levels[index])
     let scaled = min(1, sqrt(raw * 4))
-    let fraction = max(minBarHeightFraction, scaled)
-    return maxBarHeight * fraction
+    return maxBarHeight * scaled
   }
 }
