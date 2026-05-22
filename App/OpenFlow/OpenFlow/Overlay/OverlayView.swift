@@ -11,7 +11,6 @@ struct OverlayView: View {
   let levels: [Float]
   let holdHotkeyGlyph: String
   let holdHotkeySpelled: String
-  let tapHotkeyGlyph: String
   let tapHotkeySpelled: String
 
   @State private var isHovered = false
