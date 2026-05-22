@@ -8,8 +8,9 @@ struct PermissionsStepView: View {
     VStack(spacing: 0) {
       WizardStepHeader(
         title: "Welcome to OpenFlow",
-        subtitle: "Hold \(DictateHotkey.label) anywhere to dictate. "
-          + "Your voice is transcribed on-device and typed into the app you're using."
+        subtitle: "Hold \(DictateHotkey.holdLabel) anywhere to dictate, or tap "
+          + "\(DictateHotkey.tapLabel) to toggle hands-free. Your voice is "
+          + "transcribed on-device and typed into the app you're using."
       )
       Divider()
       Form {
@@ -41,7 +42,8 @@ struct PermissionsStepView: View {
     } footer: {
       Text(
         "OpenFlow needs to hear you while you dictate. "
-          + "Recording only happens while you're holding \(DictateHotkey.label)."
+          + "Recording only happens while you're holding \(DictateHotkey.holdLabel) "
+          + "or after you tap \(DictateHotkey.tapLabel)."
       )
     }
   }
