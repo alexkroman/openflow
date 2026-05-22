@@ -64,6 +64,7 @@ final class AppCoordinator: ObservableObject {
           self.toast.show("Still preparing models — please wait")
           return
         }
+        self.overlay.setRecordingMode(.pushToTalk)
         await self.session.press()
       }
     }
@@ -88,6 +89,7 @@ final class AppCoordinator: ObservableObject {
         }
         switch await self.session.phase {
         case .idle, .failed, .cancelled:
+          self.overlay.setRecordingMode(.handsFree)
           await self.session.press()
         case .recording:
           await self.session.release()

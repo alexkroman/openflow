@@ -6,8 +6,16 @@ enum OverlayUIState: Equatable {
   case processing
 }
 
+/// Which hotkey started the current (or most recent) recording session.
+/// Drives the stop-hint copy on the recording card.
+enum RecordingMode: Equatable {
+  case pushToTalk
+  case handsFree
+}
+
 struct OverlayView: View {
   let state: OverlayUIState
+  let recordingMode: RecordingMode
   let levels: [Float]
   let holdHotkeyGlyph: String
   let holdHotkeySpelled: String
@@ -19,10 +27,10 @@ struct OverlayView: View {
   // Compact idle pill: mic glyph + hold label.
   private let compactWidth: CGFloat = 120
   private let compactHeight: CGFloat = 28
-  // Expanded info card: fits two rows ("Hold: Ctrl+Opt+D" / "Tap: Ctrl+Opt+H")
-  // or waveform + tap hint during recording.
-  private let expandedWidth: CGFloat = 240
-  private let expandedHeight: CGFloat = 48
+  // Expanded info card: fits the mode-name labels and spelled-out hotkeys, or
+  // the waveform + a mode-specific stop hint during recording.
+  private let expandedWidth: CGFloat = 300
+  private let expandedHeight: CGFloat = 52
 
   private var isExpanded: Bool {
     switch state {
@@ -96,41 +104,53 @@ struct OverlayView: View {
   }
 
   private var expandedIdleCard: some View {
-    VStack(alignment: .leading, spacing: 2) {
-      hotkeyRow(prefix: "Hold:", value: holdHotkeySpelled)
-      hotkeyRow(prefix: "Tap:", value: tapHotkeySpelled)
+    VStack(alignment: .leading, spacing: 3) {
+      hotkeyRow(mode: "Push to talk", value: holdHotkeySpelled)
+      hotkeyRow(mode: "Hands-free", value: tapHotkeySpelled)
     }
-    .padding(.horizontal, 14)
+    .padding(.horizontal, 16)
   }
 
   private var recordingCard: some View {
     VStack(spacing: 2) {
       WaveformBars(levels: levels)
-      Text("Release · Tap \(tapHotkeySpelled) to stop")
+      Text(stopHint)
         .font(.system(size: 10, weight: .medium))
         .foregroundStyle(Color.white.opacity(0.75))
         .lineLimit(1)
     }
   }
 
-  private func hotkeyRow(prefix: String, value: String) -> some View {
-    HStack(spacing: 6) {
-      Text(prefix)
-        .font(.system(size: 11, weight: .medium))
-        .foregroundStyle(Color.white.opacity(0.65))
-        .frame(width: 36, alignment: .leading)
-      Text(value)
-        .font(.system(size: 12, weight: .semibold).monospaced())
+  private var stopHint: String {
+    switch recordingMode {
+    case .pushToTalk: return "Release to stop"
+    case .handsFree: return "Tap \(tapHotkeySpelled) to stop"
+    }
+  }
+
+  private func hotkeyRow(mode: String, value: String) -> some View {
+    HStack(spacing: 8) {
+      Text(mode)
+        .font(.system(size: 11, weight: .semibold))
         .foregroundStyle(Color.white)
+      Text("·")
+        .font(.system(size: 11))
+        .foregroundStyle(Color.white.opacity(0.4))
+      Text(value)
+        .font(.system(size: 11, weight: .medium))
+        .foregroundStyle(Color.white.opacity(0.75))
     }
   }
 
   private var accessibilityLabel: String {
     switch state {
     case .idle:
-      return "OpenFlow ready. Hold \(holdHotkeySpelled) or tap \(tapHotkeySpelled) to dictate."
+      return "OpenFlow ready. Push to talk with \(holdHotkeySpelled), or hands-free with \(tapHotkeySpelled)."
     case .recording:
-      return "Recording. Release \(holdHotkeySpelled) or tap \(tapHotkeySpelled) to stop."
+      switch recordingMode {
+      case .pushToTalk: return "Recording. Release \(holdHotkeySpelled) to stop."
+      case .handsFree: return "Recording. Tap \(tapHotkeySpelled) to stop."
+      }
     case .processing:
       return "Processing."
     }

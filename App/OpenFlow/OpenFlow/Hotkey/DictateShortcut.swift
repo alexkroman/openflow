@@ -18,9 +18,10 @@ enum DictateHotkey {
   /// Compact glyph label for the hands-free hotkey, e.g. "⌃⌥H".
   static var tapLabel: String { glyphLabel(.handsFree) }
 
-  /// Spelled-out form, e.g. "Ctrl+Opt+D". Used in the overlay info card.
+  /// Spelled-out form with full modifier names, e.g. "Ctrl + Option + D".
+  /// Used in the overlay info card and recording-card stop hint.
   static var holdSpelledOut: String { spelledLabel(.dictate) }
-  /// Spelled-out form of the hands-free hotkey, e.g. "Ctrl+Opt+H".
+  /// Spelled-out form of the hands-free hotkey, e.g. "Ctrl + Option + H".
   static var tapSpelledOut: String { spelledLabel(.handsFree) }
 
   private static func glyphLabel(_ name: KeyboardShortcuts.Name) -> String {
@@ -32,9 +33,9 @@ enum DictateHotkey {
     var parts: [String] = []
     let mods = shortcut.modifiers
     if mods.contains(.control) { parts.append("Ctrl") }
-    if mods.contains(.option) { parts.append("Opt") }
+    if mods.contains(.option) { parts.append("Option") }
     if mods.contains(.shift) { parts.append("Shift") }
-    if mods.contains(.command) { parts.append("Cmd") }
+    if mods.contains(.command) { parts.append("Command") }
     // KeyboardShortcuts.Key is a struct (wraps a Carbon virtual keycode),
     // not an enum — String(describing:) produces useless struct debug
     // output. nsMenuItemKeyEquivalent yields the actual character ("h" for
@@ -43,6 +44,6 @@ enum DictateHotkey {
     if let keyStr = shortcut.nsMenuItemKeyEquivalent {
       parts.append(keyStr.uppercased())
     }
-    return parts.joined(separator: "+")
+    return parts.joined(separator: " + ")
   }
 }

@@ -6,6 +6,7 @@ final class OverlayBridge: ObservableObject {
   static let waveformBarCount = 9
 
   @Published var state: OverlayUIState = .idle
+  @Published var recordingMode: RecordingMode = .pushToTalk
   @Published var levels: [Float] = Array(repeating: 0, count: waveformBarCount)
 
   // Auto-gain: a running peak decays slowly between pushes so the bars stay
@@ -28,6 +29,7 @@ private struct OverlayHost: View {
   var body: some View {
     OverlayView(
       state: bridge.state,
+      recordingMode: bridge.recordingMode,
       levels: bridge.levels,
       holdHotkeyGlyph: DictateHotkey.holdLabel,
       holdHotkeySpelled: DictateHotkey.holdSpelledOut,
@@ -46,7 +48,7 @@ final class OverlayWindowController {
   // jitter when the SwiftUI view animates between compact and expanded
   // states. shadowMargin must stay comfortably larger than the shadow's
   // (radius + |y|) so the shadow isn't clipped at any edge.
-  static let pillSize = CGSize(width: 240, height: 48)
+  static let pillSize = CGSize(width: 300, height: 52)
   static let shadowMargin: CGFloat = 16
   private static let panelSize = CGSize(
     width: pillSize.width + shadowMargin * 2,
@@ -96,6 +98,13 @@ final class OverlayWindowController {
         panel.animator().alphaValue = 1
       }
     }
+  }
+
+  /// Records which hotkey is responsible for the upcoming/current session.
+  /// Should be set before `session.press()` so the overlay's recording-card
+  /// stop hint reflects the gesture the user just made.
+  func setRecordingMode(_ mode: RecordingMode) {
+    bridge.recordingMode = mode
   }
 
   func pushLevel(_ value: Float) {
