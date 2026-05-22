@@ -6,7 +6,7 @@ struct HotkeyStepView: View {
     VStack(spacing: 0) {
       WizardStepHeader(
         title: "OpenFlow",
-        subtitle: "Hold the shortcut anywhere on your Mac and start dictating."
+        subtitle: "Hold a shortcut to dictate, or use the hands-free toggle to tap on and off."
       )
       Divider()
       Form {
@@ -24,11 +24,15 @@ struct HotkeyStepView: View {
       } label: {
         Label("Hold to dictate", systemImage: "keyboard")
       }
+      LabeledContent {
+        KeyboardShortcuts.Recorder(for: .handsFree)
+      } label: {
+        Label("Hands-free (tap on/off)", systemImage: "hand.raised")
+      }
     } header: {
-      Text("Shortcut")
+      Text("Shortcuts")
     } footer: {
-      Text("Pick any key+modifier combo. Defaults to ⌃⌥D.")
+      Text("Defaults: hold ⌃⌥D · hands-free ⌃⌥H. Either can be any key+modifier combo.")
     }
   }
-
 }
