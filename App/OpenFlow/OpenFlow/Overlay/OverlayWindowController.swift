@@ -35,9 +35,9 @@ final class OverlayWindowController {
   private static let customOriginXKey = "OpenFlowOverlayCustomOriginX"
   private static let customOriginYKey = "OpenFlowOverlayCustomOriginY"
   // The panel is sized larger than the visible pill so SwiftUI's drop shadow
-  // (radius 12, y-offset 4) has room to render without being clipped by the
-  // window's contentRect — especially around the capsule's rounded ends, where
-  // the shadow extends furthest from the pill body.
+  // has room to render without being clipped by the window's contentRect —
+  // especially at the bottom edge, where the shadow extends furthest from the
+  // pill body. Keep this margin comfortably larger than (shadow radius + y).
   static let pillSize = CGSize(width: 120, height: 28)
   static let shadowMargin: CGFloat = 16
   private static let panelSize = CGSize(

@@ -145,8 +145,8 @@ final class AppCoordinator: ObservableObject {
   // MARK: - Dictation render
 
   private var wasRecording = false
-  private let recordStartSound = NSSound(named: "Pop")
-  private let recordStopSound = NSSound(named: "Bottle")
+  private let recordStartSound = NSSound(named: "Tink")
+  private let recordStopSound = NSSound(named: "Tink")
 
   private func render(_ phase: PipelinePhase) {
     let isRecording: Bool

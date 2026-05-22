@@ -55,7 +55,7 @@ struct OverlayView: View {
       .overlay(
         Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
       )
-      .shadow(color: .black.opacity(0.3), radius: 12, y: 4)
+      .shadow(color: .black.opacity(0.18), radius: 8, y: 2)
   }
 
   @ViewBuilder
@@ -114,7 +114,16 @@ private struct WaveformBars: View {
   }
 
   private func barHeight(at index: Int) -> CGFloat {
-    let raw = index < levels.count ? CGFloat(levels[index]) : 0
+    // Mirror around the center bar so the waveform reads as a symmetric wave
+    // expanding from the middle (matches Wispr Flow's overlay), instead of a
+    // ticker-tape drifting left-to-right. levels is oldest→newest; the center
+    // bar shows the newest sample and each pair on either side shows
+    // progressively older samples.
+    let count = OverlayBridge.waveformBarCount
+    let mid = count / 2
+    let distanceFromCenter = abs(index - mid)
+    let sourceIndex = (levels.count - 1) - distanceFromCenter
+    let raw = (sourceIndex >= 0 && sourceIndex < levels.count) ? CGFloat(levels[sourceIndex]) : 0
     // sqrt response: RMS of normal speech is ~0.02–0.15 and feels too compressed
     // under linear scaling. Square-root expands the bottom of the range so quiet
     // syllables still visibly move the bars.
