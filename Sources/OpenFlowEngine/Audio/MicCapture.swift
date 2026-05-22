@@ -56,13 +56,33 @@ public actor MicCapture: MicCaptureProtocol {
     // matches the node's current output raises an uncatchable NSException
     // from AVAudioEngineImpl::InstallTapOnNode and aborts the process.
     let inputFormat = input.outputFormat(forBus: 0)
-    self.inputSampleRate = inputFormat.sampleRate
 
     Self.logger.info(
       """
       start sampleRate=\(inputFormat.sampleRate) channels=\(inputFormat.channelCount) \
       interleaved=\(inputFormat.isInterleaved)
       """)
+
+    // installTap runs IsFormatSampleRateAndChannelCountValid internally and
+    // raises an uncatchable NSException on a degenerate format (sampleRate 0
+    // or channelCount 0). That happens when the default input device is in a
+    // transitional/unusable state — AirPods asleep, USB mic unplugged, mic
+    // permission just revoked. Re-reading outputFormat doesn't save us if the
+    // value it returns is itself invalid, so guard explicitly.
+    guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else {
+      Self.logger.error(
+        """
+        start aborted: invalid input format \
+        sampleRate=\(inputFormat.sampleRate) channels=\(inputFormat.channelCount)
+        """)
+      throw NSError(
+        domain: "dev.alex.OpenFlow.MicCapture", code: 1,
+        userInfo: [
+          NSLocalizedDescriptionKey:
+            "No microphone available (sampleRate=\(inputFormat.sampleRate), channels=\(inputFormat.channelCount))."
+        ])
+    }
+    self.inputSampleRate = inputFormat.sampleRate
 
     // Defensive: installTap onto a bus that already has a tap also raises.
     // Stale taps shouldn't normally survive stop(), but if a previous start()
