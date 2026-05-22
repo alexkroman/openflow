@@ -26,7 +26,14 @@ final class OverlayBridge: ObservableObject {
 private struct OverlayHost: View {
   @ObservedObject var bridge: OverlayBridge
   var body: some View {
-    OverlayView(state: bridge.state, levels: bridge.levels, hotkeyLabel: DictateHotkey.label)
+    OverlayView(
+      state: bridge.state,
+      levels: bridge.levels,
+      holdHotkeyGlyph: DictateHotkey.holdLabel,
+      holdHotkeySpelled: DictateHotkey.holdSpelledOut,
+      tapHotkeyGlyph: DictateHotkey.tapLabel,
+      tapHotkeySpelled: DictateHotkey.tapSpelledOut
+    )
   }
 }
 
@@ -34,11 +41,13 @@ private struct OverlayHost: View {
 final class OverlayWindowController {
   private static let customOriginXKey = "OpenFlowOverlayCustomOriginX"
   private static let customOriginYKey = "OpenFlowOverlayCustomOriginY"
-  // The panel is sized larger than the visible pill so SwiftUI's drop shadow
-  // has room to render without being clipped by the window's contentRect —
-  // especially at the bottom edge, where the shadow extends furthest from the
-  // pill body. Keep this margin comfortably larger than (shadow radius + y).
-  static let pillSize = CGSize(width: 120, height: 28)
+  // The panel is sized to the pill's *largest* visible footprint (the
+  // expanded info card with both hotkeys spelled out) plus a margin for the
+  // drop shadow. Keeping the panel a constant size avoids window-resize
+  // jitter when the SwiftUI view animates between compact and expanded
+  // states. shadowMargin must stay comfortably larger than the shadow's
+  // (radius + |y|) so the shadow isn't clipped at any edge.
+  static let pillSize = CGSize(width: 240, height: 48)
   static let shadowMargin: CGFloat = 16
   private static let panelSize = CGSize(
     width: pillSize.width + shadowMargin * 2,
@@ -118,6 +127,11 @@ final class OverlayWindowController {
   }
 
   private func storedCustomOrigin() -> NSPoint? {
+    // A `pillSize` increase between app versions can leave a stored origin
+    // that no longer keeps the (now wider/taller) panel on-screen; clamp()
+    // pulls it back into the visible frame, which manifests as the pill
+    // visibly shifting from where the user last dragged it. Accepted —
+    // users can re-drag.
     let defaults = UserDefaults.standard
     guard
       defaults.object(forKey: Self.customOriginXKey) != nil,
