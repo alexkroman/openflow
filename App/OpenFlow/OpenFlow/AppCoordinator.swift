@@ -19,6 +19,8 @@ final class AppCoordinator: ObservableObject {
   private let session: DictationSession
   private var phaseObserver: Task<Void, Never>?
   private var levelsObserver: Task<Void, Never>?
+  private var pendingRelease: Task<Void, Never>?
+  private static let releaseDebounce: Duration = .milliseconds(130)
 
   @Published private(set) var modelLoadState = ModelLoadState()
 
@@ -50,6 +52,14 @@ final class AppCoordinator: ObservableObject {
     KeyboardShortcuts.onKeyDown(for: .dictate) { [weak self] in
       guard let self else { return }
       Task { @MainActor in
+        // Carbon's kEventHotKeyReleased fires spuriously while the user is
+        // still holding (focus jitter, HID glitches). A keyDown inside the
+        // debounce window means the prior keyUp was phantom — keep recording.
+        if let pending = self.pendingRelease {
+          pending.cancel()
+          self.pendingRelease = nil
+          return
+        }
         guard self.modelLoadState.isReady else {
           self.toast.show("Still preparing models — please wait")
           return
@@ -58,7 +68,16 @@ final class AppCoordinator: ObservableObject {
       }
     }
     KeyboardShortcuts.onKeyUp(for: .dictate) { [weak self] in
-      Task { @MainActor in await self?.session.release() }
+      guard let self else { return }
+      Task { @MainActor in
+        self.pendingRelease?.cancel()
+        self.pendingRelease = Task { @MainActor [weak self] in
+          try? await Task.sleep(for: Self.releaseDebounce)
+          guard let self, !Task.isCancelled else { return }
+          self.pendingRelease = nil
+          await self.session.release()
+        }
+      }
     }
 
     let phases = session.phases
@@ -145,8 +164,8 @@ final class AppCoordinator: ObservableObject {
   // MARK: - Dictation render
 
   private var wasRecording = false
-  private let recordStartSound = NSSound(named: "Tink")
-  private let recordStopSound = NSSound(named: "Tink")
+  private let recordStartSound = NSSound(named: "Purr")
+  private let recordStopSound = NSSound(named: "Purr")
 
   private func render(_ phase: PipelinePhase) {
     let isRecording: Bool
