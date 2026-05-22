@@ -33,7 +33,7 @@ struct HotkeyStepView: View {
     } header: {
       Text("Shortcuts")
     } footer: {
-      Text("Defaults: push-to-talk ⌃⌥D · hands-free ⌃⌥H. Either can be any key+modifier combo.")
+      Text("Defaults: Push to talk is Ctrl + Option + D · Hands-free is Ctrl + Option + H. Either can be any key+modifier combo.")
     }
   }
 }
