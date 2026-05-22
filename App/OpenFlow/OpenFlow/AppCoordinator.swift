@@ -79,6 +79,23 @@ final class AppCoordinator: ObservableObject {
         }
       }
     }
+    KeyboardShortcuts.onKeyDown(for: .handsFree) { [weak self] in
+      guard let self else { return }
+      Task { @MainActor in
+        guard self.modelLoadState.isReady else {
+          self.toast.show("Still preparing models — please wait")
+          return
+        }
+        switch await self.session.phase {
+        case .idle, .failed, .cancelled:
+          await self.session.press()
+        case .recording:
+          await self.session.release()
+        case .transcribing, .styling, .injecting:
+          break  // Mid-pipeline: ignore until current dictation lands.
+        }
+      }
+    }
 
     let phases = session.phases
     phaseObserver = Task { @MainActor [weak self] in
