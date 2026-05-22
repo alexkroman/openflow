@@ -31,7 +31,6 @@ private struct OverlayHost: View {
       state: bridge.state,
       recordingMode: bridge.recordingMode,
       levels: bridge.levels,
-      holdHotkeyGlyph: DictateHotkey.holdLabel,
       holdHotkeySpelled: DictateHotkey.holdSpelledOut,
       tapHotkeySpelled: DictateHotkey.tapSpelledOut
     )

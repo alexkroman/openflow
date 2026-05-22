@@ -17,18 +17,18 @@ struct OverlayView: View {
   let state: OverlayUIState
   let recordingMode: RecordingMode
   let levels: [Float]
-  let holdHotkeyGlyph: String
   let holdHotkeySpelled: String
   let tapHotkeySpelled: String
 
   @State private var isHovered = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-  // Compact idle pill: mic glyph + hold label.
-  private let compactWidth: CGFloat = 120
-  private let compactHeight: CGFloat = 28
-  // Expanded info card: fits the mode-name labels and spelled-out hotkeys, or
-  // the waveform + a mode-specific stop hint during recording.
+  // Idle-not-hovered: a small empty capsule. Acts as an unobtrusive cursor
+  // target — the surrounding hit area expands the pill on hover.
+  private let collapsedWidth: CGFloat = 32
+  private let collapsedHeight: CGFloat = 8
+  // Expanded info card: mode-name labels and spelled-out hotkeys, or the
+  // waveform + a mode-specific stop hint during recording.
   private let expandedWidth: CGFloat = 300
   private let expandedHeight: CGFloat = 52
 
@@ -42,7 +42,7 @@ struct OverlayView: View {
   private var currentSize: CGSize {
     isExpanded
       ? CGSize(width: expandedWidth, height: expandedHeight)
-      : CGSize(width: compactWidth, height: compactHeight)
+      : CGSize(width: collapsedWidth, height: collapsedHeight)
   }
 
   var body: some View {
@@ -79,9 +79,9 @@ struct OverlayView: View {
     case .idle:
       if isHovered {
         expandedIdleCard.transition(.opacity)
-      } else {
-        compactIdlePill.transition(.opacity)
       }
+      // Idle and not hovered: render nothing — the capsule itself is the
+      // entire visual, a small empty dot.
     case .recording:
       recordingCard.transition(.opacity)
     case .processing:
@@ -89,17 +89,6 @@ struct OverlayView: View {
         .controlSize(.small)
         .tint(Color.white)
         .transition(.opacity)
-    }
-  }
-
-  private var compactIdlePill: some View {
-    HStack(spacing: 6) {
-      Image(systemName: "mic.fill")
-        .font(.callout)
-        .foregroundStyle(Color.white.opacity(0.7))
-      Text(holdHotkeyGlyph)
-        .font(.callout.monospaced().weight(.semibold))
-        .foregroundStyle(Color.white)
     }
   }
 
