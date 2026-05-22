@@ -9,16 +9,27 @@ enum OverlayUIState: Equatable {
 struct OverlayView: View {
   let state: OverlayUIState
   let levels: [Float]
-  let hotkeyLabel: String
+  let holdHotkeyGlyph: String
+  let holdHotkeySpelled: String
+  let tapHotkeyGlyph: String
+  let tapHotkeySpelled: String
 
   @State private var isHovered = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-  private let expandedWidth: CGFloat = 120
-  private let expandedHeight: CGFloat = 28
+  // Compact idle pill: mic glyph + hold label. Unchanged footprint from prior
+  // single-hotkey layout so non-hovered idle doesn't grow.
+  private let compactWidth: CGFloat = 120
+  private let compactHeight: CGFloat = 28
+  // Expanded info card: fits two rows ("Hold: Ctrl+Opt+D" / "Tap: Ctrl+Opt+H")
+  // or waveform + tap hint during recording.
+  private let expandedWidth: CGFloat = 240
+  private let expandedHeight: CGFloat = 48
   private let collapsedWidth: CGFloat = 32
   private let collapsedHeight: CGFloat = 8
 
+  /// Card-sized when recording, processing, or hovered. Pill-sized when idle
+  /// and not hovered. Dot-sized never used here — see `currentSize`.
   private var isExpanded: Bool {
     switch state {
     case .recording, .processing: return true
@@ -26,24 +37,30 @@ struct OverlayView: View {
     }
   }
 
+  private var currentSize: CGSize {
+    if isExpanded {
+      return CGSize(width: expandedWidth, height: expandedHeight)
+    }
+    switch state {
+    case .idle: return CGSize(width: compactWidth, height: compactHeight)
+    case .recording, .processing: return CGSize(width: expandedWidth, height: expandedHeight)
+    }
+  }
+
   var body: some View {
     capsule
-      .frame(
-        width: isExpanded ? expandedWidth : collapsedWidth,
-        height: isExpanded ? expandedHeight : collapsedHeight
-      )
+      .frame(width: currentSize.width, height: currentSize.height)
       .animation(
         reduceMotion ? nil : .spring(response: 0.18, dampingFraction: 0.85),
-        value: isExpanded
+        value: currentSize
       )
       .overlay(content)
+      // Outer frame holds the largest possible footprint so the panel doesn't
+      // need to resize when the pill grows/shrinks. shadowMargin in
+      // OverlayWindowController matches expandedWidth × expandedHeight.
       .frame(width: expandedWidth, height: expandedHeight)
       .contentShape(Rectangle())
       .onHover { isHovered = $0 }
-      // Transparent margin so the capsule's drop shadow has room to render
-      // without being clipped by the panel's contentRect (most visible at the
-      // rounded ends when the pill is fully expanded). Matches
-      // OverlayWindowController.shadowMargin.
       .padding(OverlayWindowController.shadowMargin)
       .accessibilityElement(children: .ignore)
       .accessibilityLabel(accessibilityLabel)
@@ -60,35 +77,72 @@ struct OverlayView: View {
 
   @ViewBuilder
   private var content: some View {
-    if isExpanded {
-      switch state {
-      case .idle:
-        HStack(spacing: 6) {
-          Image(systemName: "mic.fill")
-            .font(.callout)
-            .foregroundStyle(Color.white.opacity(0.7))
-          Text(hotkeyLabel)
-            .font(.callout.monospaced().weight(.semibold))
-            .foregroundStyle(Color.white)
-        }
-        .transition(.opacity)
-      case .recording:
-        WaveformBars(levels: levels)
-          .transition(.opacity)
-      case .processing:
-        ProgressView()
-          .controlSize(.small)
-          .tint(Color.white)
-          .transition(.opacity)
+    switch state {
+    case .idle:
+      if isHovered {
+        expandedIdleCard.transition(.opacity)
+      } else {
+        compactIdlePill.transition(.opacity)
       }
+    case .recording:
+      recordingCard.transition(.opacity)
+    case .processing:
+      ProgressView()
+        .controlSize(.small)
+        .tint(Color.white)
+        .transition(.opacity)
+    }
+  }
+
+  private var compactIdlePill: some View {
+    HStack(spacing: 6) {
+      Image(systemName: "mic.fill")
+        .font(.callout)
+        .foregroundStyle(Color.white.opacity(0.7))
+      Text(holdHotkeyGlyph)
+        .font(.callout.monospaced().weight(.semibold))
+        .foregroundStyle(Color.white)
+    }
+  }
+
+  private var expandedIdleCard: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      hotkeyRow(prefix: "Hold:", value: holdHotkeySpelled)
+      hotkeyRow(prefix: "Tap:", value: tapHotkeySpelled)
+    }
+    .padding(.horizontal, 14)
+  }
+
+  private var recordingCard: some View {
+    VStack(spacing: 2) {
+      WaveformBars(levels: levels)
+      Text("Release · Tap \(tapHotkeySpelled) to stop")
+        .font(.system(size: 9, weight: .medium))
+        .foregroundStyle(Color.white.opacity(0.75))
+        .lineLimit(1)
+    }
+  }
+
+  private func hotkeyRow(prefix: String, value: String) -> some View {
+    HStack(spacing: 6) {
+      Text(prefix)
+        .font(.system(size: 11, weight: .medium))
+        .foregroundStyle(Color.white.opacity(0.65))
+        .frame(width: 36, alignment: .leading)
+      Text(value)
+        .font(.system(size: 12, weight: .semibold).monospaced())
+        .foregroundStyle(Color.white)
     }
   }
 
   private var accessibilityLabel: String {
     switch state {
-    case .idle: return "OpenFlow ready. Hold \(hotkeyLabel) to dictate."
-    case .recording: return "Recording."
-    case .processing: return "Processing."
+    case .idle:
+      return "OpenFlow ready. Hold \(holdHotkeySpelled) or tap \(tapHotkeySpelled) to dictate."
+    case .recording:
+      return "Recording. Release \(holdHotkeySpelled) or tap \(tapHotkeySpelled) to stop."
+    case .processing:
+      return "Processing."
     }
   }
 }
