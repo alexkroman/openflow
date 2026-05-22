@@ -17,19 +17,14 @@ struct OverlayView: View {
   @State private var isHovered = false
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-  // Compact idle pill: mic glyph + hold label. Unchanged footprint from prior
-  // single-hotkey layout so non-hovered idle doesn't grow.
+  // Compact idle pill: mic glyph + hold label.
   private let compactWidth: CGFloat = 120
   private let compactHeight: CGFloat = 28
   // Expanded info card: fits two rows ("Hold: Ctrl+Opt+D" / "Tap: Ctrl+Opt+H")
   // or waveform + tap hint during recording.
   private let expandedWidth: CGFloat = 240
   private let expandedHeight: CGFloat = 48
-  private let collapsedWidth: CGFloat = 32
-  private let collapsedHeight: CGFloat = 8
 
-  /// Card-sized when recording, processing, or hovered. Pill-sized when idle
-  /// and not hovered. Dot-sized never used here — see `currentSize`.
   private var isExpanded: Bool {
     switch state {
     case .recording, .processing: return true
@@ -38,13 +33,9 @@ struct OverlayView: View {
   }
 
   private var currentSize: CGSize {
-    if isExpanded {
-      return CGSize(width: expandedWidth, height: expandedHeight)
-    }
-    switch state {
-    case .idle: return CGSize(width: compactWidth, height: compactHeight)
-    case .recording, .processing: return CGSize(width: expandedWidth, height: expandedHeight)
-    }
+    isExpanded
+      ? CGSize(width: expandedWidth, height: expandedHeight)
+      : CGSize(width: compactWidth, height: compactHeight)
   }
 
   var body: some View {
@@ -117,7 +108,7 @@ struct OverlayView: View {
     VStack(spacing: 2) {
       WaveformBars(levels: levels)
       Text("Release · Tap \(tapHotkeySpelled) to stop")
-        .font(.system(size: 9, weight: .medium))
+        .font(.system(size: 10, weight: .medium))
         .foregroundStyle(Color.white.opacity(0.75))
         .lineLimit(1)
     }

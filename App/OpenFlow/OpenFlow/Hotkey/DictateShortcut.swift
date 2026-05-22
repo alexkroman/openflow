@@ -13,18 +13,14 @@ extension KeyboardShortcuts.Name {
 
 @MainActor
 enum DictateHotkey {
-  /// Compact glyph label for the hold hotkey, e.g. "⌃⌥D". Falls back to "—"
-  /// if the user has cleared the binding.
+  /// Compact glyph label, e.g. "⌃⌥D". Falls back to "—" if cleared.
   static var holdLabel: String { glyphLabel(.dictate) }
-
-  /// Compact glyph label for the hands-free toggle hotkey, e.g. "⌃⌥H".
+  /// Compact glyph label for the hands-free hotkey, e.g. "⌃⌥H".
   static var tapLabel: String { glyphLabel(.handsFree) }
 
-  /// Spelled-out form of the hold hotkey, e.g. "Ctrl+Opt+D". Used in the
-  /// overlay's expanded info card for discoverability.
+  /// Spelled-out form, e.g. "Ctrl+Opt+D". Used in the overlay info card.
   static var holdSpelledOut: String { spelledLabel(.dictate) }
-
-  /// Spelled-out form of the hands-free toggle hotkey, e.g. "Ctrl+Opt+H".
+  /// Spelled-out form of the hands-free hotkey, e.g. "Ctrl+Opt+H".
   static var tapSpelledOut: String { spelledLabel(.handsFree) }
 
   private static func glyphLabel(_ name: KeyboardShortcuts.Name) -> String {
