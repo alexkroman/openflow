@@ -23,7 +23,7 @@ struct HotkeyStepView: View {
       LabeledContent {
         KeyboardShortcuts.Recorder(for: .dictate)
       } label: {
-        Label("Hold to dictate", systemImage: "keyboard")
+        Label("Push to talk", systemImage: "keyboard")
       }
       LabeledContent {
         KeyboardShortcuts.Recorder(for: .handsFree)
@@ -33,7 +33,7 @@ struct HotkeyStepView: View {
     } header: {
       Text("Shortcuts")
     } footer: {
-      Text("Defaults: hold ⌃⌥D · hands-free ⌃⌥H. Either can be any key+modifier combo.")
+      Text("Defaults: push-to-talk ⌃⌥D · hands-free ⌃⌥H. Either can be any key+modifier combo.")
     }
   }
 }
